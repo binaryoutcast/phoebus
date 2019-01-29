@@ -16,7 +16,7 @@ define('ROOT_PATH', $_SERVER['DOCUMENT_ROOT']);
 
 // Define basic constants for the software
 const SOFTWARE_NAME       = 'Phoebus';
-const SOFTWARE_VERSION    = '2.0.0a1';
+const SOFTWARE_VERSION    = '2.0.0a2';
 const DATASTORE_RELPATH   = '/datastore/';
 const OBJ_RELPATH         = '/.obj/';
 const COMPONENTS_RELPATH  = '/components/';
@@ -30,19 +30,20 @@ const COMPONENTS = array(
   'discover'        => ROOT_PATH . COMPONENTS_RELPATH . 'discover/discoverPane.php',
   'download'        => ROOT_PATH . COMPONENTS_RELPATH . 'download/addonDownload.php',
   'integration'     => ROOT_PATH . COMPONENTS_RELPATH . 'api/amIntegration.php',
-  'panel'           => ROOT_PATH . COMPONENTS_RELPATH . 'panel/addonPanel.php',
+  'panel'           => ROOT_PATH . COMPONENTS_RELPATH . 'panel/phoebusPanel.php',
   'site'            => ROOT_PATH . COMPONENTS_RELPATH . 'site/addonSite.php',
   'special'         => ROOT_PATH . COMPONENTS_RELPATH . 'special/specialComponent.php'
 );
 
 // Define modules
 const MODULES = array(
-  'auth'            => ROOT_PATH . MODULES_RELPATH . 'classAuthentication.php',
+  'account'         => ROOT_PATH . MODULES_RELPATH . 'classAccount.php',
   'database'        => ROOT_PATH . MODULES_RELPATH . 'classDatabase.php',
   'generateContent' => ROOT_PATH . MODULES_RELPATH . 'classGenerateContent.php',
   'mozillaRDF'      => ROOT_PATH . MODULES_RELPATH . 'classMozillaRDF.php',
   'persona'         => ROOT_PATH . MODULES_RELPATH . 'classPersona.php',
   'readManifest'    => ROOT_PATH . MODULES_RELPATH . 'classReadManifest.php',
+  'writeManifest'   => ROOT_PATH . MODULES_RELPATH . 'classWriteManifest.php',
   'validator'       => ROOT_PATH . MODULES_RELPATH . 'classAddonValidator.php',
   'vc'              => ROOT_PATH . MODULES_RELPATH . 'nsIVersionComparator.php',
 );
@@ -61,13 +62,20 @@ const TARGET_APPLICATION_SITE = array(
     'enabled'       => true,
     'name'          => 'Pale Moon - Add-ons',
     'domain'        => array('live' => 'addons.palemoon.org', 'dev' => 'addons-dev.palemoon.org'),
-    'features'      => array('https', 'extensions', 'extensions-cat', 'themes', 'personas', 'language-packs', 'search-plugins')
+    'features'      => array('https', 'extensions', 'extensions-cat', 'themes',
+                             'personas', 'language-packs', 'search-plugins')
   ),
   'basilisk' => array(
     'enabled'       => true,
     'name'          => 'Basilisk: add-ons',
     'domain'        => array('live' => 'addons.basilisk-browser.org', 'dev' => null),
-    'features'      => array('https', 'extensions', 'search-plugins', 'personas')
+    'features'      => array('https', 'extensions', 'themes', 'personas', 'search-plugins')
+  ),
+  'ambassador' => array(
+    'enabled'       => true,
+    'name'          => 'Add-ons - Ambassador',
+    'domain'        => array('live' => 'ab-addons.thereisonlyxul.org', 'dev' => null),
+    'features'      => array('extensions', 'themes', 'disable-xpinstall')
   ),
   'borealis' => array(
     'enabled'       => false,
@@ -79,36 +87,30 @@ const TARGET_APPLICATION_SITE = array(
     'enabled'       => true,
     'name'          => 'Interlink Add-ons - Binary Outcast',
     'domain'        => array('live' => 'interlink-addons.binaryoutcast.com', 'dev' => null),
-    'features'      => array('extensions', 'disable-xpinstall')
+    'features'      => array('extensions', 'themes', 'disable-xpinstall')
   ),
 );
 
-// Define Application IDs
-// Application IDs are normally in the form of a GUID, however, they
-// can be in the form of a user@host ID as well.
-// Basilisk/Iceweasel/Firefox have the same ID
-// Interlink/Thunderbird have the same ID
+/* Define Application IDs
+ * Application IDs are normally in the form of a {GUID} or user@host ID.
+ *
+ * Firefox:          {ec8030f7-c20a-464f-9b0e-13a3a9e97384}
+ * Thunderbird:      {3550f703-e582-4d05-9a08-453d09bdfdc6}
+ * SeaMonkey:        {92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}
+ * Fennec (Android): {aa3c5121-dab2-40e2-81ca-7ea25febc110}
+ * Fennec (XUL):     {a23983c0-fd0e-11dc-95ff-0800200c9a66}
+ * Sunbird:          {718e30fb-e89b-41dd-9da7-e25a45638b28}
+ * Instantbird:      {33cb9019-c295-46dd-be21-8c4936574bee}
+ * Adblock Browser:  {55aba3ac-94d3-41a8-9e25-5c21fe874539} */
 const TARGET_APPLICATION_ID = array(
-  // MCP
+  'toolkit'         => 'toolkit@mozilla.org',
   'palemoon'        => '{8de7fcbb-c55c-4fbe-bfc5-fc555c87dbc4}',
   'basilisk'        => '{ec8030f7-c20a-464f-9b0e-13a3a9e97384}',
-  // BinOC
+  'ambassador'      => '{4523665a-317f-4a66-9376-3763d1ad1978}',
   'borealis'        => '{a3210b97-8e8a-4737-9aa0-aa0e607640b9}',
   'interlink'       => '{3550f703-e582-4d05-9a08-453d09bdfdc6}',
-  // Mozilla
-  'firefox'         => '{ec8030f7-c20a-464f-9b0e-13a3a9e97384}',
-  'thunderbird'     => '{3550f703-e582-4d05-9a08-453d09bdfdc6}',
-  'seamonkey'       => '{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}',
-  'fennec-xul'      => '{a23983c0-fd0e-11dc-95ff-0800200c9a66}',
-  'fennec-native'   => '{aa3c5121-dab2-40e2-81ca-7ea25febc110}',
-  'sunbird'         => '{718e30fb-e89b-41dd-9da7-e25a45638b28}',
-  // Instantbird
-  'instantbird'     => '{33cb9019-c295-46dd-be21-8c4936574bee}',
-  // Adblock Plus
-  'adblock-browser' => '{55aba3ac-94d3-41a8-9e25-5c21fe874539}',
-  // Common
-  'toolkit'         => 'toolkit@mozilla.org'
 );
+
 
 // ====================================================================================================================
 
@@ -134,20 +136,24 @@ function funcError($_value, $_mode = 0) {
   ob_get_clean();
   header('Content-Type: text/html', false);   
   print(file_get_contents('./components/special/skin/default/template-header.xhtml'));
-  print('<h2>' . SOFTWARE_NAME . ' ' . SOFTWARE_VERSION . '</h2>');
 
   switch($_mode) {
-    case 0:
-      print('<p class="pulseText" style="text-decoration: blink;"><strong>Fatal Error</strong></p>');
+    case 1:
+      print('<h2 class="pulseText" style="text-decoration: blink;"><strong>Fatal Error</strong></h2>');      
       print('<ul><li>' . $_value . '</li></ul>');
       break;
-    case 1:
-      print('<p>Output:</p>');
-      print('<pre><code>' . json_encode($_value, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</code></pre>');
+    case 98:
+      print('<h2>Output</h2>');
+      // JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+      print('<pre><code>' . json_encode($_value, 448) . '</code></pre>');
       break;
-    case 2:
-      print('<p>Output:</p>');
+    case 99:
+      print('<h2>Output</h2>');
       print('<pre>' . var_export($_value, true) . '</pre>');
+      break;
+    default:
+      print('<h2 style="text-decoration: blink;"><strong>Unable to Comply</strong></h2>');
+      print('<ul><li>' . $_value . '</li></ul>');
       break;
   }
 
@@ -193,7 +199,7 @@ function funcUnifiedVariable($_type, $_value, $_allowFalsy = null) {
       funcError('Incorrect var check');
   }
 
-  if (!$_allowFalsy && (empty($finalValue) || $finalValue === 'none')) {
+  if (!$_allowFalsy && (empty($finalValue) || $finalValue === 'none' || $finalValue === '')) {
     return null;
   }
 
@@ -419,8 +425,7 @@ elseif (startsWith($arraySoftwareState['phpRequestURI'], '/special/')) {
 // --------------------------------------------------------------------------------------------------------------------
 
 // Load component based on requestComponent
-if ($arraySoftwareState['requestComponent'] &&
-    array_key_exists($arraySoftwareState['requestComponent'], COMPONENTS)) {
+if ($arraySoftwareState['requestComponent'] && array_key_exists($arraySoftwareState['requestComponent'], COMPONENTS)) {
   require_once(COMPONENTS[$arraySoftwareState['requestComponent']]);
 }
 else {

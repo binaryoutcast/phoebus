@@ -49,8 +49,10 @@
         <small>[External]</small>
   {/if}
         <br />
-        <small>{$key.description}</small>
+        <small>{if $PAGE_TYPE == 'cat-themes'}{$key.description|truncate:190:"&hellip;"}{else}{$key.description}{/if}</small>
       </div>
     </a>
+  {foreachelse}
+    {if $PAGE_TYPE != 'search'}<p><em>There are no available add-ons in this category.</em>{/if}
   {/foreach}
 </div>

@@ -1,8 +1,8 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
+    <meta charset="UTF-8">
     <title>{$PAGE_TITLE} - Phoebus Panel</title>
     <style type="text/css">
       {%SITE_STYLESHEET}
@@ -10,24 +10,41 @@
   </head>
   <body>
     <div id="container">
-    <h1>Phoebus Panel</h2>
-    <!-- <img src="{$BASE_PATH}logo.png" style="margin-bottom: 8px;"/> -->
-    <hr class="menu">
-    <nav class="navigation">
-      {if $USER_LEVEL >= 1}
-        {if $USER_LEVEL >= 3}
-          <a href="/panel/administration/">Administration</a> 
+      <!-- <h1>Phoebus Panel</h2> -->
+      <div class="mozmenu">
+        <ul>
+        {if $USER_LEVEL >= 1}
+          <li><a href="/panel/logout/">Logout</a></li>
+          <li><a href="/panel/account/">Your Account</a></li>
+          <li><a href="/panel/addons/">Your Add-ons</a></li>
+          {if $USER_LEVEL >= 3}
+            <li><a href="/panel/administration/">Administration</a></li>
+          {else}
+            <li><a href="/panel/developer/">Developer</a></li>
+          {/if}
+        {else}
+          <li><a href="/panel/login/">Login</a></li>
+          <li><a href="/panel/registration/">Register</a></li>
         {/if}
-        <a href="/panel/addons/">Your Add-ons</a> 
-        <a href="/panel/account/">Phoebus Account</a> 
-        <a href="/panel/logout/">Logout</a>
-      {else}
-        <a href="/panel/registration/">Register</a>
-        <a href="/panel/login/">Login</a>
-      {/if}
-    </nav>
-    <hr class="menu">
-    {%PAGE_CONTENT}
+        <ul>
+      </div>
+      <h3 id="js-warning" class="pulseText" style="text-align: center;">Javascript is required for the Panel. If this doesn't go away, enable javascript.</h2>
+      <div id="content" class="fadeIn" style="display: none;">
+        {%PAGE_CONTENT}
+      </div>
+      <script>
+        var warn = document.getElementById('js-warning');
+        var content = document.getElementById('content');
+        warn.remove();
+        content.removeAttribute('style');
+      </script>
     </div>
+    <br />
+    <p style="text-align: center;">
+      <small>
+        The <a href="http://www.famfamfam.com/lab/icons/silk/" target="_blank">Silk Icons</a> are &copy; <a href="mailto:mjames@gmail.com">Mark James</a> and are used under a <a href="http://creativecommons.org/licenses/by/2.5/" target="_blank">Creative Commons Attribution 2.5 License</a>.<br />
+        Any other content is copyright or trademark to their respective owners.
+      </small>
+    </p>
   </body>
 </html>

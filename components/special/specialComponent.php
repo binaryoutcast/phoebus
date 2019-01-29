@@ -8,12 +8,21 @@
 /**********************************************************************************************************************
 * Strips path to obtain the slug
 *
-* @param $_path     $arraySoftwareState['requestPath']
-* @param $_prefix   Prefix to strip 
+* @param $aPath     $arraySoftwareState['requestPath']
+* @param $aPrefix   Prefix to strip 
 * @returns          slug
 ***********************************************************************************************************************/
-function funcStripPath($_path, $_prefix) {
-  return str_replace('/', '', str_replace($_prefix, '', $_path));
+function funcStripPath($aPath, $aPrefix) {
+  return str_replace('/', '', str_replace($aPrefix, '', $aPath));
+}
+
+/**********************************************************************************************************************
+* Strips path to obtain the slug
+***********************************************************************************************************************/
+function funcCheckDebug() {
+  if (!$GLOBALS['arraySoftwareState']['debugMode']) {
+    funcRedirect('/');
+  }
 }
 
 // ====================================================================================================================
@@ -34,16 +43,16 @@ switch ($strStripPath) {
     phpinfo(32);
     break;
   case 'softwareState':
-    funcError($arraySoftwareState, 1);
-    break;
-  case 'validate':
-  case 'validator':
-    require_once($strComponentPath . 'addonValidator.php');
-    break;
-  case 'validator2':
-    require_once($strComponentPath . 'addonValidator2.php');
+    funcCheckDebug();
+    $arrayIncludes = ['database', 'account'];
+    foreach ($arrayIncludes as $_value) { require_once(MODULES[$_value]); }
+    $moduleDatabase = new classDatabase();
+    $moduleAccount = new classAccount();
+    $moduleAccount->authenticate();
+    funcError($arraySoftwareState, 98);
     break;
   case 'migrator':
+    funcCheckDebug();
     if (file_exists(ROOT_PATH . '/.migration')) {
       require_once($strComponentPath . 'addonMigrator.php');
     }
@@ -52,24 +61,28 @@ switch ($strStripPath) {
     }
     break;
   case 'test':
-    if (!$arraySoftwareState['debugMode']) {
-      funcRedirect('/');
-    }
-
+    funcCheckDebug();
     $arraySoftwareState['requestTestCase'] = funcUnifiedVariable('get', 'case');
-
+    $arrayTestsGlob = glob($strComponentPath . 'tests/*.php');
+    $arrayFinalTests = [];
+    foreach ($arrayTestsGlob as $_value) {
+      $arrayFinalTests[] = str_replace('.php',
+                                       '',
+                                       str_replace($strComponentPath . 'tests/', '', $_value));
+    }
     if ($arraySoftwareState['requestTestCase'] &&
-        file_exists($strComponentPath . 'tests/' . $arraySoftwareState['requestTestCase'] . '.php')) {
+        in_array($arraySoftwareState['requestTestCase'], $arrayFinalTests)) {
       require_once($strComponentPath . 'tests/' . $arraySoftwareState['requestTestCase'] . '.php');
     }
     else {
       funcError('Invalid test case');
     }
-
     break;
   default:
     funcRedirect('/');
 }
+
+exit();
 
 // ====================================================================================================================
 

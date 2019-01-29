@@ -3,16 +3,20 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// == | Setup | =======================================================================================================
-
-// Include required libraries
-require_once(LIBRARIES['rdfParser']);
-
-// ====================================================================================================================
-
 class classMozillaRDF {
   const EM_NS = 'http://www.mozilla.org/2004/em-rdf#';
   const INSTALL_MANIFEST_RESOURCE = 'urn:mozilla:install-manifest';
+
+  private $libRdfParser;
+
+  /********************************************************************************************************************
+  * Class constructor that sets inital state of things
+  ********************************************************************************************************************/
+  function __construct() {
+    // Include the Rdf_parser
+    require_once(LIBRARIES['rdfParser']);
+    $this->libRdfParser = new Rdf_parser();
+  }
 
   /********************************************************************************************************************
   * Parses install.rdf using Rdf_parser class
@@ -23,14 +27,13 @@ class classMozillaRDF {
   public function parseInstallManifest($manifestData) {
     $data = array();
 
-    $rdf = new Rdf_parser();
-    $rdf->rdf_parser_create(null);
-    $rdf->rdf_set_user_data($data);
-    $rdf->rdf_set_statement_handler(array('classMozillaRDF', 'installManifestStatementHandler'));
-    $rdf->rdf_set_base('');
+    $this->libRdfParser->rdf_parser_create(null);
+    $this->libRdfParser->rdf_set_user_data($data);
+    $this->libRdfParser->rdf_set_statement_handler(array('classMozillaRDF', 'installManifestStatementHandler'));
+    $this->libRdfParser->rdf_set_base('');
 
-    if (!$rdf->rdf_parse($manifestData, strlen($manifestData), true)) {
-      return xml_error_string(xml_get_error_code($rdf->rdf_parser['xml_parser']));
+    if (!$this->libRdfParser->rdf_parse($manifestData, strlen($manifestData), true)) {
+      return xml_error_string(xml_get_error_code($this->libRdfParser->rdf_parser['xml_parser']));
     }
 
     // Set the targetApplication data
@@ -45,7 +48,7 @@ class classMozillaRDF {
 
     $data['manifest']['targetApplication'] = $targetArray;
 
-    $rdf->rdf_parser_free();
+    $this->libRdfParser->rdf_parser_free();
 
     return $data['manifest'];
   }
@@ -64,9 +67,15 @@ class classMozillaRDF {
   * @param string $object
   * @param string $xmlLang
   ********************************************************************************************************************/
-  static function installManifestStatementHandler(&$data, $subjectType, $subject, $predicate,
-                $ordinal, $objectType, $object, $xmlLang) {   
-    //single properties - ignoring: iconURL, optionsURL, aboutURL, and anything not listed
+  static function installManifestStatementHandler(&$data,
+                                                  $subjectType,
+                                                  $subject,
+                                                  $predicate,
+                                                  $ordinal,
+                                                  $objectType,
+                                                  $object,
+                                                  $xmlLang) {   
+    //single properties - ignoring: optionsURL, aboutURL, and anything not listed
     $singleProps = array(
       'id' => 1,
       'type' => 1,
@@ -79,7 +88,10 @@ class classMozillaRDF {
       'hasEmbeddedWebExtension' => 1,
       'multiprocessCompatible' => 1,
       'skinnable' => 1,
-      'strictCompatibility' => 1
+      'strictCompatibility' => 1,
+      'license' => 1,
+      'iconURL' => 1,
+      'icon64URL' => 1
     );
     
     //multiple properties - ignoring: File

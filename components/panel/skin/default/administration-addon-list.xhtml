@@ -1,5 +1,4 @@
-<h2>{$PAGE_TITLE}</h2>
-{if $USER_LEVEL >= 3}
+<h2>{if $PAGE_TYPE == 'admin-list-langpacks'}Pale Moon Language Packs{else}{$PAGE_TITLE|replace:' - Administration':''}{/if}</h2>
 {assign "SUBMENU_STYLE" "vertical-align: middle; margin-left: 2px; margin-right: 2px"}
 <p>
   <a href="/panel/administration/?task=list&what=extensions"><img src="{$BASE_PATH}../shared/plugin.png" style="{$SUBMENU_STYLE}"/>Extensions</a> 
@@ -8,36 +7,43 @@
   <a href="/panel/administration/?task=list&what=langpacks"><img src="{$BASE_PATH}../shared/world.png" style="{$SUBMENU_STYLE}" />Language Packs</a>
   <a href="/panel/administration/?task=list&what=users"><img src="{$BASE_PATH}../shared/user.png" style="{$SUBMENU_STYLE}" />Users</a>
 </p>
-{/if}
-
 <table class="addonTable single-row">
   <tr>
-    <th colspan="2" style="text-align: center;"></th>
+    {if $PAGE_TYPE != 'admin-list-langpacks'}
+    <th colspan="2" style="width: 36px;"></th>
+    {/if}
     <th>Name</th>
     <th>Slug</th>
     <th>ID</th>
-    <th>Type</th>
+    <th>{if $PAGE_TYPE != 'admin-list-langpacks'}Category{/if}</th>
     <th style="text-align: center;">Active</th>
     <th style="text-align: center;">Reviewed</th>
   </tr>
   {foreach $PAGE_DATA as $key}
     <tr>
-      <td style="width: 16px;">
-        <a href="{$PAGE_PATH}?task=update&what=metadata&slug={$key.slug}" title="Edit Add-on Metadata">
-          <img src="{$BASE_PATH}../shared/pencil.png" alt="Edit Add-on" />
-        </a>
-      </td>
-      <td style="width: 20px;">
-        {if $key.type != 'external'}
-        <a href="{$PAGE_PATH}?task=update&what=release&slug={$key.slug}" title="Release a new version of this Add-on">
-          <img src="{$BASE_PATH}../shared/plugin_add.png" alt="New Version" />
-        </a>
-        {/if}
-      </td>
+      {if $key.type != 'langpack'}
+        <td style="width: 16px;">       
+          <a href="{$PAGE_PATH}?task=update&what=metadata&slug={$key.slug}" title="Edit Add-on Metadata">
+            <img src="{$BASE_PATH}../shared/pencil.png" alt="Edit Add-on" />
+          </a>
+        </td>
+        <td style="width: 20px;">
+          {if $key.type != 'external' && $key.type != 'langpack'}
+          <a href="{$PAGE_PATH}?task=update&what=release&slug={$key.slug}" title="Release a new version of this Add-on">
+            <img src="{$BASE_PATH}../shared/plugin_add.png" alt="New Version" />
+          </a>
+          {/if}
+          {if $key.type == 'external'}
+          <a href="{$key.url}" target="_blank" title="View external site">
+            <img src="{$BASE_PATH}../shared/world_link.png" alt="External Link" />
+          </a>
+          {/if}
+        </td>
+      {/if}
       <td class="cell-ellipsis">{$key.name}</td>
       <td class="cell-ellipsis">{$key.slug}</td>
       <td>{$key.id}</td>
-      <td class="cell-ellipsis">{$key.type|capitalize}</td>
+      <td style="width: 150px; min-width: 150px; max-width: 150px">{if $PAGE_TYPE != 'admin-list-langpacks'}{$key.category}{/if}</td>
       <td style="text-align: center; width: 64px;">
         {if $key.active}
           <img src="{$BASE_PATH}../shared/accept.png" />
@@ -53,8 +59,6 @@
         {/if}
       </td>
     </tr>
-  {foreachelse}
-  <tr><td colspan="8" style="text-align: center;"><strong>{if $USER_LEVEL >= 3}This user has{else}You have{/if} not submitted any add-ons!</strong></td></tr>
   {/foreach}
 </table>
 {$key = null}

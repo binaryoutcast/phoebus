@@ -6,9 +6,6 @@
 // == | classPersonas | ===============================================================================================
 
 class classPersona {
-  private $moduleDatabase;
-  private $excludePotentiallyNonFree;
-
   /********************************************************************************************************************
   * Class constructor that sets inital state of things
   ********************************************************************************************************************/
@@ -16,17 +13,6 @@ class classPersona {
     if (!funcCheckModule('database')) {
       funcError(__CLASS__ . '::' . __FUNCTION__ . ' - database is required to be included in the global scope');
     }
-
-    switch ($GLOBALS['arraySoftwareState']['currentApplication']) {
-      case 'iceweasel':
-      case 'icedove':
-        // Exclude potentally non-free add-ons due to f5t GNU requirements
-        $this->excludePotentiallyNonFree = true;
-        break;
-    }
-    
-    // Assign the global instance of the database class to a class property by reference
-    $this->moduleDatabase = &$GLOBALS['moduleDatabase'];
   }
 
  /********************************************************************************************************************
@@ -42,7 +28,7 @@ class classPersona {
       WHERE `id` = ?s
       ORDER BY `name`
     ";
-    $queryResult = $this->moduleDatabase->query('row', $query, $_addonID);
+    $queryResult = $GLOBALS['moduleDatabase']->query('row', $query, $_addonID);
 
     if (!$queryResult) {
       return null;
@@ -78,12 +64,11 @@ class classPersona {
           FROM `persona`
           ORDER BY `name`
         ";
-        $queryResults = $this->moduleDatabase->query('rows', $query);
+        $queryResults = $GLOBALS['moduleDatabase']->query('rows', $query);
         break;
       case 'panel-user-personas':
         $returnInactive = true;
         $returnUnreviewed = true;
-        $this->excludePotentiallyNonFree = null;
         $query = "
           SELECT *
           FROM `persona`
@@ -91,18 +76,17 @@ class classPersona {
           AND `type` IN ('extension', 'theme')
           ORDER BY `name`
         ";
-        $queryResults = $this->moduleDatabase->query('rows', $query, $aQueryData);
+        $queryResults = $GLOBALS['moduleDatabase']->query('rows', $query, $aQueryData);
         break;
       case 'panel-all-personas':
         $returnInactive = true;
         $returnUnreviewed = true;
-        $this->excludePotentiallyNonFree = null;
         $query = "
           SELECT *
           FROM `persona`
           ORDER BY `name`
         ";
-        $queryResults = $this->moduleDatabase->query('rows', $query);
+        $queryResults = $GLOBALS['moduleDatabase']->query('rows', $query);
         break;
       default:
         funcError(__CLASS__ . '::' . __FUNCTION__ . ' - Unknown query type');
@@ -115,9 +99,7 @@ class classPersona {
     $manifestData = array();
     
     foreach($queryResults as $_value) {
-      $addonManifest = $this->funcProcessManifest(
-        $_value, $returnInactive, $returnUnreviewed, $this->excludePotentiallyNonFree
-      );
+      $addonManifest = $this->funcProcessManifest($_value, $returnInactive, $returnUnreviewed);
 
       if (!$addonManifest) {
         continue;
@@ -140,8 +122,7 @@ class classPersona {
   // This is where we do any post-processing on an Add-on Manifest
   private function funcProcessManifest($aPersonaManifest,
                                        $aReturnInactive = null,
-                                       $aReturnUnreviewed = null,
-                                       $aExcludePotentiallyNonFree = null) {
+                                       $aReturnUnreviewed = null) {
     // Cast the int-strings to bool
     $aPersonaManifest['reviewed'] = (bool)$aPersonaManifest['reviewed'];
     $aPersonaManifest['active'] = (bool)$aPersonaManifest['active'];
@@ -153,22 +134,7 @@ class classPersona {
     if (!$aPersonaManifest['reviewed'] && !$aReturnUnreviewed) {
       return null;
     }
-
-    // Return null all externals as well as any licenses that are null (unknown), custom (which could be anything),
-    // or copyright for Iceweasel.
-    if ($aExcludePotentiallyNonFree) {
-      $arrayNonFreeBlacklist = array();
-
-      if (in_array($aPersonaManifest['id'], $arrayNonFreeBlacklist)) {
-        return null;
-      }
-      
-      if ($aPersonaManifest['license'] == 'copyright' ||
-          $aPersonaManifest['license'] == 'pd') {
-        return null;
-      }
-    }
-   
+  
     // Truncate description if it is too long..
     $aPersonaManifest['finalDescription'] = $aPersonaManifest['description'];
     if (array_key_exists('description', $aPersonaManifest) && strlen($aPersonaManifest['description']) >= 235) {

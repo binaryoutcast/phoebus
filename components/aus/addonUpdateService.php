@@ -101,8 +101,7 @@ $arraySoftwareState['requestAddonVersion'] = funcUnifiedVariable('get', 'version
 $arraySoftwareState['requestAppID'] = funcUnifiedVariable('get', 'appID');
 $arraySoftwareState['requestAppVersion'] = funcUnifiedVariable('get', 'appVersion');
 $arraySoftwareState['requestAddonCompatMode'] = funcUnifiedVariable('get', 'compatMode');
-(bool)$arraySoftwareState['requestMozXPIUpdate'] =
-  array_key_exists('HTTP_MOZ_XPI_UPDATE', $_SERVER) || funcUnifiedVariable('get', 'updateOverride');
+$arraySoftwareState['requestMozXPIUpdate'] = funcUnifiedVariable('server', 'HTTP_MOZ_XPI_UPDATE') ?? funcUnifiedVariable('get', 'updateOverride');
 
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -142,7 +141,7 @@ if (in_array($arraySoftwareState['requestAddonID'], BAD_ADDON_IDS)) {
 // Check for Add-on Updates
 if ($arraySoftwareState['requestAppID'] == $arraySoftwareState['targetApplicationID'] ||
     ($arraySoftwareState['debugMode'] && $arraySoftwareState['orginalApplication'])) {
-  $addonManifest = $moduleReadManifest->getAddonByID($arraySoftwareState['requestAddonID']);
+  $addonManifest = $moduleReadManifest->getAddon('by-id', $arraySoftwareState['requestAddonID']);
 
   if (!$addonManifest) {
     // Send non-existant add-ons to AMO for Basilisk

@@ -6,7 +6,6 @@
 // == | classReadManifest | ===========================================================================================
 
 class classReadManifest {
-  private $moduleDatabase;
   private $currentApplication;
   private $currentAppID;
 
@@ -66,6 +65,26 @@ class classReadManifest {
     //'search-133' => 'pale-moon-add-ons-google.xml'
     );
 
+  // ------------------------------------------------------------------------------------------------------------------
+
+  const LICENSES = array(
+      'Apache-2.0' => 'Apache License 2.0',
+      'Apache-1.1' => 'Apache License 1.1',
+      'BSD-3-Clause' => 'BSD 3-Clause',
+      'BSD-2-Clause' => 'BSD 2-Clause',
+      'GPL-3.0' => 'GNU General Public License 3.0',
+      'GPL-2.0' => 'GNU General Public License 2.0',
+      'LGPL-3.0' => 'GNU Lesser General Public License 3.0',
+      'LGPL-2.1' => 'GNU Lesser General Public License 2.1',
+      'AGPL-3.0' => 'GNU Affero General Public License v3',
+      'MIT' => 'MIT License',
+      'MPL-2.0' => 'Mozilla Public License 2.0',
+      'MPL-1.1' => 'Mozilla Public License 1.1',
+      'Custom' => 'Custom License',
+      'PD' => 'Public Domain',
+      'COPYRIGHT' => ''
+    );
+
   /********************************************************************************************************************
   * Class constructor that sets inital state of things
   ********************************************************************************************************************/
@@ -77,33 +96,70 @@ class classReadManifest {
     // Assign currentApplication
     $this->currentApplication = $GLOBALS['arraySoftwareState']['currentApplication'];
     $this->currentAppID = TARGET_APPLICATION_ID[$GLOBALS['arraySoftwareState']['currentApplication']];
-   
-    // Assign the global instance of the database class to a class property by reference
-    $this->moduleDatabase = &$GLOBALS['moduleDatabase'];
   }
 
  /********************************************************************************************************************
-  * Gets a single reduced manifest for an add-on by ID
+  * Gets a single add-on manifest
   * 
-  * @param $_addonID        Add-on ID either GUID or user@host
-  * @returns                reduced add-on manifest or null
+  * @param $aQueryType      Type of query to be performed
+  * @param $aQueryData      Data for the query such as add-on slug
+  * @returns                indexed array of manifests or null
   ********************************************************************************************************************/
-  public function getAddonByID($_addonID) {
-    $query = "
-      SELECT `id`, `slug`, `type`, `releaseXPI`, `reviewed`, `active`, `xpinstall`
-      FROM `addon`
-      JOIN `client` ON addon.id = client.addonID
-      WHERE ?n = 1
-      AND `id` = ?s
-      AND `type` IN ('extension', 'theme', 'langpack')
-    ";
-    $queryResult = $this->moduleDatabase->query('row', $query, $this->currentApplication, $_addonID);
+  public function getAddon($aQueryType, $aQueryData) {
+    $query = null;
+    $returnInactive = null;
+    $returnUnreviewed = null;
+    $processContent = null;
+
+    switch ($aQueryType) {
+      case 'by-id':
+        $returnUnreviewed = true;
+        $query = "SELECT `id`, `slug`, `type`, `releaseXPI`, `reviewed`, `active`, `xpinstall`
+                  FROM `addon`
+                  JOIN `client` ON addon.id = client.addonID
+                  WHERE ?n = 1
+                  AND `id` = ?s
+                  AND `type` IN ('extension', 'theme', 'langpack')";
+        $queryResult = $GLOBALS['moduleDatabase']->query('row', $query, $this->currentApplication, $aQueryData);
+        break;
+      case 'by-slug':
+        $returnUnreviewed = true;
+        $processContent = true;
+        $query = "SELECT addon.*
+                  FROM `addon`
+                  JOIN `client` ON addon.id = client.addonID
+                  WHERE ?n = 1
+                  AND `slug` = ?s
+                  AND `type` IN ('extension', 'theme', 'langpack')";
+        $queryResult = $GLOBALS['moduleDatabase']->query('row', $query, $this->currentApplication, $aQueryData);
+        break;
+      case 'panel-by-id':
+        $returnInactive = true;
+        $returnUnreviewed = true;
+        $query = "SELECT `id`, `slug`, `type`, `releaseXPI`, `reviewed`, `active`, `xpinstall`
+                  FROM `addon`
+                  WHERE `id` = ?s
+                  AND `type` IN ('extension', 'theme', 'langpack')";
+        $queryResult = $GLOBALS['moduleDatabase']->query('row', $query, $aQueryData);
+        break;
+      case 'panel-by-slug':
+        $returnInactive = true;
+        $returnUnreviewed = true;
+        $query = "SELECT addon.*
+                  FROM `addon`
+                  WHERE `slug` = ?s
+                  AND `type` IN ('extension', 'theme', 'langpack', 'external')";
+        $queryResult = $GLOBALS['moduleDatabase']->query('row', $query, $aQueryData);
+        break;
+      default:
+        funcError(__CLASS__ . '::' . __FUNCTION__ . ' - Unknown query type');
+    }
 
     if (!$queryResult) {
       return null;
     }
-    
-    $addonManifest = $this->funcProcessManifest($queryResult, null, true);
+
+    $addonManifest = $this->processManifest($queryResult, $returnInactive, $returnUnreviewed, $processContent);
     
     if (!$addonManifest) {
       return null;
@@ -113,143 +169,88 @@ class classReadManifest {
   }
 
  /********************************************************************************************************************
-  * Gets a single manifest for an add-on by slug
+  * Gets an indexed array of add-ons
   * 
-  * @param $_addonSlug      Add-on ID either GUID or user@host
-  * @returns                add-on manifest or null
-  ********************************************************************************************************************/
-  public function getAddonBySlug($_addonSlug) { 
-    $query = "
-      SELECT addon.*, `license` AS `licenseCode`
-      FROM `addon`
-      JOIN `client` ON addon.id = client.addonID
-      WHERE ?n = 1
-      AND `slug` = ?s
-      AND `type` IN ('extension', 'theme', 'langpack')
-    ";
-    $queryResult = $this->moduleDatabase->query('row', $query, $this->currentApplication, $_addonSlug);
-    
-    if (!$queryResult) {
-      return null;
-    }
-    
-    $addonManifest = $this->funcProcessManifest($queryResult, null, true);
-    
-    if (!$addonManifest) {
-      return null;
-    }
-
-    return $addonManifest;
-  }
-
- /********************************************************************************************************************
-  * Method to replace a bunch of methods that are virtually identical
-  * Mostly those that get an indexed array of manifests
-  * 
-  * @param $_queryType      Type of query to be performed
+  * @param $aQueryType      Type of query to be performed
   * @param $_queryData      Data for the query such as slugs or search terms
   * @returns                indexed array of manifests or null
   ********************************************************************************************************************/
-  public function getAddons($_queryType, $_queryData = null) {
+  public function getAddons($aQueryType, $aQueryData = null) {
     $query = null;
     $returnInactive = null;
     $returnUnreviewed = null;
     $processContent = true;
 
-    switch ($_queryType) {
+    switch ($aQueryType) {
       case 'site-addons-by-category':
-        $query = "
-          SELECT `id`, `slug`, `type`, `name`, `description`, `url`, `reviewed`, `active`, `license` AS `licenseCode`
-          FROM `addon`
-          JOIN `client` ON addon.id = client.addonID
-          WHERE ?n = 1
-          AND `category` = ?s
-          ORDER BY `name`
-        ";
-        $queryResults = $this->moduleDatabase->query('rows', $query, $this->currentApplication, $_queryData);
+        $query = "SELECT `id`, `slug`, `type`, `name`, `description`, `url`, `reviewed`, `active`
+                  FROM `addon`
+                  JOIN `client` ON addon.id = client.addonID
+                  WHERE ?n = 1
+                  AND `category` = ?s
+                  AND NOT `category` = 'unlisted'
+                  ORDER BY `name`";
+        $queryResults = $GLOBALS['moduleDatabase']->query('rows', $query, $this->currentApplication, $aQueryData);
         break;
       case 'site-all-extensions':
-        $query = "
-          SELECT `id`, `slug`, `type`, `name`, `description`, `url`, `reviewed`, `active`, `license` AS `licenseCode`
-          FROM `addon`
-          JOIN `client` ON addon.id = client.addonID
-          WHERE ?n = 1
-          AND `type` IN ('extension', 'external')
-          AND NOT `category` IN ('unlisted', 'theme', 'langpack')
-          ORDER BY `name`
-        ";
-        $queryResults = $this->moduleDatabase->query('rows', $query, $this->currentApplication);
+        $query = "SELECT `id`, `slug`, `type`, `name`, `description`, `url`, `reviewed`, `active`
+                 FROM `addon`
+                 JOIN `client` ON addon.id = client.addonID
+                 WHERE ?n = 1
+                 AND `type` IN ('extension', 'external')
+                 AND NOT `category` IN ('unlisted', 'themes', 'langpack')
+                 ORDER BY `name`";
+        $queryResults = $GLOBALS['moduleDatabase']->query('rows', $query, $this->currentApplication);
         break;
       case 'site-search':
-        $query = "
-          SELECT `id`, `slug`, `type`, `name`, `description`, `url`, `reviewed`, `active`, `license` AS `licenseCode`
-          FROM `addon`
-          JOIN `client` ON addon.id = client.addonID
-          WHERE ?n = 1
-          AND `type` IN ('extension', 'theme', 'langpack')
-          AND MATCH(`tags`) AGAINST(?s IN NATURAL LANGUAGE MODE)
-        ";
-        $queryResults = $this->moduleDatabase->query('rows', $query, $this->currentApplication, $_queryData);
+        $query = "SELECT `id`, `slug`, `type`, `name`, `description`, `url`, `reviewed`, `active`
+                  FROM `addon`
+                  JOIN `client` ON addon.id = client.addonID
+                  WHERE ?n = 1
+                  AND `type` IN ('extension', 'theme', 'langpack')
+                  AND MATCH(`tags`) AGAINST(?s IN NATURAL LANGUAGE MODE)";
+        $queryResults = $GLOBALS['moduleDatabase']->query('rows', $query, $this->currentApplication, $aQueryData);
         break;
       case 'api-search':
-        $query = "
-          SELECT `id`, `slug`, `type`, `creator`, `releaseXPI`, `name`, `homepageURL`, `description`,
-                 `url`, `reviewed`, `active`, `license` AS `licenseCode`, `xpinstall`
-          FROM `addon`
-          JOIN `client` ON addon.id = client.addonID
-          WHERE ?n = 1
-          AND `type` IN ('extension', 'theme', 'langpack')
-          AND MATCH(`tags`) AGAINST(?s IN NATURAL LANGUAGE MODE)
-        ";
-        $queryResults = $this->moduleDatabase->query('rows', $query, $this->currentApplication, $_queryData);
+        $query = "SELECT `id`, `slug`, `type`, `creator`, `releaseXPI`, `name`, `homepageURL`, `description`,
+                         `url`, `reviewed`, `active`, `xpinstall`
+                  FROM `addon`
+                  JOIN `client` ON addon.id = client.addonID
+                  WHERE ?n = 1
+                  AND `type` IN ('extension', 'theme', 'langpack')
+                  AND MATCH(`tags`) AGAINST(?s IN NATURAL LANGUAGE MODE)";
+        $queryResults = $GLOBALS['moduleDatabase']->query('rows', $query, $this->currentApplication, $aQueryData);
         break;
       case 'api-get':
-        $query = "
-          SELECT `id`, `slug`, `type`, `creator`, `releaseXPI`, `name`, `homepageURL`, `description`,
-                 `url`, `reviewed`, `active`, `xpinstall`
-          FROM `addon`
-          JOIN `client` ON addon.id = client.addonID
-          WHERE ?n = 1
-          AND `id` IN (?a)
-          AND `type` IN ('extension', 'theme', 'langpack')
-        ";
-        $queryResults = $this->moduleDatabase->query('rows', $query, $this->currentApplication, $_queryData);
+        $query = "SELECT `id`, `slug`, `type`, `creator`, `releaseXPI`, `name`, `homepageURL`, `description`,
+                         `url`, `reviewed`, `active`, `xpinstall`
+                  FROM `addon`
+                  JOIN `client` ON addon.id = client.addonID
+                  WHERE ?n = 1
+                  AND `id` IN (?a)
+                  AND `type` IN ('extension', 'theme', 'langpack')";
+        $queryResults = $GLOBALS['moduleDatabase']->query('rows', $query, $this->currentApplication, $aQueryData);
         break;
       case 'panel-user-addons':
         $returnInactive = true;
         $returnUnreviewed = true;
         $processContent = null;
-        $query = "
-          SELECT `id`, `slug`, `type`, `name`, `url`, `reviewed`, `active`
-          FROM `addon`
-          WHERE `slug` IN (?a)
-          AND `type` IN ('extension', 'theme')
-          ORDER BY `name`
-        ";
-        $queryResults = $this->moduleDatabase->query('rows', $query, $_queryData);
-        break;
-      case 'panel-all-addons':
-        $returnInactive = true;
-        $returnUnreviewed = true;
-        $processContent = null;
-        $query = "
-          SELECT `id`, `slug`, `type`, `name`, `category`, `url`, `reviewed`, `active`
-          FROM `addon`
-          ORDER BY `type`, `name`
-        ";
-        $queryResults = $this->moduleDatabase->query('rows', $query);
+        $query = "SELECT `id`, `slug`, `type`, `name`, `url`, `reviewed`, `active`
+                  FROM `addon`
+                  WHERE `slug` IN (?a)
+                  AND `type` IN ('extension', 'theme')
+                  ORDER BY `name`";
+        $queryResults = $GLOBALS['moduleDatabase']->query('rows', $query, $aQueryData);
         break;
       case 'panel-addons-by-type':
         $returnInactive = true;
         $returnUnreviewed = true;
         $processContent = null;
-        $query = "
-          SELECT `id`, `slug`, `type`, `name`, `category`, `url`, `reviewed`, `active`
-          FROM `addon`
-          WHERE `type` = ?s
-          ORDER BY `name`
-        ";
-        $queryResults = $this->moduleDatabase->query('rows', $query, $_queryData);
+        $query = "SELECT `id`, `slug`, `type`, `name`, `category`, `url`, `reviewed`, `active`
+                  FROM `addon`
+                  WHERE `type` = ?s
+                  ORDER BY `name`";
+        $queryResults = $GLOBALS['moduleDatabase']->query('rows', $query, $aQueryData);
         break;
       default:
         funcError(__CLASS__ . '::' . __FUNCTION__ . ' - Unknown query type');
@@ -262,9 +263,7 @@ class classReadManifest {
     $manifestData = array();
     
     foreach($queryResults as $_value) {
-      $addonManifest = $this->funcProcessManifest(
-        $_value, $returnInactive, $returnUnreviewed, $processContent
-      );
+      $addonManifest = $this->processManifest($_value, $returnInactive, $returnUnreviewed, $processContent);
 
       if (!$addonManifest) {
         continue;
@@ -312,7 +311,7 @@ class classReadManifest {
   * @returns                    add-on manifest or null
   ********************************************************************************************************************/
   // This is where we do any post-processing on an Add-on Manifest
-  private function funcProcessManifest($addonManifest,
+  private function processManifest($addonManifest,
                                        $returnInactive = null,
                                        $returnUnreviewed = null,
                                        $processContent = true) {
@@ -342,13 +341,18 @@ class classReadManifest {
         }
 
         // Set a human readable date based on epoch
-        $addonManifest['xpinstall'][$_key]['date'] = date('F j, Y' ,$addonManifest['xpinstall'][$_key]['epoch']);
+        $addonManifest['xpinstall'][$_key]['date'] = date('F j, Y', $addonManifest['xpinstall'][$_key]['epoch']);
       }
 
       // Ensure that the xpinstall keys are reverse sorted using an anonymous function and a spaceship
       uasort($addonManifest['xpinstall'], function ($_xpi1, $_xpi2) {
         return $_xpi2['epoch'] <=> $_xpi1['epoch'];
       });
+    }
+
+    // Remove whitespace from description and html encode
+    if ($addonManifest['description'] ?? false) {
+      $addonManifest['description'] = htmlentities(trim($addonManifest['description']), ENT_XHTML);
     }
 
     // If content exists, process it
@@ -358,16 +362,16 @@ class classReadManifest {
 
       // Process content or assign description to it
       if ($addonManifest['content'] != null) {
-        $addonManifest['content'] = $this->funcProcessContent($addonManifest['content']);
+        $addonManifest['content'] = $this->processContent($addonManifest['content']);
       }
       else {
-        $addonManifest['content'] = nl2br($addonManifest['description']);
+        $addonManifest['content'] = $addonManifest['description'];
       }
     }
 
     // Process license
     if (array_key_exists('license', $addonManifest)) {
-      $addonManifest = $this->funcProcessLicense($addonManifest);
+      $addonManifest = $this->processLicense($addonManifest);
     }
     
     // Truncate description if it is too long..
@@ -377,14 +381,21 @@ class classReadManifest {
 
     // Set baseURL if applicable
     if ($addonManifest['type'] != 'external') {
-      $addonManifest['baseURL'] =
-        'http://' .
-        $GLOBALS['arraySoftwareState']['currentDomain'] .
-        '/?component=download&version=latest&id=';
+      $addonManifest['baseURL'] = 'http://' .
+                                  $GLOBALS['arraySoftwareState']['currentDomain'] .
+                                  '/?component=download&version=latest&id=';
     }
 
-    // Set Datastore Paths     
-    if ($addonManifest['type'] == 'external') {
+    // Set Datastore Paths  
+    $addonManifest['basePath'] =
+      '.' . DATASTORE_RELPATH . 'addons/' . $addonManifest['slug'] . '/';
+
+    // Set reletive url paths
+    $_addonPath = substr($addonManifest['basePath'], 1);
+    $_defaultPath = str_replace($addonManifest['slug'], 'default', $_addonPath);
+
+    // Legacy Externals have their icons in an ex-### directory
+    if ($addonManifest['type'] == 'external' && contains($addonManifest['id'], '@ex-')) {
       // Extract the legacy external id
       $_oldID = preg_replace('/(.*)\@(.*)/iU', '$2', $addonManifest['id']);
 
@@ -395,15 +406,6 @@ class classReadManifest {
       // Set reletive url paths
       $_addonPath = substr($addonManifest['basePath'], 1);
       $_defaultPath = str_replace($_oldID, 'default', $_addonPath);
-    }
-    else {
-      // Set basePath
-      $addonManifest['basePath'] =
-        '.' . DATASTORE_RELPATH . 'addons/' . $addonManifest['slug'] . '/';
-
-      // Set reletive url paths
-      $_addonPath = substr($addonManifest['basePath'], 1);
-      $_defaultPath = str_replace($addonManifest['slug'], 'default', $_addonPath);
     }
 
     // We want to not have to hit this unless we are coming from the SITE
@@ -437,15 +439,15 @@ class classReadManifest {
   * @param $_addonPhoebusContent    raw "phoebus.content"
   * @returns                        processed "phoebus.content"
   ********************************************************************************************************************/
-  public function funcProcessContent($_addonPhoebusContent) {     
+  public function processContent($aAddonContent) {     
     // html encode phoebus.content
-    $_addonPhoebusContent = htmlentities($_addonPhoebusContent, ENT_XHTML);
+    $aAddonContent = htmlentities($aAddonContent, ENT_XHTML);
 
     // Replace new lines with <br />
-    $_addonPhoebusContent = nl2br($_addonPhoebusContent, true);
+    $aAddonContent = nl2br($aAddonContent, true);
 
     // create an array that contains the strs to pseudo-bbcode to real html
-    $_arrayPhoebusCode = array(
+    $arrayPhoebusCode = array(
       'simple' => array(
         '[b]' => '<strong>',
         '[/b]' => '</strong>',
@@ -471,100 +473,81 @@ class classReadManifest {
     );
 
     // str replace pseudo-bbcode with real html
-    foreach ($_arrayPhoebusCode['simple'] as $_key => $_value) {
-      $_addonPhoebusContent = str_replace($_key, $_value, $_addonPhoebusContent);
+    foreach ($arrayPhoebusCode['simple'] as $_key => $_value) {
+      $aAddonContent = str_replace($_key, $_value, $aAddonContent);
     }
     
     // Regex replace pseudo-bbcode with real html
-    foreach ($_arrayPhoebusCode['complex'] as $_key => $_value) {
-      $_addonPhoebusContent = preg_replace('/' . $_key . '/iU', $_value, $_addonPhoebusContent);
+    foreach ($arrayPhoebusCode['complex'] as $_key => $_value) {
+      $aAddonContent = preg_replace('/' . $_key . '/iU', $_value, $aAddonContent);
     }
 
     // Less hacky than what is in funcReadManifest
     // Remove linebreak special cases
-    $_addonPhoebusContent = str_replace('<fixme /><br />', '', $_addonPhoebusContent);
+    $aAddonContent = str_replace('<fixme /><br />', '', $aAddonContent);
 
-    return $_addonPhoebusContent;
+    return $aAddonContent;
   }
 
  /********************************************************************************************************************
   * Internal method to process "phoebus.content"
   * 
-  * @param $addonManifest    add-on manifest
+  * @param $aAddonManifest   add-on manifest
   * @returns                 add-on manifest with additional license metadata
   ********************************************************************************************************************/
-  private function funcProcessLicense($addonManifest) {
-    // Approved Licenses
-    $_arrayLicenses = array(
-      'custom' => 'Custom License',
-      'Apache-2.0' => 'Apache License 2.0',
-      'Apache-1.1' => 'Apache License 1.1',
-      'BSD-3-Clause' => 'BSD 3-Clause',
-      'BSD-2-Clause' => 'BSD 2-Clause',
-      'GPL-3.0' => 'GNU General Public License 3.0',
-      'GPL-2.0' => 'GNU General Public License 2.0',
-      'LGPL-3.0' => 'GNU Lesser General Public License 3.0',
-      'LGPL-2.1' => 'GNU Lesser General Public License 2.1',
-      'AGPL-3.0' => 'GNU Affero General Public License v3',
-      'MIT' => 'MIT License',
-      'MPL-2.0' => 'Mozilla Public License 2.0',
-      'MPL-1.1' => 'Mozilla Public License 1.1',
-      'PD' => 'Public Domain',
-      'COPYRIGHT' => '&copy;' . ' ' . date("Y") . ' - ' . $addonManifest['creator']
-    );
-    
-    $_arrayLicenses = array_change_key_case($_arrayLicenses, CASE_LOWER);
+  private function processLicense($aAddonManifest) {
+    // Approved Licenses  
+    $arrayLicenses = array_change_key_case(self::LICENSES, CASE_LOWER);
+    $arrayLicenses['copyright'] = '&copy; ' . date("Y") . ' - ' . $aAddonManifest['creator'];
      
     // Set to lowercase
-    if ($addonManifest['license'] != null) {
-      $addonManifest['license'] = strtolower($addonManifest['license']);
+    if ($aAddonManifest['license'] != null) {
+      $aAddonManifest['license'] = strtolower($aAddonManifest['license']);
     }
 
     // phoebus.license trumps all
     // If existant override any license* keys and load the file into the manifest
-    if ($addonManifest['licenseText'] != null) {
-      $addonManifest['license'] = 'custom';
-      $addonManifest['licenseName'] = $_arrayLicenses[$addonManifest['license']];
-      $addonManifest['licenseDefault'] = null;
-      $addonManifest['licenseURL'] = null;
+    if ($aAddonManifest['licenseText'] != null) {
+      $aAddonManifest['license'] = 'custom';
+      $aAddonManifest['licenseName'] = $arrayLicenses[$aAddonManifest['license']];
+      $aAddonManifest['licenseDefault'] = null;
+      $aAddonManifest['licenseURL'] = null;
 
-      return $addonManifest;
+      return $aAddonManifest;
     }
 
     // If license is not set then default to copyright
-    if ($addonManifest['license'] == null) {
-      $addonManifest['license'] = 'copyright';
-      $addonManifest['licenseName'] = $_arrayLicenses[$addonManifest['license']];
-      $addonManifest['licenseDefault'] = true;
+    if ($aAddonManifest['license'] == null) {
+      $aAddonManifest['license'] = 'copyright';
+      $aAddonManifest['licenseName'] = $arrayLicenses[$aAddonManifest['license']];
+      $aAddonManifest['licenseDefault'] = true;
 
-      return $addonManifest;
+      return $aAddonManifest;
     }
 
-    if ($addonManifest['license'] != null) {
-      if ($addonManifest['license'] == 'custom' &&
-        startsWith($addonManifest['licenseURL'], 'http')) {
-        $addonManifest['license'] = 'custom';
-        $addonManifest['licenseName'] = $_arrayLicenses[$addonManifest['license']];
+    if ($aAddonManifest['license'] != null) {
+      if ($aAddonManifest['license'] == 'custom' && startsWith($aAddonManifest['licenseURL'], 'http')) {
+        $aAddonManifest['license'] = 'custom';
+        $aAddonManifest['licenseName'] = $arrayLicenses[$aAddonManifest['license']];
 
-        return $addonManifest;
+        return $aAddonManifest;
       }
-      elseif (array_key_exists($addonManifest['license'], $_arrayLicenses)) {
-        $addonManifest['licenseName'] =
-          $_arrayLicenses[$addonManifest['license']];
-        $addonManifest['licenseDefault'] = null;
-        $addonManifest['licenseURL'] = null;
-        $addonManifest['licenseText'] = null;
+      elseif (array_key_exists($aAddonManifest['license'], $arrayLicenses)) {
+        $aAddonManifest['licenseName'] = $arrayLicenses[$aAddonManifest['license']];
+        $aAddonManifest['licenseDefault'] = null;
+        $aAddonManifest['licenseURL'] = null;
+        $aAddonManifest['licenseText'] = null;
 
-        return $addonManifest;
+        return $aAddonManifest;
       }
       else {
-        $addonManifest['license'] = 'unknown';
-        $addonManifest['licenseName'] = 'Unknown License';
-        $addonManifest['licenseDefault'] = null;
-        $addonManifest['licenseURL'] = null;
-        $addonManifest['licenseText'] = null;
+        $aAddonManifest['license'] = 'unknown';
+        $aAddonManifest['licenseName'] = 'Unknown License';
+        $aAddonManifest['licenseDefault'] = null;
+        $aAddonManifest['licenseURL'] = null;
+        $aAddonManifest['licenseText'] = null;
         
-        return $addonManifest;
+        return $aAddonManifest;
       }
     }
   }

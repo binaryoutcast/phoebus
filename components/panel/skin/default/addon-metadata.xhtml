@@ -1,0 +1,178 @@
+<script>
+  function licenseChange() {
+    var licenseDropDown = document.getElementById('license');
+    var licenseTextRow = document.getElementById('licenseTextRow');
+    var licenseTextBox = document.getElementById('licenseTextBox');
+    if (licenseDropDown.value == "custom") {
+      licenseTextRow.removeAttribute('style');
+      licenseTextBox.setAttribute('form', 'addon-metadata');
+      licenseTextBox.setAttribute('required', '');
+    }
+    else {
+     licenseTextRow.setAttribute('style', 'display: none;');
+     licenseTextBox.removeAttribute('form');
+     licenseTextBox.removeAttribute('required');
+    }
+  }
+</script>
+
+<h2>{$PAGE_TITLE}</h2>
+{if $USER_LEVEL >= 3}
+{assign "SUBMENU_STYLE" "vertical-align: middle; margin-left: 2px; margin-right: 2px"}
+<p>
+  <a href="/panel/administration/?task=list&what=extensions"><img src="{$BASE_PATH}../shared/plugin.png" style="{$SUBMENU_STYLE}"/>Extensions</a> 
+  <a href="/panel/administration/?task=list&what=externals"><img src="{$BASE_PATH}../shared/plugin_link.png" style="{$SUBMENU_STYLE}" />Externals</a> 
+  <a href="/panel/administration/?task=list&what=themes"><img src="{$BASE_PATH}../shared/palette.png" style="{$SUBMENU_STYLE}" />Themes</a> 
+  <a href="/panel/administration/?task=list&what=langpacks"><img src="{$BASE_PATH}../shared/world.png" style="{$SUBMENU_STYLE}" />Language Packs</a>
+  <a href="/panel/administration/?task=list&what=users"><img src="{$BASE_PATH}../shared/user.png" style="{$SUBMENU_STYLE}" />Users</a>
+</p>
+{/if}
+
+<table class="addonTable single-row" metadata>
+  <tr>
+    <th>Property</th>
+    <th>Value</th>
+  </tr>
+  <tr>
+    <td>Status</td>
+    <td>
+      {if $USER_LEVEL >= 3}
+      <input form="addon-metadata" name="active" type="checkbox" value="1" {if $PAGE_DATA.active}checked{/if} /> Active 
+      <input form="addon-metadata" name="reviewed" type="checkbox" value="1" {if $PAGE_DATA.reviewed}checked{/if} /> Reviewed
+    </td>
+  </tr>
+  <tr>
+    <td>Release XPI</td>
+    <td><a href="/?component=download&id={$PAGE_DATA.id}&panel=1">{$PAGE_DATA.releaseXPI}</a></td>
+      {else}
+      <img src="{$BASE_PATH}../shared/{if $PAGE_DATA.active}accept{else}delete{/if}.png" class="aligntop" /> Active 
+      <img src="{$BASE_PATH}../shared/{if $PAGE_DATA.reviewed}accept{else}delete{/if}.png" class="aligntop" style="margin-left: 2px" /> Reviewed<br />
+      {/if}
+    </td>
+  </tr>
+  <tr>
+    <td>Name</td>
+    <td>{$PAGE_DATA.name}</td>
+  </tr>
+  <tr>
+    <td>Creator</td>
+    <td>{$PAGE_DATA.creator}</td>
+  </tr>
+  <tr>
+    <td>Description</td>
+    <td>{$PAGE_DATA.description}</td>
+  </tr>
+  <tr>
+    <td>Homepage URL</td>
+    <td>{if $PAGE_DATA.homepageURL}{$PAGE_DATA.homepageURL}{else}NULL <em>(em:homepageURL in install.rdf)</em>{/if}</td>
+  </tr>
+  <tr>
+    <td>ID</td>
+    <td>{$PAGE_DATA.id}</td>
+  </tr>
+  <tr>
+    <td>Slug</td>
+    <td>{$PAGE_DATA.slug}</td>
+  </tr>
+  <tr>
+    <td>Category</td>
+    <td>
+      <select form="addon-metadata" name="category" style="width: 175px;">
+      {assign "FOUND_CATEGORY" 0}
+      {if $PAGE_DATA.type == 'extension'}
+        {foreach $EXTRA_DATA.categories as $key => $value}
+          {if $PAGE_DATA.category == $key}
+            <option selected="selected" value="{$key}">{$value}</option>
+            {assign "FOUND_CATEGORY" 1}
+            {continue}
+          {/if}
+           <option value="{$key}">{$value}</option>
+        {/foreach}
+      {/if}
+      {if $PAGE_DATA.type == 'theme'}
+        <option value="themes" {if $PAGE_DATA.category == 'themes'}{assign "FOUND_CATEGORY" 1}selected="selected"{/if}>Themes</option>
+      {/if}
+      <option value="unlisted" {if $USER_LEVEL <= 1}disabled{/if} {if $FOUND_CATEGORY == 0}selected="selected"{/if}>Unlisted</option>
+      </select> 
+      {if $PAGE_DATA.type == 'extension'}<em>(Some Add-ons Sites do not currently list extensions by category, however, you need to choose one)</em>{/if}
+    </td>
+  </tr>
+  <tr>
+    <td>License</td>
+    <td>
+      <select id="license" form="addon-metadata" name="license" style="width: 175px;" onchange="licenseChange();">
+        {assign "FOUND_LICENSE" 0}
+        {foreach $EXTRA_DATA.licenses as $value}
+          {assign "LC_LICENSE" $value|lower}
+          {if $LC_LICENSE == 'pd'} {assign "value" "Public Domain"} {/if}
+          {if $LC_LICENSE == 'custom'} {assign "value" "Custom License"} {/if}
+
+          {if $LC_LICENSE == "copyright"}
+            {if $PAGE_DATA.license|lower == "copyright"}
+              {assign "FOUND_LICENSE" 2}
+            {/if}
+            {continue}
+          {/if}
+
+          {if $FOUND_LICENSE == 0 && $PAGE_DATA.license|lower == $LC_LICENSE}
+            <option value="{$LC_LICENSE}" selected="selected">{$value}</option>
+            {assign "FOUND_LICENSE" 1}
+            {continue}
+          {/if}
+
+          <option value="{$LC_LICENSE}">{$value}</option>
+        {/foreach}
+        <option value="copyright"{if $FOUND_LICENSE == 0 || $FOUND_LICENSE == 2}selected="selected"{/if}>Copyright</option>
+      </select> 
+      <em>(Open Source licenses are encuraged)</em>
+    </td>
+  </tr>
+  <tr id="licenseTextRow">
+    <td class="aligntop"><div style="margin-top: 4px">Custom License Text</div></td>
+    <td>
+      <div style="margin-top: 4px"><em>Plain Text Formatting (If you change to another license your custom license text will be cleared on submit)</em></div>
+      <textarea id="licenseTextBox" style="width: 1065px; resize: vertical;" name="licenseText" rows="20">{if $PAGE_DATA.licenseText}{$PAGE_DATA.licenseText}{/if}</textarea>
+    </td>
+  <tr>
+    <td>Repository URL</td>
+    <td><input form="addon-metadata" name="repository" type="url" size="80" value="{$PAGE_DATA.repository}" /></td>
+  </tr>
+  <tr>
+    <td>Support URL</td>
+    <td><input form="addon-metadata" name="supportURL" type="url" size="80" value="{$PAGE_DATA.supportURL}" /></td>
+  </tr>
+  <tr>
+    <td>Support E-mail</td>
+    <td><input form="addon-metadata" name="supportEmail" type="email" size="80" value="{$PAGE_DATA.supportEmail}" /></td>
+  </tr>
+  <tr>
+    <td>Search Tags</td>
+    <td>
+      <input form="addon-metadata" name="tags" type="text" size="80" value="{$PAGE_DATA.tags}" /> 
+      <em>(Up to 10 max)</em>
+    </td>
+  </tr>
+  <tr>
+    <td class="aligntop"><div style="margin-top: 4px">Add-on Page Content</div></td>
+    <td>
+      <div style="margin-top: 4px">
+        <em>
+          <a href="http://developer.palemoon.org/Add-ons:Site/Manifest_Files#head:The_phoebus.content_file" target="_blank">Formatting Syntax</a> - 
+          (formerly phoebus.content)
+        </em>
+      </div>
+      <textarea form="addon-metadata" style="width: 1065px; resize: vertical;" name="content" rows="20">{$PAGE_DATA.content}</textarea>
+    </td>
+  </tr>
+</table>
+
+<br />
+
+<form id="addon-metadata" accept-charset="UTF-8" autocomplete="off" method="POST" >
+  <input type="hidden" name="slug" value="{$PAGE_DATA.slug}" />
+  <button type="submit" value="Submit" style="float: right;">Update</button><br />
+</form>
+
+<script>
+  licenseChange();
+</script>

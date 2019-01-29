@@ -17,7 +17,7 @@ $moduleReadManifest = new classReadManifest();
 
 // == | funcDownloadXPI | ===============================================
 
-function funcDownloadXPI($aAddonManifest, $aAddonVersion) {
+function funcDownloadXPI($aAddonManifest, $aAddonVersion, $aBinaryStream = null) {
   $versionXPI = null;
   
   if ($aAddonVersion == 'latest') {
@@ -41,10 +41,11 @@ function funcDownloadXPI($aAddonManifest, $aAddonVersion) {
       funcError('Unknown XPI version');
     }
   }
-  
+
+   
   if (file_exists($addonFile)) {
     // Non-web browsers should send as an arbitrary binary stream
-    if (in_array('disable-xpinstall', TARGET_APPLICATION_SITE[$GLOBALS['arraySoftwareState']['currentApplication']]['features'])) {
+    if ($aBinaryStream) {
       header('Content-Type: application/octet-stream');
     }
     else {
@@ -91,16 +92,15 @@ function funcDownloadSearchPlugin($aSearchPluginName) {
 // == | Main | ================================================================
 
 $strRequestAddonID = funcUnifiedVariable('get', 'id');
-$strRequestAddonVersion = funcUnifiedVariable('get', 'version');
+$strRequestAddonVersion = funcUnifiedVariable('get', 'version') ?? 'latest';
+$boolRequestPanel = funcUnifiedVariable('get', 'panel');
+$boolRequestBinaryStream = in_array('disable-xpinstall', TARGET_APPLICATION_SITE[$arraySoftwareState['currentApplication']]['features']);
+                    
 
 // Sanity
 if ($strRequestAddonID == null) {
   funcError('Missing minimum required arguments.');
 }
-
-if ($strRequestAddonVersion == null) {
-  $strRequestAddonVersion = 'latest';
-} 
 
 // Search for add-ons in our databases
 // Search Plugins
@@ -108,11 +108,17 @@ if (array_key_exists($strRequestAddonID, classReadManifest::SEARCH_PLUGINS_DB)) 
   funcDownloadSearchPlugin(classReadManifest::SEARCH_PLUGINS_DB[$strRequestAddonID]);
 }
 else {
-  $addonManifest = $moduleReadManifest->getAddonByID($strRequestAddonID);
+  if ($boolRequestPanel) {
+    $addonManifest = $moduleReadManifest->getAddon('panel-by-id', $strRequestAddonID);
+    $boolRequestBinaryStream = true;
+  }
+  else {
+    $addonManifest = $moduleReadManifest->getAddon('by-id', $strRequestAddonID);
+  }
 
   if ($addonManifest != null) {
     $addonManifest['release'] = $addonManifest['releaseXPI'];
-    funcDownloadXPI($addonManifest, $strRequestAddonVersion);
+    funcDownloadXPI($addonManifest, $strRequestAddonVersion, $boolRequestBinaryStream);
   }
   else {  
     funcError('Add-on could not be found in our database');

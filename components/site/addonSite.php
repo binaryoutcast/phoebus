@@ -87,7 +87,7 @@ if ($arraySoftwareState['debugMode']) {
 
 // --------------------------------------------------------------------------------------------------------------------
 
-// Use a simple switch case to deal with simple URIs
+// Handle URIs
 switch ($arraySoftwareState['requestPath']) {
   case URI_ROOT:
     // Special Case: Interlink should go to Extensions instead of a front page
@@ -136,7 +136,7 @@ switch ($arraySoftwareState['requestPath']) {
 
     // If there are no extensions then 404
     if (!$categoryManifest) {
-      funcSend404();
+      $categoryManifest = [];
     }
 
     // Generate the "All Extensions" Page
@@ -155,7 +155,7 @@ switch ($arraySoftwareState['requestPath']) {
 
     // If there are no themes then 404
     if (!$categoryManifest) {
-      funcSend404();
+      $categoryManifest = [];
     }
 
     // We have themes so generate the page
@@ -171,7 +171,7 @@ switch ($arraySoftwareState['requestPath']) {
 
     // If there are no Personas then 404
     if (!$categoryManifest) {
-      funcSend404();
+      $categoryManifest = [];
     }
 
     // We have personas so generate the page
@@ -187,7 +187,7 @@ switch ($arraySoftwareState['requestPath']) {
 
     // If there are no langpacks then 404
     if (!$categoryManifest) {
-      funcSend404();
+      $categoryManifest = [];
     }
 
     // We have langpacks so generate the page
@@ -203,7 +203,7 @@ switch ($arraySoftwareState['requestPath']) {
 
     // If for some reason there aren't any even though there is no error checking in the method, 404
     if (!$categoryManifest) {
-      funcSend404();
+      $categoryManifest = [];
     }
 
     // Generate the Search Engine Plugins category page
@@ -214,105 +214,104 @@ switch ($arraySoftwareState['requestPath']) {
   case URI_ADDON_LICENSE:
     // These have no content so send the client back to root
     funcRedirect(URI_ROOT);
-}
+    break;
+  default:
+    // Complex URIs need more complex conditional checking
+    // Extension Subcategories
+    if (startsWith($arraySoftwareState['requestPath'], URI_EXTENSIONS)) {
+      // Check if Extension Subcategories are enabled
+      funcCheckEnabledFeature('extensions-cat');
 
-// --------------------------------------------------------------------------------------------------------------------
+      // Strip the path to get the slug
+      $strSlug = funcStripPath($arraySoftwareState['requestPath'], URI_EXTENSIONS);
 
-// Complex URIs need more complex conditional checking
-// Extension Subcategories
-if (startsWith($arraySoftwareState['requestPath'], URI_EXTENSIONS)) {
-  // Check if Extension Subcategories are enabled
-  funcCheckEnabledFeature('extensions-cat');
+      // See if the slug exists in the category array
+      if (!array_key_exists($strSlug, classReadManifest::EXTENSION_CATEGORY_SLUGS)) {
+        funcSend404();
+      }
 
-  // Strip the path to get the slug
-  $strSlug = funcStripPath($arraySoftwareState['requestPath'], URI_EXTENSIONS);
+      // Query SQL for extensions in this specific category
+      $categoryManifest = $moduleReadManifest->getAddons('site-addons-by-category', $strSlug);
+      
+      // If there are no extensions then 404
+      if (!$categoryManifest) {
+        funcSend404();
+      }
 
-  // See if the slug exists in the category array
-  if (!array_key_exists($strSlug, classReadManifest::EXTENSION_CATEGORY_SLUGS)) {
-    funcSend404();
-  }
+      // We have extensions so generate the subcategory page
+      $moduleGenerateContent->addonSite('cat-extensions',
+                                        'Extensions: ' . classReadManifest::EXTENSION_CATEGORY_SLUGS[$strSlug],
+                                        $categoryManifest, classReadManifest::EXTENSION_CATEGORY_SLUGS);
+    }
+    // Add-on Page
+    elseif (startsWith($arraySoftwareState['requestPath'], URI_ADDON_PAGE)) {
+      // Strip the path to get the slug
+      $strSlug = funcStripPath($arraySoftwareState['requestPath'], URI_ADDON_PAGE);
 
-  // Query SQL for extensions in this specific category
-  $categoryManifest = $moduleReadManifest->getAddons('site-addons-by-category', $strSlug);
-  
-  // If there are no extensions then 404
-  if (!$categoryManifest) {
-    funcSend404();
-  }
+      // Query SQL for the add-on
+      $addonManifest = $moduleReadManifest->getAddon('by-slug', $strSlug);
 
-  // We have extensions so generate the subcategory page
-  $moduleGenerateContent->addonSite('cat-extensions',
-                                    'Extensions: ' . classReadManifest::EXTENSION_CATEGORY_SLUGS[$strSlug],
-                                    $categoryManifest, classReadManifest::EXTENSION_CATEGORY_SLUGS);
-}
-// Add-on Page
-elseif (startsWith($arraySoftwareState['requestPath'], URI_ADDON_PAGE)) {
-  // Strip the path to get the slug
-  $strSlug = funcStripPath($arraySoftwareState['requestPath'], URI_ADDON_PAGE);
+      // If there is no add-on, 404
+      if (!$addonManifest) {
+        funcSend404();
+      }
 
-  // Query SQL for the add-on
-  $addonManifest = $moduleReadManifest->getAddonBySlug($strSlug);
+      // Generate the Add-on Releases Page
+      $moduleGenerateContent->addonSite('addon-page', $addonManifest['name'], $addonManifest);
+    }
+    // Add-on Releases
+    elseif (startsWith($arraySoftwareState['requestPath'], URI_ADDON_RELEASES)) {
+      // Strip the path to get the slug
+      $strSlug = funcStripPath($arraySoftwareState['requestPath'], URI_ADDON_RELEASES);
 
-  // If there is no add-on, 404
-  if (!$addonManifest) {
-    funcSend404();
-  }
+      // Query SQL for the add-on
+      $addonManifest = $moduleReadManifest->getAddon('by-slug', $strSlug);
 
-  // Generate the Add-on Releases Page
-  $moduleGenerateContent->addonSite('addon-page', $addonManifest['name'], $addonManifest);
-}
-// Add-on Releases
-elseif (startsWith($arraySoftwareState['requestPath'], URI_ADDON_RELEASES)) {
-  // Strip the path to get the slug
-  $strSlug = funcStripPath($arraySoftwareState['requestPath'], URI_ADDON_RELEASES);
+      // If there is no add-on, 404
+      if (!$addonManifest) {
+        funcSend404();
+      }
 
-  // Query SQL for the add-on
-  $addonManifest = $moduleReadManifest->getAddonBySlug($strSlug);
+      // Generate the Add-on Releases Page
+      $moduleGenerateContent->addonSite('addon-releases', $addonManifest['name'] . ' - Releases', $addonManifest);
+    }
+    // Add-on License
+    elseif (startsWith($arraySoftwareState['requestPath'], URI_ADDON_LICENSE)) {
+      // Strip the path to get the slug
+      $strSlug = funcStripPath($arraySoftwareState['requestPath'], URI_ADDON_LICENSE);
 
-  // If there is no add-on, 404
-  if (!$addonManifest) {
-    funcSend404();
-  }
+      // Query SQL for the add-on
+      $addonManifest = $moduleReadManifest->getAddon('by-slug', $strSlug);
 
-  // Generate the Add-on Releases Page
-  $moduleGenerateContent->addonSite('addon-releases', $addonManifest['name'] . ' - Releases', $addonManifest);
-}
-// Add-on License
-elseif (startsWith($arraySoftwareState['requestPath'], URI_ADDON_LICENSE)) {
-  // Strip the path to get the slug
-  $strSlug = funcStripPath($arraySoftwareState['requestPath'], URI_ADDON_LICENSE);
+      // If there is no add-on, 404
+      if (!$addonManifest) {
+        funcSend404();
+      }
 
-  // Query SQL for the add-on
-  $addonManifest = $moduleReadManifest->getAddonBySlug($strSlug);
+      // If there is a licenseURL then redirect to it
+      if ($addonManifest['licenseURL']) {
+        funcRedirect($addonManifest['licenseURL']);
+      }
+      
+      // If the license is public domain, copyright, or custom then we want to generate a page for it
+      if ($addonManifest['license'] == 'pd' || $addonManifest['license'] == 'copyright' ||
+          $addonManifest['license'] == 'custom') {
+        // If we have licenseText we want to convert newlines to xhtml line breaks
+        if ($addonManifest['licenseText']) {
+          $addonManifest['licenseText'] = nl2br($addonManifest['licenseText'], true);
+        }
 
-  // If there is no add-on, 404
-  if (!$addonManifest) {
-    funcSend404();
-  }
+        // Smarty will handle displaying content for these license types
+        $moduleGenerateContent->addonSite('addon-license', $addonManifest['name'] . ' - License', $addonManifest);
+      }
 
-  // If there is a licenseURL then redirect to it
-  if ($addonManifest['licenseURL']) {
-    funcRedirect($addonManifest['licenseURL']);
-  }
-  
-  // If the license is public domain, copyright, or custom then we want to generate a page for it
-  if ($addonManifest['license'] == 'pd' || $addonManifest['license'] == 'copyright' ||
-      $addonManifest['license'] == 'custom') {
-    // If we have licenseText we want to convert newlines to xhtml line breaks
-    if ($addonManifest['licenseText']) {
-      $addonManifest['licenseText'] = nl2br($addonManifest['licenseText'], true);
+      // The license is assumed to be an OSI license so redirect there
+      funcRedirect('https://opensource.org/licenses/' . $addonManifest['license']);
     }
 
-    // Smarty will handle displaying content for these license types
-    $moduleGenerateContent->addonSite('addon-license', $addonManifest['name'] . ' - License', $addonManifest);
-  }
-
-  // The license is assumed to be an OSI license so redirect there
-  funcRedirect('https://opensource.org/licenses/' . $addonManifest['license']);
+    // There are no matches so 404
+    funcSend404(); 
 }
-
-// There are no matches so 404
-funcSend404();
 
 // ====================================================================================================================
 

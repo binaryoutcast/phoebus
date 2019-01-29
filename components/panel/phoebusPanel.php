@@ -8,21 +8,29 @@
 // Constants
 const URI_PANEL     = '/panel/';
 const URI_REG       = URI_PANEL . 'registration/';
+const URI_VERIFY    = URI_PANEL . 'verification/';
 const URI_LOGIN     = URI_PANEL . 'login/';
 const URI_LOGOUT    = URI_PANEL . 'logout/';
+const URI_DEV       = URI_PANEL . 'developer/';
 const URI_ACCOUNT   = URI_PANEL . 'account/';
 const URI_ADDONS    = URI_PANEL . 'addons/';
 const URI_ADMIN     = URI_PANEL . 'administration/';
 
 // Include modules
-$arrayIncludes = ['database', 'auth', 'readManifest', 'generateContent'];
+$arrayIncludes = ['database', 'account', 'readManifest', 'writeManifest', 'generateContent'];
 foreach ($arrayIncludes as $_value) { require_once(MODULES[$_value]); }
 
 // Instantiate modules
-$moduleDatabase = new classDatabase();
-$moduleAuth = new classAuthentication();
-$moduleReadManifest = new classReadManifest();
-$moduleGenerateContent = new classGenerateContent(true);
+$moduleDatabase         = new classDatabase();
+$moduleAccount          = new classAccount();
+$moduleReadManifest     = new classReadManifest();
+$moduleWriteManifest    = new classWriteManifest();
+$moduleGenerateContent  = new classGenerateContent('smarty');
+
+// Request arguments
+$arraySoftwareState['requestPanelTask'] = funcUnifiedVariable('get', 'task');
+$arraySoftwareState['requestPanelWhat'] = funcUnifiedVariable('get', 'what');
+$arraySoftwareState['requestPanelSlug'] = funcUnifiedVariable('get', 'slug');
 
 // ====================================================================================================================
 
@@ -34,12 +42,16 @@ $moduleGenerateContent = new classGenerateContent(true);
 * @param $_level    Required level
 * @returns          true 404
 ***********************************************************************************************************************/
-function funcCheckAccessLevel($aLevel) {
+function funcCheckAccessLevel($aLevel, $aReturnNull = null) {
   if ($GLOBALS['arraySoftwareState']['authentication']['level'] >= $aLevel) {
     return true;
   }
 
-  funcSend404();
+  if (!$aReturnNull) {
+    funcRedirect('/panel/login/');
+  }
+
+  return null;
 }
 
 // ====================================================================================================================
@@ -47,10 +59,11 @@ function funcCheckAccessLevel($aLevel) {
 // == | Main | ========================================================================================================
 
 $strComponentPath = dirname(COMPONENTS[$arraySoftwareState['requestComponent']]) . '/';
+$boolHasPostData = !empty($_POST);
 
 // --------------------------------------------------------------------------------------------------------------------
 
-// Special case: Interlink should use Pale Moon's panel access
+// Special case: Interlink should use Pale Moon's panel access at least until I get a cert
 if ($arraySoftwareState['currentApplication'] == 'interlink') {
   funcRedirect('https://addons.palemoon.org/panel/');
 }
@@ -62,46 +75,70 @@ if (!in_array('https', TARGET_APPLICATION_SITE[$arraySoftwareState['currentAppli
             '<li>If all else fails you can always use the Panel at the <a href="https://addons.palemoon.org/panel/">Pale Moon Add-ons Site</a>.');
 }
 
-if ($_SERVER['SCHEME'] != 'https') {
+if ($arraySoftwareState['currentScheme'] != 'https') {
   funcRedirect('https://' . $arraySoftwareState['currentDomain'] . '/panel/');
-}
-
-// Use a simple switch case to deal with simple URIs
-switch ($arraySoftwareState['requestPath']) {
-  case URI_PANEL:
-    $moduleGenerateContent->addonPanel('panel-frontpage.xhtml', 'Landing Page');
-    break;
-  case URI_REG:
-    funcSendHeader('501');
-    break;
-  case URI_LOGOUT:
-    $moduleAuth->authenticate(true);
-    break;
-  case URI_LOGIN:
-    $moduleAuth->authenticate();
-    funcRedirect('/panel/account/');
-    break;
-  case URI_ACCOUNT:
-    $moduleAuth->authenticate();
-    funcCheckAccessLevel(1);
-    $moduleGenerateContent->addonPanel('panel-frontpage.xhtml', 'Account Page');
-    break;
 }
 
 // --------------------------------------------------------------------------------------------------------------------
 
-// Complex URIs need more complex conditional checking
-if (startsWith($arraySoftwareState['requestPath'], URI_ADDONS)) {
-  $moduleAuth->authenticate();
-  funcCheckAccessLevel(1);
-  $userAddons = $moduleReadManifest->getAddons('panel-user-addons', $arraySoftwareState['authentication']['addons']);
-  $moduleGenerateContent->addonPanel('developer-addons-list', 'Your Add-ons', $userAddons);
-}
-elseif (startsWith($arraySoftwareState['requestPath'], URI_ADMIN)){
-  require_once($strComponentPath . 'panelAdministration.php');
-}
+// Handle URIs
+switch ($arraySoftwareState['requestPath']) {
+  case URI_PANEL:
+    $moduleGenerateContent->addonSite('panel-frontpage.xhtml', 'Landing Page');
+    break;
+  case URI_REG:
+    //funcSendHeader('501');
+    if ($boolHasPostData) {
+      $boolRegComplete = $moduleAccount->registerUser();
 
-funcSend404();
+      if (!$boolRegComplete) {
+        funcError('Something has gone horribly wrong!');
+      }
+
+      $moduleGenerateContent->addonSite('panel-account-registration-done', 'Registration Complete');
+    }
+
+    $moduleGenerateContent->addonSite('panel-account-registration', 'Registration');
+    break;
+  case URI_VERIFY:
+    if ($boolHasPostData) {
+      $boolVerificationComplete = $moduleAccount->verifyUser();
+
+      if (!$boolVerificationComplete) {
+        funcError('Something has gone horribly wrong!');
+      }
+
+      funcRedirect(URI_LOGIN);
+    }
+    $moduleGenerateContent->addonSite('panel-account-validation', 'Account Verification');
+    break;
+  case URI_LOGIN:
+    $moduleAccount->authenticate();
+    if (funcCheckAccessLevel(3, true)) {
+      funcRedirect(URI_ADMIN);
+    }
+    funcRedirect(URI_DEV);
+    break;
+  case URI_LOGOUT:
+    $moduleAccount->authenticate('logout');
+    break;
+  case URI_DEV:
+  case URI_ACCOUNT:
+  case URI_ADDONS:
+    $moduleAccount->authenticate();
+    funcCheckAccessLevel(1);
+    require_once($strComponentPath . 'developer.php');
+    break;
+  default:
+    if (startsWith($arraySoftwareState['requestPath'], URI_ADMIN)){
+      $moduleAccount->authenticate();
+      funcCheckAccessLevel(3);
+      require_once($strComponentPath . 'administration.php');
+    }
+
+    // No clue send 404
+    funcSend404();
+}
 
 // ====================================================================================================================
 

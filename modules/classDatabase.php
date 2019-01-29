@@ -3,13 +3,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// == | Setup | =======================================================================================================
-
-// Include required libraries
-require_once(LIBRARIES['safeMySQL']);
-
-// ====================================================================================================================
-
 class classDatabase {
   private $arraySoftwareState;
   private $libSafeMySQL;
@@ -45,6 +38,7 @@ class classDatabase {
     
     mysqli_set_charset($this->connection, 'utf8');
 
+    require_once(LIBRARIES['safeMySQL']);
     $this->libSafeMySQL = new SafeMysql(['mysqli' => &$this->connection]);
   }
 

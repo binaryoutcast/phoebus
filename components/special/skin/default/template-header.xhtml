@@ -13,90 +13,165 @@
         font-size: 12px;
         font-family: message-box, "Segoe UI", sans-serif;
       }
+
       #container {
         margin: 0 auto;
         padding: 30px;
-        min-width: 330px;
-        max-width: 960px;
+        width: 1200px;
+        min-width: 1200px;
+        max-width: 1200px;
         border: 1px solid #a0a0a0;
         border-radius: 10px;
         background: #fff
       }
-      /* h1{margin-bottom:3px} */
+
+      /*
+      h1{
+        margin-bottom: 3px;
+      }
+      */
 
       h1 .small {
-        font-size: .4em
+        font-size: .4em;
       }
+
       h1 a {
-        text-decoration: none
+        text-decoration: none;
       }
+
       h2 {
         color: #000;
-        font-size: 1.5em
+        font-size: 1.5em;
+        border-bottom: 1px solid #ccc
       }
+
       h3 {
         color: #000;
-        text-align: center
+        text-align: center;
       }
+
       a {
-        color: #000
+        color: #000;
       }
+
       .description {
         margin-bottom: 30px;
         font-style: italic;
-        /*margin-top:30px*/
-        
-        font-size: 1.2em
+        /*
+        margin-top:30px;
+        */  
+        font-size: 1.2em;
       }
+
       .download {
-        float: right
+        float: right;
       }
+
       pre {
         font-family: "Courier New",Courier,monospace;
         white-space: pre-wrap;
         min-width: 300px;
         max-width: 930px;
-        }
+      }
+
       hr {
         width: 80%;
-        border-bottom: 1px solid #aaa
+        border-bottom: 1px solid #aaa;
       }
+
       .strike {
-        text-decoration: line-through
+        text-decoration: line-through;
       }
+
       .hidden {
-        display: none
+        display: none;
       }
+
       .footer {
         padding-top: 30px;
         text-align: center;
-        font-style: italic
+        font-style: italic;
       }
+
       nav {
         display: flex;
-        width: 20vw;
-        justify-content: space-between
+        justify-content: flex-start;
       }
+
+      nav a {
+        margin-left: 20px;
+        margin-right: 20px;
+      }
+
       img {
         border: 0
       }
+
       img.favicon {
         margin-top: 1px;
         padding-right: 5px;
         width: 16px;
         height: 16px;
-        vertical-align: text-bottom
+        vertical-align: text-bottom;
       }
+
       img.textbottom {
-        vertical-align: text-bottom
+        vertical-align: text-bottom;
       }
+
       .menu {
         margin-left: 0;
-        max-width: 20vw
+        width: 100%;
       }
+
+      .mozmenu {
+        background: url('/components/special/skin/default/logo.png') no-repeat, linear-gradient(to bottom, #455372 0%, #445271 35%, #445271 60%, #2a3753 100%);
+        height: 70px;
+        border-radius: 8px;
+        margin-top: -8px;
+        margin-bottom: 8px;
+      }
+
+      .mozmenu ul li {
+        height: 26px;
+        min-height: 26px;
+        max-height: 26px;
+        float: right;
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+        color: white;
+        font-weight: bold;
+        font-size: 14px;
+        margin-top: 41px;
+        margin-right: 1px;
+        padding: 2px 8px 0px 8px;
+        background-color: #697388;
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+        border-bottom: 1px solid #515358;
+      }
+
+      .mozmenu ul:last-child {
+        margin-right: 16px;
+      }
+
+      .mozmenu ul li a,
+      .mozmenu ul li a:hover,
+      .mozmenu ul li a:active,
+      .mozmenu ul li a:visited {
+        color: white;
+        text-decoration: none;
+      }
+
+      .mozmenu ul li:hover {
+        background-color: #747f96;
+      }
+
       a.active {
-        font-weight: 700
+        font-weight: 700;
       }
+
       a.download-stable {
         padding: 7px 10px 8px;
         border: 1px solid #63a62f;
@@ -111,20 +186,22 @@
         text-shadow: 0 -1px 0 #4c9021;
         font-weight: 700;
         font-size: 16px;
-        line-height: 1
+        line-height: 1;
       }
-      a.download-stable:active,
-      a.download-beta:active {
+
+      a.download-stable:active, a.download-beta:active {
         border: 1px solid #5b992b;
         border-bottom: 1px solid #538c27;
-        box-shadow: inset 0 0 8px 4px #548c29, 0 1px 0 0 #eee
+        box-shadow: inset 0 0 8px 4px #548c29, 0 1px 0 0 #eee;
       }
+
       a.download-stable:hover {
         background-color: #76b347;
         background-image: linear-gradient(to bottom, #76b347, #5e9e2e);
         box-shadow: inset 0 1px 0 0 #8dbf67;
-        cursor: pointer
+        cursor: pointer;
       }
+
       a.download-beta {
         padding: 7px 10px 8px;
         border: 1px solid #63a62f;
@@ -139,17 +216,18 @@
         text-decoration: none;
         text-shadow: 0 -1px 0 #ccc;
         font-size: 16px;
-        line-height: 1
+        line-height: 1;
       }
+
       a.download-beta:hover {
         background-color: #ffd203;
         background-image: repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.3) 5px, rgba(0, 0, 0, 0.2) 5px, rgba(0, 0, 0, 0.2) 10px);
         /* (-45deg, #F1B802, #FFD203) */
         
         box-shadow: inset 0 1px 0 0 #8dbf67;
-        cursor: pointer
+        cursor: pointer;
       }
-      
+
       .pulseText {
         animation: pulse 2000ms infinite;
       }
@@ -159,7 +237,76 @@
           color: red;
         }
       }
+
+      .fadeIn {
+        animation: fade 0.4s;
+      }
+
+      @keyframes fade {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+
+      /* Add-on Table */
+
+      .addonTable {
+        width: 100%;
+        border-spacing: 0px 0px;
+      }
+
+      .addonTable th {
+        text-align: left;
+      }
+
+      .addonTable tr {
+        padding-top: 2px;
+        padding-bottom: 2px;
+      }
+
+      .single-row tr:nth-child(odd) {
+        background:#eee;
+      }
+
+      .double-row tr:nth-child(4n+0), tr:nth-child(4n+1) {
+        background:#eee;
+      }
+
+      .addonTable tr:first-child {
+          background: #2a3753;
+          color: #fff;
+      }
+
+      .addonTable[metadata] tr td {
+        height: 26px;
+      }
+
+      .addonTable[metadata] tr td:first-child {
+        width: 125px;
+        font-weight: bold;
+      }
+
+      .cell-ellipsis {
+        width: 225px;
+        min-width: 225px;
+        max-width: 225px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .aligntop {
+        vertical-align: top;
+      }
     </style>
   </head>
   <body>
     <div id="container">
+      <!-- <h1>Phoebus Panel</h2> -->
+      <div class="mozmenu">
+        <ul>
+          <li><a href="/panel/">Panel</a></li>
+          <li><a href="/">Root</a></li>
+          <li><a href="#" onclick="window.history.back();">Go Back</a></li>
+        <ul>
+      </div>
+      <div id="content" class="fadeIn">

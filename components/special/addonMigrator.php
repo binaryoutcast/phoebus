@@ -308,12 +308,18 @@ function funcUsers() {
   $arrayGlobJSON = glob('../.vsftpd/users/*.json');
   $arrayAdmins = json_decode(file_get_contents(ADMIN_JSON_FILE), true);
   $arrayFinalUsers = array();
+  $time = time();
 
   // Process Administrators
   // "addons-team" is not actually an administrator but it is stored in this json so..
   foreach ($arrayAdmins as $_value) {
     $_temp = $_value;
-    $_temp['addons'] = json_encode($_temp['addons']);
+    $_temp['addons'] = json_encode($_temp['addons'], 320);
+    $extraData = array(
+      'regEpoch' => $time,
+      'verification' => null
+    );
+    $_temp['extraData'] = json_encode($extraData, 320);
     $arrayFinalUsers[] = $_temp;
     print('Processed Administrator: ' . $_temp['username'] . NEW_LINE);
   }
@@ -344,11 +350,16 @@ function funcUsers() {
     $_temp['level'] = 1;
 
     // Users with five or more add-ons get Level 2 status
-    if (count($_json['addons']) >= 5 && $_temp['username'] != 'srazzano') {
+    if (count($_json['addons']) >= 5 && !in_array($_temp['username'], ['srazzano', 'riiis'])) {
       $_temp['level'] = 2;
     }
 
-    $_temp['addons'] = json_encode($_json['addons']);
+    $_temp['addons'] = json_encode($_json['addons'], 320);
+    $extraData = array(
+      'regEpoch' => $time,
+      'verification' => null
+    );
+    $_temp['extraData'] = json_encode($extraData, 320);
     $arrayFinalUsers[] = $_temp;
     print('Processed User: ' . $_temp['username'] . NEW_LINE);
   }
@@ -373,54 +384,13 @@ function funcSQL($_arrayAddons, $_arrayUsers) {
       if ($_addon['xpinstall']) {
         $_targetApplication = array_keys($_addon['xpinstall'][$_addon['releaseXPI']]['targetApplication']);
 
-        foreach ($_targetApplication as $_value2) {
-          if (TARGET_APPLICATION_ID['toolkit'] == $_value2) {
-            $_client['toolkit'] = 1;
-          }
-
-          if (TARGET_APPLICATION_ID['palemoon'] == $_value2) {
-            $_client['palemoon'] = 1;
-          }
-
-          if (TARGET_APPLICATION_ID['firefox'] == $_value2) {
-            $_client['firefox'] = 1;
-            $_client['basilisk'] = 1;
-          }
-
-          if (TARGET_APPLICATION_ID['borealis'] == $_value2) {
-            $_client['borealis'] = 1;
-          }
-
-          if (TARGET_APPLICATION_ID['thunderbird'] == $_value2) {
-            $_client['thunderbird'] = 1;
-            $_client['interlink'] = 1;
-          }
-
-          if (TARGET_APPLICATION_ID['seamonkey'] == $_value2) {
-            $_client['seamonkey'] = 1;
-          }
-
-          if (TARGET_APPLICATION_ID['fennec-xul'] == $_value2) {
-            $_client['fennec-xul'] = 1;
-          }
-
-          if (TARGET_APPLICATION_ID['fennec-native'] == $_value2) {
-            $_client['fennec-native'] = 1;
-          }
-
-          if (TARGET_APPLICATION_ID['sunbird'] == $_value2) {
-            $_client['sunbird'] = 1;
-          }
-
-          if (TARGET_APPLICATION_ID['instantbird'] == $_value2) {
-            $_client['instantbird'] = 1;
-          }
-
-          if (TARGET_APPLICATION_ID['adblock-browser'] == $_value2) {
-            $_client['adblock-browser'] = 1;
-          }
-        }
-
+        $_client['toolkit']     = in_array(TARGET_APPLICATION_ID['toolkit'], $_targetApplication) ? true : false;
+        $_client['palemoon']    = in_array(TARGET_APPLICATION_ID['palemoon'], $_targetApplication) ? true : false;
+        $_client['basilisk']    = in_array(TARGET_APPLICATION_ID['basilisk'], $_targetApplication) ? true : false;
+        $_client['ambassador']  = in_array(TARGET_APPLICATION_ID['ambassador'], $_targetApplication) ? true : false;
+        $_client['borealis']    = in_array(TARGET_APPLICATION_ID['borealis'], $_targetApplication) ? true : false;
+        $_client['interlink']   = in_array(TARGET_APPLICATION_ID['interlink'], $_targetApplication) ? true : false;
+        
         // XPInstall needs to be stored as JSON so encode it
         $_addon['xpinstall'] = json_encode($_addon['xpinstall'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
       }
@@ -450,10 +420,13 @@ function funcSQL($_arrayAddons, $_arrayUsers) {
 
 // == | Main | ========================================================================================================
 
-funcSendHeader('text');
+funcSendHeader('html');
 
 // Include old category array - $arrayCategoriesDB
 require_once(LIVE_ROOT_PATH . '/db/categories.php');
+print(file_get_contents('./components/special/skin/default/template-header.xhtml'));
+print('<h2>Manifest to SQL Migration</h2>');
+print('<textarea style="width: 99%; resize: none;" name="content" rows="30" readonly>');
 
 print('== | Processing Phase' . NEW_LINE);
 
@@ -469,7 +442,8 @@ print(NEW_LINE . '== | SQL Insertion Phase' . NEW_LINE);
 
 funcSQL($arrayAddonsFinal, $arrayUsers);
 
-exit();
+print('</textarea>');
+print(file_get_contents('./components/special/skin/default/template-footer.xhtml'));
 
 // ====================================================================================================================
 

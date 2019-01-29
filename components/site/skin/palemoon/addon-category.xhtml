@@ -52,6 +52,9 @@
         <small>{$key.description}</small>
       </div>
     </a>
+  {foreachelse}
+    {if $PAGE_TYPE != 'search'}<p><em>There are no available add-ons in this category.</em>{/if}
+    </p>
   {/foreach}
 </div>
 

@@ -37,6 +37,7 @@ h1 a {
 h2 {
   color: #000;
   font-size: 1.5em;
+  border-bottom: 1px solid #ccc
 }
 
 h3 {
@@ -118,6 +119,50 @@ img.textbottom {
   width: 100%;
 }
 
+.mozmenu {
+  background: url('{$BASE_PATH}logo.png') no-repeat, linear-gradient(to bottom, #455372 0%, #445271 35%, #445271 60%, #2a3753 100%);
+  height: 70px;
+  border-radius: 8px;
+  margin-top: -8px;
+  margin-bottom: 8px;
+}
+
+.mozmenu ul li {
+  height: 26px;
+  min-height: 26px;
+  max-height: 26px;
+  float: right;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  color: white;
+  font-weight: bold;
+  font-size: 14px;
+  margin-top: 41px;
+  margin-right: 1px;
+  padding: 2px 8px 0px 8px;
+  background-color: #697388;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  border-bottom: 1px solid #515358;
+}
+
+.mozmenu ul:last-child {
+  margin-right: 16px;
+}
+
+.mozmenu ul li a,
+.mozmenu ul li a:hover,
+.mozmenu ul li a:active,
+.mozmenu ul li a:visited {
+  color: white;
+  text-decoration: none;
+}
+
+.mozmenu ul li:hover {
+  background-color: #747f96;
+}
+
 a.active {
   font-weight: 700;
 }
@@ -188,6 +233,15 @@ a.download-beta:hover {
   }
 }
 
+.fadeIn {
+  animation: fade 0.4s;
+}
+
+@keyframes fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 /* Add-on Table */
 
 .addonTable {
@@ -213,8 +267,17 @@ a.download-beta:hover {
 }
 
 .addonTable tr:first-child {
-    background:#005ca0;
-    color:#fff;
+    background: #2a3753;
+    color: #fff;
+}
+
+.addonTable[metadata] tr td {
+  height: 26px;
+}
+
+.addonTable[metadata] tr td:first-child {
+  width: 125px;
+  font-weight: bold;
 }
 
 .cell-ellipsis {
@@ -225,3 +288,8 @@ a.download-beta:hover {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+.aligntop {
+  vertical-align: top;
+}
+
