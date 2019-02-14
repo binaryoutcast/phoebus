@@ -99,14 +99,14 @@ class classGenerateContent {
     // ----------------------------------------------------------------------------------------------------------------
 
     // Read the Site Template
-    $template = $this->getContentFile('site-template.xhtml');
+    $template = $this->getContentTemplate('site-template.xhtml');
 
     if (!$template) {
       funcError('Main template file could not be read or is missing');
     }
 
     // Read the Site Stylesheet
-    $stylesheet = $this->getContentFile('site-stylesheet.css');
+    $stylesheet = $this->getContentTemplate('site-stylesheet.css');
 
     if (!$stylesheet) {
       funcError('Mail stylesheet file could not be read or is missing');
@@ -117,60 +117,73 @@ class classGenerateContent {
     switch ($aType) {
       case 'addon-page':
       case 'addon-releases':
-        $content = $this->getContentFile('addon-page.xhtml');
+        $content = $this->getContentTemplate('addon-page.xhtml');
         break;
       case 'addon-license':
-        $content = $this->getContentFile('addon-license.xhtml');
+        $content = $this->getContentTemplate('addon-license.xhtml');
         break;
       case 'cat-extension-category':
-        $content = $this->getContentFile('extension-category.xhtml');
+        $content = $this->getContentTemplate('extension-category.xhtml');
         break;
       case 'cat-all-extensions':
       case 'cat-extensions':
       case 'cat-themes':
       case 'search':
-        $content = $this->getContentFile('addon-category.xhtml');
+        $content = $this->getContentTemplate('addon-category.xhtml');
         break;
       case 'cat-personas':
-        $content = $this->getContentFile('persona-category.xhtml');
+        $content = $this->getContentTemplate('persona-category.xhtml');
         break;
       case 'cat-language-packs':
-        $content = $this->getContentFile('langpack-category.xhtml');
+        $content = $this->getContentTemplate('langpack-category.xhtml');
         break;
       case 'cat-search-plugins':
-        $content = $this->getContentFile('searchplugin-category.xhtml');
+        $content = $this->getContentTemplate('searchplugin-category.xhtml');
         break;
       case 'panel-account-registration':
       case 'panel-account-registration-done':
-         $content = $this->getContentFile('account-registration.xhtml');
+         $content = $this->getContentTemplate('account-registration.xhtml');
          break;
       case 'panel-account-validation':
-         $content = $this->getContentFile('account-validation.xhtml');
+         $content = $this->getContentTemplate('account-validation.xhtml');
          break;
       case 'developer-account':
       case 'admin-edit-account-metadata':
-        $content = $this->getContentFile('account-metadata.xhtml');
+        $content = $this->getContentTemplate('account-metadata.xhtml');
         break;
       case 'developer-addons-list':
       case 'admin-user-addons-list':
-        $content = $this->getContentFile('developer-addons-list.xhtml');
+        $content = $this->getContentTemplate('developer-addons-list.xhtml');
         break;
       case 'administration-list':
       case 'admin-list-extensions':
       case 'admin-list-externals':
       case 'admin-list-themes':
       case 'admin-list-langpacks':
-        $content = $this->getContentFile('administration-addon-list.xhtml');
+        $content = $this->getContentTemplate('administration-addon-list.xhtml');
         break;
       case 'admin-list-users':
-        $content = $this->getContentFile('administration-users-list.xhtml');
+        $content = $this->getContentTemplate('administration-users-list.xhtml');
         break;
       case 'developer-edit-addon-metadata':
       case 'admin-edit-addon-metadata':
-        $content = $this->getContentFile('addon-metadata.xhtml');
+        $content = $this->getContentTemplate('addon-metadata.xhtml');
+        break;
+      case 'admin-edit-external-metadata':
+        $content = $this->getContentTemplate('external-metadata.xhtml');
+        break;
+      case 'panel-submit-addon':
+      case 'panel-submit-langpack':
+      case 'panel-submit-external':
+      case 'panel-update-release':
+        $content = $this->getContentTemplate('addon-submit-update.xhtml');
+        break;
+      case 'addon-bulk-upload-langpack':
+      case 'addon-bulk-upload-result':
+        $content = $this->getContentTemplate('addon-bulk-upload.xhtml');
         break;
       default:
-        $content = $this->getContentFile($aType, 'content');
+        $content = $this->getContentTemplate($aType, 'content');
         if (!$content) {
           funcError('Unkown template or content');
         }
@@ -379,7 +392,7 @@ class classGenerateContent {
   * @param $aSource     component content or skin
   * @param $aFilename   name of file
   ********************************************************************************************************************/
-  private function getContentFile($aFilename, $aSource = 'skin') {
+  private function getContentTemplate($aFilename, $aSource = 'skin') {
     $aSource = ucfirst($aSource);
     return @file_get_contents($GLOBALS['arraySoftwareState']['component' . $aSource . 'Path'] . $aFilename) ?? null;
   }

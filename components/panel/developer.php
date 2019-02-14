@@ -59,8 +59,66 @@ switch ($arraySoftwareState['requestPath']) {
     }
 
     switch ($arraySoftwareState['requestPanelTask']) {
+      case 'submit':
+        if (!$arraySoftwareState['requestPanelWhat']) {
+          funcError('You did not specify what you want to submit');
+        }
+
+        switch ($arraySoftwareState['requestPanelWhat']) {
+          case 'addon':
+            if ($boolHasPostData) {
+              $finalSlug = $moduleWriteManifest->submitNewAddon();
+
+              // If an error happened stop.
+              if (!$finalSlug) {
+                funcError('Something has gone horribly wrong');
+              }
+
+              // Add-on Submitted go to edit metadata
+              funcRedirect(URI_ADDONS . '?task=update&what=metadata' . '&slug=' . $finalSlug);
+            }
+
+            // Generate the submit page
+            $moduleGenerateContent->addonSite('panel-submit-addon', 'Submit new Add-on');
+            break;
+          default:
+            funcError('Invalid submit request');
+        }
+        break;
       case 'update':
         switch ($arraySoftwareState['requestPanelWhat']) {
+          case 'release':
+            // Check for valid slug
+            if (!$arraySoftwareState['requestPanelSlug']) {
+              funcError('You did not specify a slug');
+            }
+
+            // Get the manifest
+            $addonManifest = $moduleReadManifest->getAddon('panel-by-slug', $arraySoftwareState['requestPanelSlug']);
+
+            // Check if manifest is valid
+            if (!$addonManifest || !in_array($addonManifest['type'], ['extension', 'theme'])) {
+              funcError('Add-on Manifest is null');
+            }
+
+            if (!in_array($arraySoftwareState['requestPanelSlug'], $arraySoftwareState['authentication']['addons'])) {
+              funcError('You do not own this add-on. Stop trying to fuck with other people\'s shit!');
+            }
+
+            if ($boolHasPostData) {
+              $finalType = $moduleWriteManifest->updateAddonRelease($addonManifest);
+
+              // If an error happened stop.
+              if (!$finalType) {
+                funcError('Something has gone horribly wrong');
+              }
+
+              // Add-on Submitted go to edit metadata
+              funcRedirect(URI_ADDONS);
+            }
+
+            $moduleGenerateContent->addonSite('panel-update-release', 'Release new version Add-on', $addonManifest['slug']);
+            break;
           case 'metadata':
             // Check for valid slug
             if (!$arraySoftwareState['requestPanelSlug']) {
@@ -107,8 +165,6 @@ switch ($arraySoftwareState['requestPath']) {
                                                $addonManifest,
                                                $arrayExtraData);
             break;
-          case 'release':
-            funcSendHeader('501');
           default:
             funcError('Invalid update request');
         }

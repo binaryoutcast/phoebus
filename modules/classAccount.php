@@ -158,6 +158,8 @@ class classAccount {
   * Update a user manifest
   ********************************************************************************************************************/
   public function updateUserManifest($aUserManifest) {
+    unset($aUserManifest['addons']);
+
     if (!$this->postData['username']) {
       funcError('Username was not found in POST');
     }
@@ -226,21 +228,16 @@ class classAccount {
       }
       $this->postData['password'] = password_hash($this->postData['password'], PASSWORD_BCRYPT);
     }
-
-    // Remove stuff that is the same
-    foreach ($this->postData as $_key => $_value) {
-      if ($aUserManifest[$_key] == $_value) {
-        unset($this->postData[$_key]);
-      }
+    else {
+      unset($this->postData['password']);
     }
 
     if (empty($this->postData)) {
       return true;
     }
 
-    if (funcUnifiedVariable('var', $this->postData['username'])) {
-      funcError('Username is still existing in post data');
-    }
+    unset($this->postData['verification']);
+    unset($this->postData['username']);
 
     // Insert the new manifest data into the database
     $query = "UPDATE `user` SET ?u WHERE `username` = ?s";
@@ -300,6 +297,31 @@ class classAccount {
   }
 
   /********************************************************************************************************************
+  * Gets all users at or below the requesting user level
+  ********************************************************************************************************************/
+  public function assignAddonToUser($aUsername, $aSlug) {
+    $query = "SELECT `username`, `addons` FROM `user` WHERE `username` = ?s";
+    $userManifest = $GLOBALS['moduleDatabase']->query('row', $query, $aUsername);
+
+    if (!$userManifest) {
+      return null;
+    }
+
+    $userAddons = json_decode($userManifest['addons']);
+
+    if (!in_array($aSlug, $userAddons)) {
+      $userAddons[] = $aSlug;
+      $userAddons = json_encode($userAddons, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+
+      // Insert the new manifest data into the database
+      $query = "UPDATE `user` SET ?u WHERE `username` = ?s";
+      $GLOBALS['moduleDatabase']->query('normal', $query, array('addons' => $userAddons), $userManifest['username']);
+    }
+
+    return true;
+  }
+
+  /********************************************************************************************************************
   * Performs authentication
   ********************************************************************************************************************/
   public function authenticate($aLogout = null) {
@@ -354,9 +376,9 @@ class classAccount {
     }
 
     // Levels 1 and 2 need to add their email and displayName so force them
-    if ($userManifest['level'] < 3 && $GLOBALS['arraySoftwareState']['requestPath'] != URI_ACCOUNT) {
+    if ($userManifest['level'] < 3 && $GLOBALS['arraySoftwareState']['requestPath'] != '/panel/account/') {
       if (!$userManifest['email'] || !$userManifest['displayName']) {
-        funcRedirect(URI_ACCOUNT);
+        funcRedirect('/panel/account/');
       }
     }
 

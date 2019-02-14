@@ -1,17 +1,28 @@
 <h2>{if $PAGE_TYPE == 'admin-list-langpacks'}Pale Moon Language Packs{else}{$PAGE_TITLE|replace:' - Administration':''}{/if}</h2>
-{assign "SUBMENU_STYLE" "vertical-align: middle; margin-left: 2px; margin-right: 2px"}
+{assign "SUBMENU_STYLE" "vertical-align: middle; margin-left: 2px; margin-right: 2px;"}
 <p>
   <a href="/panel/administration/?task=list&what=extensions"><img src="{$BASE_PATH}../shared/plugin.png" style="{$SUBMENU_STYLE}"/>Extensions</a> 
   <a href="/panel/administration/?task=list&what=externals"><img src="{$BASE_PATH}../shared/plugin_link.png" style="{$SUBMENU_STYLE}" />Externals</a> 
   <a href="/panel/administration/?task=list&what=themes"><img src="{$BASE_PATH}../shared/palette.png" style="{$SUBMENU_STYLE}" />Themes</a> 
+  {if $USER_LEVEL >= 4}
   <a href="/panel/administration/?task=list&what=langpacks"><img src="{$BASE_PATH}../shared/world.png" style="{$SUBMENU_STYLE}" />Language Packs</a>
+  {/if}
   <a href="/panel/administration/?task=list&what=users"><img src="{$BASE_PATH}../shared/user.png" style="{$SUBMENU_STYLE}" />Users</a>
+  <a href="/panel/administration/?task=submit&what={if $PAGE_TYPE == 'admin-list-externals'}external{elseif $PAGE_TYPE == 'admin-list-langpacks'}langpack{else}addon{/if}" style="float: right; margin-left: 2px;">
+    <img src="{$BASE_PATH}../shared/add.png" style="{$SUBMENU_STYLE}" />
+    Submit
+  </a>
+  {if $PAGE_TYPE == 'admin-list-langpacks'}
+  <a href="/panel/administration/?task=bulk-upload&what=langpacks" style="float: right">
+    <img src="{$BASE_PATH}../shared/wand.png" style="{$SUBMENU_STYLE} vertical-align: top;" />
+    Bulk Upload
+  </a>
+  {/if}
 </p>
+
 <table class="addonTable single-row">
   <tr>
-    {if $PAGE_TYPE != 'admin-list-langpacks'}
     <th colspan="2" style="width: 36px;"></th>
-    {/if}
     <th>Name</th>
     <th>Slug</th>
     <th>ID</th>
@@ -21,25 +32,23 @@
   </tr>
   {foreach $PAGE_DATA as $key}
     <tr>
-      {if $key.type != 'langpack'}
-        <td style="width: 16px;">       
-          <a href="{$PAGE_PATH}?task=update&what=metadata&slug={$key.slug}" title="Edit Add-on Metadata">
-            <img src="{$BASE_PATH}../shared/pencil.png" alt="Edit Add-on" />
-          </a>
-        </td>
-        <td style="width: 20px;">
-          {if $key.type != 'external' && $key.type != 'langpack'}
-          <a href="{$PAGE_PATH}?task=update&what=release&slug={$key.slug}" title="Release a new version of this Add-on">
-            <img src="{$BASE_PATH}../shared/plugin_add.png" alt="New Version" />
-          </a>
-          {/if}
-          {if $key.type == 'external'}
-          <a href="{$key.url}" target="_blank" title="View external site">
-            <img src="{$BASE_PATH}../shared/world_link.png" alt="External Link" />
-          </a>
-          {/if}
-        </td>
-      {/if}
+      <td style="width: 16px;">       
+        <a href="{$PAGE_PATH}?task=update&what=metadata&slug={$key.slug}" title="Edit Add-on Metadata">
+          <img src="{$BASE_PATH}../shared/pencil.png" alt="Edit Add-on" />
+        </a>
+      </td>
+      <td style="width: 20px;">
+        {if $key.type != 'external'}
+        <a href="{$PAGE_PATH}?task=update&what=release&slug={$key.slug}" title="Release a new version of this Add-on">
+          <img src="{$BASE_PATH}../shared/plugin_add.png" alt="New Version" />
+        </a>
+        {/if}
+        {if $key.type == 'external' && $key.url}
+        <a href="{$key.url}" target="_blank" title="View external site">
+          <img src="{$BASE_PATH}../shared/world_link.png" alt="External Link" />
+        </a>
+        {/if}
+      </td>
       <td class="cell-ellipsis">{$key.name}</td>
       <td class="cell-ellipsis">{$key.slug}</td>
       <td>{$key.id}</td>

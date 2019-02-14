@@ -7,7 +7,7 @@
   By: {$PAGE_DATA.creator}
 </p>
 
-{if $PAGE_DATA.homepageURL != null || $PAGE_DATA.supportURL != null || $PAGE_DATA.supportEmail != null || $PAGE_DATA.repository != null}
+{if $PAGE_DATA.homepageURL != null || $PAGE_DATA.supportURL != null || $PAGE_DATA.supportEmail != null || $PAGE_DATA.repository != null || $PAGE_DATA.xpinstall|@count > 1}
     <h3>Resources</h3>
     <p class="aligncenter">
       {if $PAGE_TYPE == 'addon-page' && $PAGE_DATA.xpinstall|@count > 1}

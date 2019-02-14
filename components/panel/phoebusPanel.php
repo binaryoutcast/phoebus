@@ -6,26 +6,27 @@
 // == | Setup | =======================================================================================================
 
 // Constants
-const URI_PANEL     = '/panel/';
-const URI_REG       = URI_PANEL . 'registration/';
-const URI_VERIFY    = URI_PANEL . 'verification/';
-const URI_LOGIN     = URI_PANEL . 'login/';
-const URI_LOGOUT    = URI_PANEL . 'logout/';
-const URI_DEV       = URI_PANEL . 'developer/';
-const URI_ACCOUNT   = URI_PANEL . 'account/';
-const URI_ADDONS    = URI_PANEL . 'addons/';
-const URI_ADMIN     = URI_PANEL . 'administration/';
+const URI_PANEL                         = '/panel/';
+const URI_REG                           = URI_PANEL . 'registration/';
+const URI_VERIFY                        = URI_PANEL . 'verification/';
+const URI_LOGIN                         = URI_PANEL . 'login/';
+const URI_LOGOUT                        = URI_PANEL . 'logout/';
+const URI_DEV                           = URI_PANEL . 'developer/';
+const URI_ACCOUNT                       = URI_PANEL . 'account/';
+const URI_ADDONS                        = URI_PANEL . 'addons/';
+const URI_ADMIN                         = URI_PANEL . 'administration/';
 
 // Include modules
-$arrayIncludes = ['database', 'account', 'readManifest', 'writeManifest', 'generateContent'];
+$arrayIncludes = ['database', 'account', 'mozillaRDF', 'vc', 'readManifest', 'writeManifest', 'generateContent'];
 foreach ($arrayIncludes as $_value) { require_once(MODULES[$_value]); }
 
 // Instantiate modules
-$moduleDatabase         = new classDatabase();
-$moduleAccount          = new classAccount();
-$moduleReadManifest     = new classReadManifest();
-$moduleWriteManifest    = new classWriteManifest();
-$moduleGenerateContent  = new classGenerateContent('smarty');
+$moduleDatabase                         = new classDatabase();
+$moduleAccount                          = new classAccount();
+$moduleMozillaRDF                       = new classMozillaRDF();
+$moduleReadManifest                     = new classReadManifest();
+$moduleWriteManifest                    = new classWriteManifest();
+$moduleGenerateContent                  = new classGenerateContent('smarty');
 
 // Request arguments
 $arraySoftwareState['requestPanelTask'] = funcUnifiedVariable('get', 'task');
@@ -63,16 +64,9 @@ $boolHasPostData = !empty($_POST);
 
 // --------------------------------------------------------------------------------------------------------------------
 
-// Special case: Interlink should use Pale Moon's panel access at least until I get a cert
-if ($arraySoftwareState['currentApplication'] == 'interlink') {
-  funcRedirect('https://addons.palemoon.org/panel/');
-}
-
-// The Panel can ONLY be used on HTTPS
+// The Panel can ONLY be used on HTTPS so redirect those sites without https to Pale Moon
 if (!in_array('https', TARGET_APPLICATION_SITE[$arraySoftwareState['currentApplication']]['features'])) {
-  funcError('The Phoebus Panel requires HTTPS, however this application\'s Add-ons Site does not have this feature enabled.</li>' .
-            '<li>To access the Panel please try one of the other Phoebus-based Add-ons Sites.</li>' .
-            '<li>If all else fails you can always use the Panel at the <a href="https://addons.palemoon.org/panel/">Pale Moon Add-ons Site</a>.');
+  funcRedirect('https://addons.palemoon.org/panel/');
 }
 
 if ($arraySoftwareState['currentScheme'] != 'https') {
@@ -87,7 +81,6 @@ switch ($arraySoftwareState['requestPath']) {
     $moduleGenerateContent->addonSite('panel-frontpage.xhtml', 'Landing Page');
     break;
   case URI_REG:
-    //funcSendHeader('501');
     if ($boolHasPostData) {
       $boolRegComplete = $moduleAccount->registerUser();
 

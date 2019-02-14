@@ -5,8 +5,8 @@
 
 // == | Setup | =======================================================================================================
 
-// Disable all error reporting
-error_reporting(0);
+error_reporting(E_ALL);
+ini_set("display_errors", "on");
 
 // This has to be defined using the function at runtime because it is based
 // on a variable. However, constants defined with the language construct
@@ -16,7 +16,7 @@ define('ROOT_PATH', $_SERVER['DOCUMENT_ROOT']);
 
 // Define basic constants for the software
 const SOFTWARE_NAME       = 'Phoebus';
-const SOFTWARE_VERSION    = '2.0.0a2';
+const SOFTWARE_VERSION    = '2.0.0b2';
 const DATASTORE_RELPATH   = '/datastore/';
 const OBJ_RELPATH         = '/.obj/';
 const COMPONENTS_RELPATH  = '/components/';
@@ -44,7 +44,6 @@ const MODULES = array(
   'persona'         => ROOT_PATH . MODULES_RELPATH . 'classPersona.php',
   'readManifest'    => ROOT_PATH . MODULES_RELPATH . 'classReadManifest.php',
   'writeManifest'   => ROOT_PATH . MODULES_RELPATH . 'classWriteManifest.php',
-  'validator'       => ROOT_PATH . MODULES_RELPATH . 'classAddonValidator.php',
   'vc'              => ROOT_PATH . MODULES_RELPATH . 'nsIVersionComparator.php',
 );
 
@@ -117,51 +116,143 @@ const TARGET_APPLICATION_ID = array(
 // == | Functions | ===================================================================================================
 
 /**********************************************************************************************************************
-* Error function that will display data (Error Message) as an html page
-*
-* @param $_value    Data to be printed
-* @param #_mode     Optional integer to change how data is printed
-                    0: Default, just print $_value as-is
-                    1: Print #_value as a JSON encoded string
-                    2: Print $_value as valid php code
-**********************************************************************************************************************/
-function funcError($_value, $_mode = 0) {
-  // This is basically the orginal funcError behavior for use when pretty toolkit html is not reasonable
-  if ($_mode == -1) {
-    header('Content-Type: text/plain', false);
-    var_export($_value);
-    exit();
+* Basic Content Generation using the Special Component's Template
+***********************************************************************************************************************/
+function funcGenerateContent($aTitle, $aContent, $aTextBox = null, $aList = null, $aError = null) {
+  $templateHead = @file_get_contents('./components/special/skin/default/template-header.xhtml');
+  $templateFooter = @file_get_contents('./components/special/skin/default/template-footer.xhtml');
+
+  // Make sure the template isn't busted, if it is send a text only error as an array
+  if (!$templateHead || !$templateFooter) {
+    funcError([__FUNCTION__ . ': Special Template is busted...', $aTitle, $aContent], -1);
   }
 
-  ob_get_clean();
-  header('Content-Type: text/html', false);   
-  print(file_get_contents('./components/special/skin/default/template-header.xhtml'));
-
-  switch($_mode) {
-    case 1:
-      print('<h2 class="pulseText" style="text-decoration: blink;"><strong>Fatal Error</strong></h2>');      
-      print('<ul><li>' . $_value . '</li></ul>');
-      break;
-    case 98:
-      print('<h2>Output</h2>');
-      // JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
-      print('<pre><code>' . json_encode($_value, 448) . '</code></pre>');
-      break;
-    case 99:
-      print('<h2>Output</h2>');
-      print('<pre>' . var_export($_value, true) . '</pre>');
-      break;
-    default:
-      print('<h2 style="text-decoration: blink;"><strong>Unable to Comply</strong></h2>');
-      print('<ul><li>' . $_value . '</li></ul>');
-      break;
+  // Can't use both the textbox and list arguments
+  if ($aTextBox && $aList) {
+    funcError(__FUNCTION__ . ': You cannot use both textbox and list');
   }
 
-  print(file_get_contents('./components/special/skin/default/template-footer.xhtml'));
-  
-  // We are done here
+  // Anonymous function to determin if aContent is a string-ish or not
+  $notString = function() use ($aContent) {
+    return (!is_string($aContent) && !is_int($aContent)); 
+  };
+
+  // If not a string var_export it and enable the textbox
+  if ($notString()) {
+    $aContent = var_export($aContent, true);
+    $aTextBox = true;
+    $aList = false;
+  }
+
+  // Use either a textbox or an unordered list
+  if ($aTextBox) {
+    // We are using the textbox so put aContent in there
+    $aContent = '<textarea style="width: 1195px; resize: none;" name="content" rows="36" readonly>' .
+                $aContent .
+                '</textarea>';
+  }
+  elseif ($aList) {
+    // We are using an unordered list so put aContent in there
+    $aContent = '<ul><li>' . $aContent . '</li><ul>';
+  }
+
+  // Set page title
+  $templateHead = str_replace('<title></title>',
+                  '<title>' . $aTitle . ' - ' . SOFTWARE_NAME . ' ' . SOFTWARE_VERSION . '</title>',
+                  $templateHead);
+
+  // If we are generating an error from funcError we want to clean the output buffer
+  if ($aError) {
+    ob_get_clean();
+  }
+
+  // Send an html header
+  header('Content-Type: text/html', false);
+
+  // write out the everything
+  print($templateHead . '<h2>' . $aTitle . '</h2>' . $aContent . $templateFooter);
+
+  // We're done here
   exit();
 }
+
+/**********************************************************************************************************************
+* Error function that will display data (Error Message)
+**********************************************************************************************************************/
+function funcError($aValue, $aMode = 0) {
+  $varExport  = var_export($aValue, true);
+  $jsonEncode = json_encode($aValue, 448); // JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+  
+  $pageHeader = array(
+    'default' => 'Unable to Comply',
+    'fatal'   => 'Fatal Error',
+    'php'     => 'PHP Error',
+    'output'  => 'Output'
+  );
+
+  switch($aMode) {
+    case -1:
+      // Text only
+      header('Content-Type: text/plain', false);
+      if (is_string($aValue) || is_int($aValue)) {
+        print($aValue);
+      }
+      else {
+        print($varExport);
+      }
+      break;
+    case 1:
+      funcGenerateContent($pageHeader['php'], $aValue, null, true, true);
+      break;
+    case 98:
+      // Depercated, use funcGenerateContent
+      funcGenerateContent($pageHeader['output'], $jsonEncode, true);
+      break;
+    case 99:
+      // Depercated, use funcGenerateContent
+      funcGenerateContent($pageHeader['output'], $varExport, true);
+      break;
+    default:
+      funcGenerateContent($pageHeader['default'], $aValue, null, true, true);
+  }
+
+  exit();
+}
+
+/**********************************************************************************************************************
+* PHP Error Handler
+**********************************************************************************************************************/
+
+function funcPHPErrorHandler($errno, $errstr, $errfile, $errline) {
+  $errorCodes = array(
+    E_ERROR => 'Fatal Error',
+    E_WARNING => 'Warning',
+    E_PARSE => 'Parse',
+    E_NOTICE => 'Notice',
+    E_CORE_ERROR => 'Fatal Error (Core)',
+    E_CORE_WARNING => 'Warning (Core)',
+    E_COMPILE_ERROR => 'Fatal Error (Compile)',
+    E_COMPILE_WARNING => 'Warning (Compile)',
+    E_USER_ERROR => 'Fatal Error (User Generated)',
+    E_USER_WARNING => 'Warning (User Generated)',
+    E_USER_NOTICE => 'Notice (User Generated)',
+    E_STRICT => 'Strict',
+    E_RECOVERABLE_ERROR => 'Fatal Error (Recoverable)',
+    E_DEPRECATED => 'Depercated',
+    E_USER_DEPRECATED => 'Depercated (User Generated)',
+    E_ALL => 'All',
+  );
+
+  $errorType = $errorCodes[$errno] ?? $errno;
+  $errorMessage = $errorType . ': ' . $errstr . ' in ' .
+                  str_replace(ROOT_PATH, '', $errfile) . ' on line ' . $errline;
+
+  if (error_reporting() !== 0) {
+    funcError($errorMessage, 1);
+  }
+}
+
+set_error_handler("funcPHPErrorHandler");
 
 /**********************************************************************************************************************
 * Unified Var Checking
@@ -191,6 +282,18 @@ function funcUnifiedVariable($_type, $_value, $_allowFalsy = null) {
       break;
     case 'files':
       $finalValue = $_FILES[$_value] ?? null;
+      if ($finalValue) {
+        if (!in_array($finalValue['error'], [UPLOAD_ERR_OK, UPLOAD_ERR_NO_FILE])) {
+          funcError('Upload of ' . $_value . ' failed with error code: ' . $finalValue['error']);
+        }
+
+        if ($finalValue['error'] == UPLOAD_ERR_NO_FILE) {
+          $finalValue = null;
+        }
+        else {
+          $finalValue['type'] = mime_content_type($finalValue['tmp_name']);
+        }
+      }
       break;
     case 'var':
       $finalValue = $_value ?? null;
@@ -362,11 +465,7 @@ foreach (TARGET_APPLICATION_SITE as $_key => $_value) {
 // Items that get changed depending on debug mode
 if ($arraySoftwareState['debugMode']) {
   // We can disable debug mode when on a dev url otherwise if debug mode we want all errors
-  if (!$arraySoftwareState['requestDebugOff']) {
-    error_reporting(E_ALL);
-    ini_set("display_errors", "on");
-  }
-  else {
+  if ($arraySoftwareState['requestDebugOff']) {
     $arraySoftwareState['debugMode'] = null;
   }
 

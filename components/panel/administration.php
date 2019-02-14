@@ -17,10 +17,13 @@ switch ($arraySoftwareState['requestPanelTask']) {
     }
 
     switch ($arraySoftwareState['requestPanelWhat']) {
+      case 'langpacks':
+        if ($arraySoftwareState['authentication']['level'] < 4) {
+          funcError('You are not allowed to list language packs!');
+        }
       case 'extensions':
       case 'externals':
       case 'themes':
-      case 'langpacks':
         $addons = $moduleReadManifest->getAddons('panel-addons-by-type',
                                                  substr($arraySoftwareState['requestPanelWhat'], 0, -1));
 
@@ -53,7 +56,50 @@ switch ($arraySoftwareState['requestPanelTask']) {
     }
     break;
   case 'submit':
-    funcSendHeader('501');
+    if (!$arraySoftwareState['requestPanelWhat']) {
+      funcError('You did not specify what you want to submit');
+    }
+
+    switch ($arraySoftwareState['requestPanelWhat']) {
+      case 'addon':
+      case 'langpack':
+        $isLangPack = (bool)($arraySoftwareState['requestPanelWhat'] == 'langpack');
+        $strTitle = $isLangPack ? 'Pale Moon Language Pack' : 'Add-on';
+        if ($boolHasPostData) {
+          $finalSlug = $moduleWriteManifest->submitNewAddon($isLangPack);
+
+          // If an error happened stop.
+          if (!$finalSlug) {
+            funcError('Something has gone horribly wrong');
+          }
+
+          // Add-on Submitted go to edit metadata
+          funcRedirect(URI_ADMIN . '?task=update&what=metadata' . '&slug=' . $finalSlug);
+        }
+
+        // Generate the submit page
+        $moduleGenerateContent->addonSite('panel-submit-' . $arraySoftwareState['requestPanelWhat'],
+                                          'Submit new ' . $strTitle);
+        break;
+      case 'external':
+        if ($boolHasPostData) {
+          $finalSlug = $moduleWriteManifest->submitNewExternal();
+
+          // If an error happened stop.
+          if (!$finalSlug) {
+            funcError('Something has gone horribly wrong');
+          }
+
+          // External Submitted go to edit metadata
+          funcRedirect(URI_ADMIN . '?task=update&what=metadata' . '&slug=' . $finalSlug);
+        }
+
+        // Generate the submit page
+        $moduleGenerateContent->addonSite('panel-submit-external', 'Submit new External');
+        break;
+      default:
+        funcError('Invalid submit request');
+    }
     break;
   case 'update':
     if (!$arraySoftwareState['requestPanelWhat'] || !$arraySoftwareState['requestPanelSlug']) {
@@ -61,6 +107,44 @@ switch ($arraySoftwareState['requestPanelTask']) {
     }
 
     switch ($arraySoftwareState['requestPanelWhat']) {
+      case 'release':
+        // Check for valid slug
+        if (!$arraySoftwareState['requestPanelSlug']) {
+          funcError('You did not specify a slug');
+        }
+
+        // Get the manifest
+        $addonManifest = $moduleReadManifest->getAddon('panel-by-slug', $arraySoftwareState['requestPanelSlug']);
+
+        // Check if manifest is valid
+        if (!$addonManifest) {
+          funcError('Add-on Manifest is null');
+        }
+
+        $isLangPack = (bool)($addonManifest['type'] == 'langpack');
+
+        if ($isLangPack && $arraySoftwareState['authentication']['level'] < 4) {
+          funcError('You are not allowed to update language packs!');
+        }
+
+        if ($addonManifest['type'] == 'external') {
+          funcError('Externals do not physically exist here.. Are you a moron?');
+        }
+
+        if ($boolHasPostData) {
+          $finalType = $moduleWriteManifest->updateAddonRelease($addonManifest, $isLangPack);
+
+          // If an error happened stop.
+          if (!$finalType) {
+            funcError('Something has gone horribly wrong');
+          }
+
+          // Add-on Submitted go to edit metadata
+          funcRedirect(URI_ADMIN . '?task=list&what=' . $finalType);
+        }
+
+        $moduleGenerateContent->addonSite('panel-update-release', 'Release new version', $addonManifest['slug']);
+        break;
       case 'metadata':
         // Check for valid slug
         if (!$arraySoftwareState['requestPanelSlug']) {
@@ -75,18 +159,19 @@ switch ($arraySoftwareState['requestPanelTask']) {
           funcError('Add-on Manifest is null');
         }
 
-        // Extenrals need special handling so just send back the manifest for now
-        if ($addonManifest['type'] == 'external') {
-          funcError($addonManifest, 98);
-        }
-
-        if ($addonManifest['type'] == 'langpack') {
-          funcError('Language Packs are not handled using this function. Stop being a moron.');
+        if ($addonManifest['type'] == 'langpack' && $arraySoftwareState['authentication']['level'] < 4) {
+          funcError('You are not allowed to edit language packs!');
         }
 
         // We have post data so we should update the manifest data via classWriteManifest
         if ($boolHasPostData) {
-          $boolUpdate = $moduleWriteManifest->updateAddonMetadata($addonManifest);
+          // Extenrals need special handling
+          if ($addonManifest['type'] == 'external') {
+            $boolUpdate = $moduleWriteManifest->updateExternalMetadata($addonManifest);
+          }
+          else {
+            $boolUpdate = $moduleWriteManifest->updateAddonMetadata($addonManifest);
+          }
 
           // If an error happened stop.
           if (!$boolUpdate) {
@@ -102,18 +187,23 @@ switch ($arraySoftwareState['requestPanelTask']) {
         $arrayExtraData = array('licenses' => array_keys($moduleReadManifest::LICENSES));
 
         // Extensions need the associative array of extension categories as well
-        if ($addonManifest['type'] == 'extension') {
+        if ($addonManifest['type'] != 'theme') {
           $arrayExtraData['categories'] = $moduleReadManifest::EXTENSION_CATEGORY_SLUGS;
         }
 
+        $strMetadataType = 'addon';
+
+        // Extenrals need special handling
+        if ($addonManifest['type'] == 'external') {
+          $strMetadataType = 'external';
+        }
+
         // Generate the edit add-on metadata page
-        $moduleGenerateContent->addonSite('admin-edit-addon-metadata',
-                                           'Editing Metadata for ' . $addonManifest['name'],
+        $moduleGenerateContent->addonSite('admin-edit-' . $strMetadataType . '-metadata',
+                                           'Editing Metadata for ' . ($addonManifest['name'] ?? $addonManifest['slug']),
                                            $addonManifest,
                                            $arrayExtraData);
         break;
-      case 'release':
-        funcSendHeader('501');
       case 'user':
         // Check for valid slug
         if (!$arraySoftwareState['requestPanelSlug']) {
@@ -155,8 +245,34 @@ switch ($arraySoftwareState['requestPanelTask']) {
         funcError('Invalid update request');
     }
     break;
+  case 'bulk-upload':
+    if (!$arraySoftwareState['requestPanelWhat']) {
+      funcError('You did not specify what you want to bulk upload');
+    }
+    switch ($arraySoftwareState['requestPanelWhat']) {
+      case 'langpacks':
+        if ($boolHasPostData) {
+          $finalResult = $moduleWriteManifest->bulkUploader('langpack');
+
+          if (!$finalResult) {
+            funcError('Something has gone horribly wrong');
+          }
+
+          if (!empty($finalResult['errors'])) {
+            $moduleGenerateContent->addonSite('addon-bulk-upload-result', 'Bulk Upload Report', $finalResult);
+          }
+
+          funcRedirect(URI_ADMIN . '?task=list&what=langpacks');
+        }
+
+        $moduleGenerateContent->addonSite('addon-bulk-upload-langpack', 'Bulk Upload Language Packs');
+        break;
+      default:
+        funcError('Invalid bulk upload request');
+    }
+    break;
   default:
-    funcSendHeader('501');
+    funcError('Invalid task');
 }
 
 // ====================================================================================================================

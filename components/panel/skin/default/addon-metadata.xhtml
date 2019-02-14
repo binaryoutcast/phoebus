@@ -14,6 +14,15 @@
      licenseTextBox.removeAttribute('required');
     }
   }
+
+  function enableUpload(aElement) {
+    var elm = document.getElementById(aElement);
+    elm.setAttribute('form', 'addon-metadata');
+    elm.setAttribute('type', 'file');
+    elm.setAttribute('accept', 'image/png');
+    elm.removeAttribute('onclick');
+    elm.removeAttribute('value');
+  }
 </script>
 
 <h2>{$PAGE_TITLE}</h2>
@@ -23,7 +32,9 @@
   <a href="/panel/administration/?task=list&what=extensions"><img src="{$BASE_PATH}../shared/plugin.png" style="{$SUBMENU_STYLE}"/>Extensions</a> 
   <a href="/panel/administration/?task=list&what=externals"><img src="{$BASE_PATH}../shared/plugin_link.png" style="{$SUBMENU_STYLE}" />Externals</a> 
   <a href="/panel/administration/?task=list&what=themes"><img src="{$BASE_PATH}../shared/palette.png" style="{$SUBMENU_STYLE}" />Themes</a> 
+  {if $USER_LEVEL >= 4}
   <a href="/panel/administration/?task=list&what=langpacks"><img src="{$BASE_PATH}../shared/world.png" style="{$SUBMENU_STYLE}" />Language Packs</a>
+  {/if}
   <a href="/panel/administration/?task=list&what=users"><img src="{$BASE_PATH}../shared/user.png" style="{$SUBMENU_STYLE}" />Users</a>
 </p>
 {/if}
@@ -38,18 +49,21 @@
     <td>
       {if $USER_LEVEL >= 3}
       <input form="addon-metadata" name="active" type="checkbox" value="1" {if $PAGE_DATA.active}checked{/if} /> Active 
+      {if $PAGE_DATA.type != 'langpack'}
       <input form="addon-metadata" name="reviewed" type="checkbox" value="1" {if $PAGE_DATA.reviewed}checked{/if} /> Reviewed
-    </td>
-  </tr>
-  <tr>
-    <td>Release XPI</td>
-    <td><a href="/?component=download&id={$PAGE_DATA.id}&panel=1">{$PAGE_DATA.releaseXPI}</a></td>
+      {/if}
       {else}
       <img src="{$BASE_PATH}../shared/{if $PAGE_DATA.active}accept{else}delete{/if}.png" class="aligntop" /> Active 
       <img src="{$BASE_PATH}../shared/{if $PAGE_DATA.reviewed}accept{else}delete{/if}.png" class="aligntop" style="margin-left: 2px" /> Reviewed<br />
       {/if}
     </td>
   </tr>
+  {if $USER_LEVEL >= 3}
+  <tr>
+    <td>Release XPI</td>
+    <td><a href="/?component=download&id={$PAGE_DATA.id}&panel=1">{$PAGE_DATA.releaseXPI}</a></td>
+  </tr>
+  {/if}
   <tr>
     <td>Name</td>
     <td>{$PAGE_DATA.name}</td>
@@ -58,6 +72,7 @@
     <td>Creator</td>
     <td>{$PAGE_DATA.creator}</td>
   </tr>
+  {if $PAGE_DATA.type != 'langpack'}
   <tr>
     <td>Description</td>
     <td>{$PAGE_DATA.description}</td>
@@ -66,6 +81,7 @@
     <td>Homepage URL</td>
     <td>{if $PAGE_DATA.homepageURL}{$PAGE_DATA.homepageURL}{else}NULL <em>(em:homepageURL in install.rdf)</em>{/if}</td>
   </tr>
+  {/if}
   <tr>
     <td>ID</td>
     <td>{$PAGE_DATA.id}</td>
@@ -73,6 +89,15 @@
   <tr>
     <td>Slug</td>
     <td>{$PAGE_DATA.slug}</td>
+  </tr>
+  <tr>
+    <td>Icon</td>
+    <td><input type="button" id="iconUpload" name="iconUpload" value="{if $PAGE_DATA.hasIcon}Change{else}Add{/if}&hellip;" onclick="enableUpload('iconUpload');"></td>
+  </tr>
+  {if $PAGE_DATA.type != 'langpack'}
+  <tr>
+    <td>Preview</td>
+    <td><input type="button" id="previewUpload" name="previewUpload" value="{if $PAGE_DATA.hasPreview}Change{else}Add{/if}&hellip;" onclick="enableUpload('previewUpload');"></td>
   </tr>
   <tr>
     <td>Category</td>
@@ -97,6 +122,7 @@
       {if $PAGE_DATA.type == 'extension'}<em>(Some Add-ons Sites do not currently list extensions by category, however, you need to choose one)</em>{/if}
     </td>
   </tr>
+  {/if}
   <tr>
     <td>License</td>
     <td>
@@ -124,7 +150,7 @@
         {/foreach}
         <option value="copyright"{if $FOUND_LICENSE == 0 || $FOUND_LICENSE == 2}selected="selected"{/if}>Copyright</option>
       </select> 
-      <em>(Open Source licenses are encuraged)</em>
+      <em>(Open Source licenses are encouraged)</em>
     </td>
   </tr>
   <tr id="licenseTextRow">
@@ -133,6 +159,8 @@
       <div style="margin-top: 4px"><em>Plain Text Formatting (If you change to another license your custom license text will be cleared on submit)</em></div>
       <textarea id="licenseTextBox" style="width: 1065px; resize: vertical;" name="licenseText" rows="20">{if $PAGE_DATA.licenseText}{$PAGE_DATA.licenseText}{/if}</textarea>
     </td>
+  </tr>
+  {if $PAGE_DATA.type != 'langpack'}
   <tr>
     <td>Repository URL</td>
     <td><input form="addon-metadata" name="repository" type="url" size="80" value="{$PAGE_DATA.repository}" /></td>
@@ -145,6 +173,7 @@
     <td>Support E-mail</td>
     <td><input form="addon-metadata" name="supportEmail" type="email" size="80" value="{$PAGE_DATA.supportEmail}" /></td>
   </tr>
+  {/if}
   <tr>
     <td>Search Tags</td>
     <td>
@@ -152,6 +181,7 @@
       <em>(Up to 10 max)</em>
     </td>
   </tr>
+  {if $PAGE_DATA.type != 'langpack'}
   <tr>
     <td class="aligntop"><div style="margin-top: 4px">Add-on Page Content</div></td>
     <td>
@@ -164,11 +194,12 @@
       <textarea form="addon-metadata" style="width: 1065px; resize: vertical;" name="content" rows="20">{$PAGE_DATA.content}</textarea>
     </td>
   </tr>
+  {/if}
 </table>
 
 <br />
 
-<form id="addon-metadata" accept-charset="UTF-8" autocomplete="off" method="POST" >
+<form id="addon-metadata" accept-charset="UTF-8" autocomplete="off" method="POST" enctype="multipart/form-data">
   <input type="hidden" name="slug" value="{$PAGE_DATA.slug}" />
   <button type="submit" value="Submit" style="float: right;">Update</button><br />
 </form>

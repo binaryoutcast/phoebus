@@ -15,6 +15,7 @@ const URI_THEMES          = '/themes/';
 const URI_PERSONAS        = '/personas/';
 const URI_SEARCHPLUGINS   = '/search-plugins/';
 const URI_LANGPACKS       = '/language-packs/';
+const URI_DICTIONARIES    = '/dictionaries/';
 const URI_SEARCH          = '/search/';
 
 // Include modules
@@ -192,6 +193,9 @@ switch ($arraySoftwareState['requestPath']) {
 
     // We have langpacks so generate the page
     $moduleGenerateContent->addonSite('cat-language-packs', 'Language Packs', $categoryManifest);
+    break;
+  case URI_DICTIONARIES:
+    funcRedirect('https://addons.thunderbird.net/en-US/thunderbird/language-tools/');
     break;
   case URI_SEARCHPLUGINS:
     // Search Engine Plugins Category

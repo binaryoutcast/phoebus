@@ -45,9 +45,7 @@ $strInstallRDF = '<?xml version="1.0"?>
 
 $arrayInstallManifest = $moduleMozillaRDF->parseInstallManifest($strInstallRDF);
 
-funcSendHeader('text');
-print(var_export($arrayInstallManifest, true));
-exit();
+funcGenerateContent('RDF Test', $arrayInstallManifest);
 
 // ====================================================================================================================
 

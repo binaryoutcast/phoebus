@@ -16,43 +16,30 @@ function funcStripPath($aPath, $aPrefix) {
   return str_replace('/', '', str_replace($aPrefix, '', $aPath));
 }
 
-/**********************************************************************************************************************
-* Strips path to obtain the slug
-***********************************************************************************************************************/
-function funcCheckDebug() {
-  if (!$GLOBALS['arraySoftwareState']['debugMode']) {
-    funcRedirect('/');
-  }
-}
-
-// ====================================================================================================================
-
 // == | Main | ========================================================================================================
+
+if (!$arraySoftwareState['debugMode']) {
+  funcRedirect('/');
+}
 
 $strComponentPath = dirname(COMPONENTS[$arraySoftwareState['requestComponent']]) . '/';
 $strStripPath = funcStripPath($arraySoftwareState['requestPath'], '/special/');
-$strSkinPath = $strComponentPath . '/skin/';
 
 // --------------------------------------------------------------------------------------------------------------------
 
 switch ($strStripPath) {
   case 'phpinfo':
-    phpinfo();
+    phpinfo(INFO_GENERAL | INFO_CONFIGURATION | INFO_ENVIRONMENT | INFO_VARIABLES);
     break;
-  case 'phpvars':
-    phpinfo(32);
-    break;
-  case 'softwareState':
-    funcCheckDebug();
+  case 'software-state':
     $arrayIncludes = ['database', 'account'];
     foreach ($arrayIncludes as $_value) { require_once(MODULES[$_value]); }
     $moduleDatabase = new classDatabase();
     $moduleAccount = new classAccount();
     $moduleAccount->authenticate();
-    funcError($arraySoftwareState, 98);
+    funcGenerateContent('Authenticated Software State', $arraySoftwareState);
     break;
   case 'migrator':
-    funcCheckDebug();
     if (file_exists(ROOT_PATH . '/.migration')) {
       require_once($strComponentPath . 'addonMigrator.php');
     }
@@ -61,25 +48,38 @@ switch ($strStripPath) {
     }
     break;
   case 'test':
-    funcCheckDebug();
     $arraySoftwareState['requestTestCase'] = funcUnifiedVariable('get', 'case');
     $arrayTestsGlob = glob($strComponentPath . 'tests/*.php');
     $arrayFinalTests = [];
+
     foreach ($arrayTestsGlob as $_value) {
       $arrayFinalTests[] = str_replace('.php',
                                        '',
                                        str_replace($strComponentPath . 'tests/', '', $_value));
     }
+
+    unset($arrayTestsGlob);
+
     if ($arraySoftwareState['requestTestCase'] &&
         in_array($arraySoftwareState['requestTestCase'], $arrayFinalTests)) {
       require_once($strComponentPath . 'tests/' . $arraySoftwareState['requestTestCase'] . '.php');
     }
-    else {
-      funcError('Invalid test case');
+
+    $testsHTML = '';
+
+    foreach ($arrayFinalTests as $_value) {
+      $testsHTML .= '<li><a href="/special/test/?case=' . $_value . '">' . $_value . '</a></li>';
     }
+
+    $testsHTML = '<ul>' . $testsHTML . '</ul>';
+
+    funcGenerateContent('Special Test Cases', $testsHTML);
     break;
   default:
-    funcRedirect('/');
+    $rootHTML = '<a href="/special/test/">Test Cases</a></li><li>' .
+                '<a href="/special/phpinfo/">PHP Info</a></li><li>' .
+                '<a href="/special/software-state/">Authenticated Software State</a>';
+    funcGenerateContent('Special Component', $rootHTML, null, true);
 }
 
 exit();

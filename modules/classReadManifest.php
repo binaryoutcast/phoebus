@@ -110,6 +110,7 @@ class classReadManifest {
     $returnInactive = null;
     $returnUnreviewed = null;
     $processContent = null;
+    $xpInstallFixup = null;
 
     switch ($aQueryType) {
       case 'by-id':
@@ -125,6 +126,7 @@ class classReadManifest {
       case 'by-slug':
         $returnUnreviewed = true;
         $processContent = true;
+        $xpInstallFixup = true;
         $query = "SELECT addon.*
                   FROM `addon`
                   JOIN `client` ON addon.id = client.addonID
@@ -145,10 +147,12 @@ class classReadManifest {
       case 'panel-by-slug':
         $returnInactive = true;
         $returnUnreviewed = true;
-        $query = "SELECT addon.*
+        $xpInstallFixup = true;
+        $query = "SELECT *
                   FROM `addon`
+                  JOIN `client` ON addon.id = client.addonID
                   WHERE `slug` = ?s
-                  AND `type` IN ('extension', 'theme', 'langpack', 'external')";
+                  AND `type` IN ('extension', 'theme', 'external', 'langpack')";
         $queryResult = $GLOBALS['moduleDatabase']->query('row', $query, $aQueryData);
         break;
       default:
@@ -180,6 +184,7 @@ class classReadManifest {
     $returnInactive = null;
     $returnUnreviewed = null;
     $processContent = true;
+    $xpInstallFixup = true;
 
     switch ($aQueryType) {
       case 'site-addons-by-category':
@@ -207,21 +212,25 @@ class classReadManifest {
                   FROM `addon`
                   JOIN `client` ON addon.id = client.addonID
                   WHERE ?n = 1
-                  AND `type` IN ('extension', 'theme', 'langpack')
+                  AND `type` IN ('extension', 'theme', 'langpack', 'external')
+                  AND NOT `category` = 'unlisted'
                   AND MATCH(`tags`) AGAINST(?s IN NATURAL LANGUAGE MODE)";
         $queryResults = $GLOBALS['moduleDatabase']->query('rows', $query, $this->currentApplication, $aQueryData);
         break;
       case 'api-search':
+        $xpInstallFixup = null;
         $query = "SELECT `id`, `slug`, `type`, `creator`, `releaseXPI`, `name`, `homepageURL`, `description`,
                          `url`, `reviewed`, `active`, `xpinstall`
                   FROM `addon`
                   JOIN `client` ON addon.id = client.addonID
                   WHERE ?n = 1
                   AND `type` IN ('extension', 'theme', 'langpack')
+                  AND NOT `category` = 'unlisted'
                   AND MATCH(`tags`) AGAINST(?s IN NATURAL LANGUAGE MODE)";
         $queryResults = $GLOBALS['moduleDatabase']->query('rows', $query, $this->currentApplication, $aQueryData);
         break;
       case 'api-get':
+        $xpInstallFixup = null;
         $query = "SELECT `id`, `slug`, `type`, `creator`, `releaseXPI`, `name`, `homepageURL`, `description`,
                          `url`, `reviewed`, `active`, `xpinstall`
                   FROM `addon`
@@ -235,6 +244,7 @@ class classReadManifest {
         $returnInactive = true;
         $returnUnreviewed = true;
         $processContent = null;
+        $xpInstallFixup = null;
         $query = "SELECT `id`, `slug`, `type`, `name`, `url`, `reviewed`, `active`
                   FROM `addon`
                   WHERE `slug` IN (?a)
@@ -246,6 +256,7 @@ class classReadManifest {
         $returnInactive = true;
         $returnUnreviewed = true;
         $processContent = null;
+        $xpInstallFixup = null;
         $query = "SELECT `id`, `slug`, `type`, `name`, `category`, `url`, `reviewed`, `active`
                   FROM `addon`
                   WHERE `type` = ?s
@@ -263,7 +274,11 @@ class classReadManifest {
     $manifestData = array();
     
     foreach($queryResults as $_value) {
-      $addonManifest = $this->processManifest($_value, $returnInactive, $returnUnreviewed, $processContent);
+      $addonManifest = $this->processManifest($_value,
+                                              $returnInactive,
+                                              $returnUnreviewed,
+                                              $processContent,
+                                              $xpInstallFixup);
 
       if (!$addonManifest) {
         continue;
@@ -282,7 +297,7 @@ class classReadManifest {
   * 
   * @returns                indexed array of manifests or null
   ********************************************************************************************************************/
-  public function getSearchPlugins($_listOnly = null) {
+  public function getSearchPlugins() {
     $datastorePath = ROOT_PATH . DATASTORE_RELPATH . '/searchplugins/';
     $arraySearchPlugins = array();
 
@@ -303,6 +318,19 @@ class classReadManifest {
   }
 
  /********************************************************************************************************************
+  * Gets an indexed array of dictionary manifests
+  ********************************************************************************************************************/
+  public function getDictionaries() {
+    $manifestData = null;
+
+    if (!$manifestData) {
+      $manifestData = [];
+    }
+
+    return $manifestData;
+  }
+
+ /********************************************************************************************************************
   * Internal method to post-process an add-on manifest
   * 
   * @param $addonManifest       add-on manifest
@@ -312,9 +340,10 @@ class classReadManifest {
   ********************************************************************************************************************/
   // This is where we do any post-processing on an Add-on Manifest
   private function processManifest($addonManifest,
-                                       $returnInactive = null,
-                                       $returnUnreviewed = null,
-                                       $processContent = true) {
+                                   $returnInactive = null,
+                                   $returnUnreviewed = null,
+                                   $processContent = true,
+                                   $xpInstallFixup = true) {
     // Cast the int-strings to bool
     $addonManifest['reviewed'] = (bool)$addonManifest['reviewed'];
     $addonManifest['active'] = (bool)$addonManifest['active'];
@@ -327,27 +356,36 @@ class classReadManifest {
       return null;
     }
 
+    if ($GLOBALS['arraySoftwareState']['requestComponent'] == 'panel' && $addonManifest['type'] != 'external') {
+      foreach (TARGET_APPLICATION_ID as $_key => $_value) {
+        unset($addonManifest[$_key]);
+      }
+    }
+
     // Actions on xpinstall key
-    if (array_key_exists('xpinstall', $addonManifest)) {
+    if ($addonManifest['xpinstall'] ?? false) {
       // JSON Decode xpinstall
       $addonManifest['xpinstall'] = json_decode($addonManifest['xpinstall'], true);
 
-      // We need to perform some minor post processing on XPInstall
-      foreach ($addonManifest['xpinstall'] as $_key => $_value) {
-        // Remove entries that are not compatible with the current application
-        if (!array_key_exists($this->currentAppID, $addonManifest['xpinstall'][$_key]['targetApplication'])) {
-          unset($addonManifest['xpinstall'][$_key]);
-          continue;
-        }
+      if ($xpInstallFixup) {
+        // We need to perform some minor post processing on XPInstall
+        foreach ($addonManifest['xpinstall'] as $_key => $_value) {
+          // Remove entries that are not compatible with the current application
+          if (!array_key_exists($this->currentAppID, $addonManifest['xpinstall'][$_key]['targetApplication'])) {
+            unset($addonManifest['xpinstall'][$_key]);
+            continue;
+          }
 
-        // Set a human readable date based on epoch
-        $addonManifest['xpinstall'][$_key]['date'] = date('F j, Y', $addonManifest['xpinstall'][$_key]['epoch']);
+          if ($processContent) {
+            // XXX: We should get Smarty to do the conversion...
+            // Set a human readable date based on epoch
+            $addonManifest['xpinstall'][$_key]['date'] = date('F j, Y', $addonManifest['xpinstall'][$_key]['epoch']);
+          }
+        }
       }
 
       // Ensure that the xpinstall keys are reverse sorted using an anonymous function and a spaceship
-      uasort($addonManifest['xpinstall'], function ($_xpi1, $_xpi2) {
-        return $_xpi2['epoch'] <=> $_xpi1['epoch'];
-      });
+      uasort($addonManifest['xpinstall'], function ($_xpi1, $_xpi2) { return $_xpi2['epoch'] <=> $_xpi1['epoch']; });
     }
 
     // Remove whitespace from description and html encode
@@ -374,11 +412,13 @@ class classReadManifest {
       $addonManifest = $this->processLicense($addonManifest);
     }
     
+    // XXX: Smarty/CSS can do this so why are we doing it here instead?
     // Truncate description if it is too long..
     if (array_key_exists('description', $addonManifest) && strlen($addonManifest['description']) >= 235) {
       $addonManifest['description'] = substr($addonManifest['description'], 0, 230) . '&hellip;';
     }
 
+    // XXX: Why the fuck do we need this?
     // Set baseURL if applicable
     if ($addonManifest['type'] != 'external') {
       $addonManifest['baseURL'] = 'http://' .
@@ -386,10 +426,12 @@ class classReadManifest {
                                   '/?component=download&version=latest&id=';
     }
 
-    // Set Datastore Paths  
+    // XXX: Do we need this?
+    // Set Datastore Paths 
     $addonManifest['basePath'] =
       '.' . DATASTORE_RELPATH . 'addons/' . $addonManifest['slug'] . '/';
 
+    // XXX: Ditto
     // Set reletive url paths
     $_addonPath = substr($addonManifest['basePath'], 1);
     $_defaultPath = str_replace($addonManifest['slug'], 'default', $_addonPath);
@@ -413,9 +455,11 @@ class classReadManifest {
       // Detect Icon
       if (file_exists($addonManifest['basePath'] . 'icon.png')) {
         $addonManifest['icon'] = $_addonPath . 'icon.png';
+        $addonManifest['hasIcon'] = true;
       }
       else {
         $addonManifest['icon'] = $_defaultPath . 'icon.png';
+        $addonManifest['hasIcon'] = false;
       }
 
       // Detect Preview

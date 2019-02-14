@@ -1,0 +1,35 @@
+<h2>{$PAGE_TITLE}</h2>
+
+{if $PAGE_TYPE == 'panel-submit-addon' || $PAGE_TYPE == 'panel-submit-external'}
+<p>
+  To get started, you need to select a unique "pretty url" slug. This will be used 
+  {if $PAGE_TYPE == 'panel-submit-external'}
+  to generate an internal ID and provide a location to store icons and previews on the filesystem.
+  {else}
+  as a component in the URL. You will also need to select your inital XPI file for validation and hosting.
+  {/if}
+</p>
+{elseif $PAGE_TYPE == 'panel-update-release'}
+<p>Please select your new release XPI file.</p>
+{/if}
+
+<div style="width: 100%; text-align: center;">
+    <form id="addon-submit"
+          accept-charset="UTF-8"
+          autocomplete="off"
+          method="POST"
+          enctype="multipart/form-data"
+          style="display: inline-block; text-align: left; width: 503px;">
+      {if $PAGE_TYPE != 'panel-submit-langpack' && $PAGE_TYPE != 'panel-update-release'}
+      <strong>Slug:</strong> <em title="Regular Expression: /[^a-z0-9\-]/">(3-32 characters, lowercase alphanumerics, and dashes)</em><br />
+      <input name="slug" type="text" size="80" minlength="3" maxlength="32" required><br /><br />
+      {else}
+      <input type="hidden" name="slug" value="{if $PAGE_DATA}{$PAGE_DATA}{else}submit{/if}" />
+      {/if}
+      {if $PAGE_TYPE == 'panel-submit-addon' || $PAGE_TYPE == 'panel-submit-langpack' || $PAGE_TYPE == 'panel-update-release'}
+      <strong>Add-on:</strong> <em>(XPI or JAR file type)</em><br />
+      <input type="file" id="xpiUpload" name="xpiUpload" accept="application/x-xpinstall" required>
+      {/if}
+      <button type="submit" value="Submit" style="float: right;">Submit</button><br />
+    </form>
+</div>

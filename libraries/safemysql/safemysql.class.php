@@ -557,7 +557,7 @@ class SafeMySQL
 		{
 			return 'NULL';
 		}
-		return	"'".mysqli_real_escape_string($this->conn,$value)."'";
+		return	"'".@mysqli_real_escape_string($this->conn,$value)."'";
 	}
 
 	protected function escapeIdent($value)
