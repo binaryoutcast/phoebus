@@ -422,6 +422,26 @@ function contains($haystack, $needle) {
 
 // == | Main | ========================================================================================================
 
+// Define an array that will hold the current application state
+$arraySoftwareState = array(
+  'authentication'      => null,
+  'currentApplication'  => null,
+  'orginalApplication'  => null,
+  'currentName'         => null,
+  'currentScheme'       => funcUnifiedVariable('server', 'SCHEME'),
+  'currentDomain'       => null,
+  'debugMode'           => null,
+  'phpServerName'       => funcUnifiedVariable('server', 'SERVER_NAME'),
+  'phpRequestURI'       => funcUnifiedVariable('server', 'REQUEST_URI'),
+  'requestComponent'    => funcUnifiedVariable('get', 'component'),
+  'requestPath'         => funcUnifiedVariable('get', 'path'),
+  'requestApplication'  => funcUnifiedVariable('get', 'appOverride'),
+  'requestDebugOff'     => funcUnifiedVariable('get', 'debugOff'),
+  'requestSearchTerms'  => funcUnifiedVariable('get', 'terms')
+);
+
+// --------------------------------------------------------------------------------------------------------------------
+
 // If the entire site is offline but nothing above is busted.. We want to serve proper but empty responses
 if (file_exists(ROOT_PATH . '/.offline' && !funcUnifiedVariable('cookie', 'overrideOffline') {
   $strOfflineMessage = 'Phoebus, and by extension this Add-ons Site, is currently unavailable. Please try again later.';
@@ -465,26 +485,6 @@ if (file_exists(ROOT_PATH . '/.offline' && !funcUnifiedVariable('cookie', 'overr
       funcError($strOfflineMessage);
   }
 }
-
-// --------------------------------------------------------------------------------------------------------------------
-
-// Define an array that will hold the current application state
-$arraySoftwareState = array(
-  'authentication'      => null,
-  'currentApplication'  => null,
-  'orginalApplication'  => null,
-  'currentName'         => null,
-  'currentScheme'       => funcUnifiedVariable('server', 'SCHEME'),
-  'currentDomain'       => null,
-  'debugMode'           => null,
-  'phpServerName'       => funcUnifiedVariable('server', 'SERVER_NAME'),
-  'phpRequestURI'       => funcUnifiedVariable('server', 'REQUEST_URI'),
-  'requestComponent'    => funcUnifiedVariable('get', 'component'),
-  'requestPath'         => funcUnifiedVariable('get', 'path'),
-  'requestApplication'  => funcUnifiedVariable('get', 'appOverride'),
-  'requestDebugOff'     => funcUnifiedVariable('get', 'debugOff'),
-  'requestSearchTerms'  => funcUnifiedVariable('get', 'terms')
-);
 
 // --------------------------------------------------------------------------------------------------------------------
 
