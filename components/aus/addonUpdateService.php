@@ -144,11 +144,6 @@ if ($arraySoftwareState['requestAppID'] == $arraySoftwareState['targetApplicatio
   $addonManifest = $moduleReadManifest->getAddon('by-id', $arraySoftwareState['requestAddonID']);
 
   if (!$addonManifest) {
-    // Send non-existant add-ons to AMO for Basilisk
-    if ($arraySoftwareState['currentApplication'] == 'basilisk') {
-      funcSendToAMO(TARGET_APPLICATION_ID['firefox'], '52.9');
-    }
-
     // Add-on is non-existant send blank rdf response
     $moduleGenerateContent->addonUpdateService(null);
   }
