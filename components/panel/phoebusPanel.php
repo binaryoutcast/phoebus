@@ -59,6 +59,10 @@ function funcCheckAccessLevel($aLevel, $aReturnNull = null) {
 
 // == | Main | ========================================================================================================
 
+if (file_exists(ROOT_PATH . '/.nopanel') && !funcUnifiedVariable('cookie', 'overrideNoPanel')) {
+  funcError('The Panel is currently disabled. Please try again later.');
+}
+
 $strComponentPath = dirname(COMPONENTS[$arraySoftwareState['requestComponent']]) . '/';
 $boolHasPostData = !empty($_POST);
 

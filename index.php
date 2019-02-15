@@ -16,7 +16,7 @@ define('ROOT_PATH', $_SERVER['DOCUMENT_ROOT']);
 
 // Define basic constants for the software
 const SOFTWARE_NAME       = 'Phoebus';
-const SOFTWARE_VERSION    = '2.0.0b2';
+const SOFTWARE_VERSION    = '2.0.0b3';
 const DATASTORE_RELPATH   = '/datastore/';
 const OBJ_RELPATH         = '/.obj/';
 const COMPONENTS_RELPATH  = '/components/';
@@ -297,6 +297,7 @@ function funcUnifiedVariable($_type, $_value, $_allowFalsy = null) {
       break;
     case 'cookie':
       $finalValue = $_COOKIE[$_value] ?? null;
+      break;
     case 'var':
       $finalValue = $_value ?? null;
       break;
@@ -441,7 +442,6 @@ $arraySoftwareState = array(
 );
 
 // --------------------------------------------------------------------------------------------------------------------
-
 // If the entire site is offline but nothing above is busted.. We want to serve proper but empty responses
 if (file_exists(ROOT_PATH . '/.offline') && !funcUnifiedVariable('cookie', 'overrideOffline')) {
   $strOfflineMessage = 'Phoebus, and by extension this Add-ons Site, is currently unavailable. Please try again later.';
