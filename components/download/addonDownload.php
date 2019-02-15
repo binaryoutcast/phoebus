@@ -69,11 +69,17 @@ function funcDownloadXPI($aAddonManifest, $aAddonVersion, $aBinaryStream = null)
 
 // == | funcDownloadSearchPlugin | ============================================
 
-function funcDownloadSearchPlugin($aSearchPluginName) {
+function funcDownloadSearchPlugin($aSearchPluginName, $aBinaryStream = null) {
   $searchPluginFile = './datastore/searchplugins/' . $aSearchPluginName;
   
   if (file_exists($searchPluginFile)) {
-    header('Content-Type: text/xml');
+    // Non-web browsers should send as an arbitrary binary stream
+    if ($aBinaryStream) {
+      header('Content-Type: application/octet-stream');
+    }
+    else {
+      header('Content-Type: text/xml');
+    }
     header('Content-Disposition: inline; filename="' . $aSearchPluginName .'"');
     header('Cache-Control: no-cache');
     
@@ -105,7 +111,7 @@ if ($strRequestAddonID == null) {
 // Search for add-ons in our databases
 // Search Plugins
 if (array_key_exists($strRequestAddonID, classReadManifest::SEARCH_PLUGINS_DB)) {
-  funcDownloadSearchPlugin(classReadManifest::SEARCH_PLUGINS_DB[$strRequestAddonID]);
+  funcDownloadSearchPlugin(classReadManifest::SEARCH_PLUGINS_DB[$strRequestAddonID], $boolRequestBinaryStream);
 }
 else {
   if ($boolRequestPanel) {
