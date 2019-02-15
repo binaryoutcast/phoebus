@@ -404,11 +404,6 @@ background: linear-gradient(to right, rgba(240,240,240,1) 50%,rgba(255,255,255,0
   color: black;
 }
 
-.category-addon:hover,
-.category-addon-content:hover {
-  text-decoration: none;
-}
-
 .category-addon-icon {
   padding-top: 8px;
   padding-bottom: 16px;
@@ -460,6 +455,12 @@ background: linear-gradient(to right, rgba(240,240,240,1) 50%,rgba(255,255,255,0
   padding: 4px 8px;
   text-decoration: none;
   color: #000;
+}
+
+.category-addon:hover,
+.category-addon-content:hover,
+.fake-table-row-search-plugin:hover {
+  text-decoration: none;
 }
 
 pre {
