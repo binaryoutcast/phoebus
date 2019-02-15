@@ -443,7 +443,7 @@ $arraySoftwareState = array(
 // --------------------------------------------------------------------------------------------------------------------
 
 // If the entire site is offline but nothing above is busted.. We want to serve proper but empty responses
-if (file_exists(ROOT_PATH . '/.offline' && !funcUnifiedVariable('cookie', 'overrideOffline') {
+if (file_exists(ROOT_PATH . '/.offline' && !funcUnifiedVariable('cookie', 'overrideOffline')) {
   $strOfflineMessage = 'Phoebus, and by extension this Add-ons Site, is currently unavailable. Please try again later.';
   // Root (/) won't set a component or path
   if (!$arraySoftwareState['requestComponent'] && !$arraySoftwareState['requestPath']) {
