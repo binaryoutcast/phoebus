@@ -86,7 +86,7 @@ const TARGET_APPLICATION_SITE = array(
     'enabled'       => true,
     'name'          => 'Interlink Add-ons - Binary Outcast',
     'domain'        => array('live' => 'interlink-addons.binaryoutcast.com', 'dev' => null),
-    'features'      => array('extensions', 'themes', 'disable-xpinstall')
+    'features'      => array('extensions', 'themes', 'search-plugins', 'disable-xpinstall')
   ),
 );
 
