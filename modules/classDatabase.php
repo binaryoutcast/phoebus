@@ -15,22 +15,19 @@ class classDatabase {
     // Assign current software state to a class property by reference
     $this->arraySoftwareState = &$GLOBALS['arraySoftwareState'];
 
-    $creds = parse_ini_file(ROOT_PATH . DATASTORE_RELPATH . '.phoebus/sql.ini', true);
+    @include_once(ROOT_PATH . DATASTORE_RELPATH . '.phoebus/sql');
 
-    if (!$creds) {
-      funcError(__CLASS__ . '::' . __FUNCTION__ . ' - Could not read ini file');
+    if (!($arrayCreds ?? false)) {
+      funcError(__CLASS__ . '::' . __FUNCTION__ . ' - Could not read aql file');
     }
 
-    $creds['db'] = $creds['proto']['livedb'];
+    $arrayCreds['currentDB'] = $arrayCreds['liveDB'];
 
     if($this->arraySoftwareState['debugMode'] || $this->arraySoftwareState['requestDebugOff']) {
-      $creds['db'] = $creds['proto']['devdb'];
+      $arrayCreds['currentDB'] = $arrayCreds['devDB'];;
     }
 
-    $creds['user'] = $creds['proto']['wuser'];
-    $creds['pass'] = $creds['proto']['wpass'];
-
-    $this->connection = mysqli_connect('localhost', $creds['user'], $creds['pass'], $creds['db']);
+    $this->connection = mysqli_connect('localhost', $arrayCreds['username'], $arrayCreds['password'], $arrayCreds['currentDB']);
     
     if (mysqli_connect_errno($this->connection)) {
       funcError('SQL Connection Error: ' . mysqli_connect_errno($this->connection));

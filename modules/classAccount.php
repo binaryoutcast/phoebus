@@ -407,7 +407,7 @@ class classAccount {
   * Generates a verification code
   ********************************************************************************************************************/
   private function generateCode($aUsername, $aEmail) {
-    $secretFile = ROOT_PATH . DATASTORE_RELPATH . '.phoebus/secret.code';
+    $secretFile = ROOT_PATH . DATASTORE_RELPATH . '.phoebus/code';
     $secret = funcUnifiedVariable('var', @file_get_contents(secretFile)) ?? time();
     $code = hash('sha256', time() . $aUsername . $aEmail . $secret);
     return $code;
