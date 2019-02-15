@@ -436,7 +436,7 @@ $arraySoftwareState = array(
   'phpRequestURI'       => funcUnifiedVariable('server', 'REQUEST_URI'),
   'requestComponent'    => funcUnifiedVariable('get', 'component'),
   'requestPath'         => funcUnifiedVariable('get', 'path'),
-  'requestApplication'  => funcUnifiedVariable('get', 'appOverride'),
+  'requestApplication'  => funcUnifiedVariable('get', 'appOverride') ?? funcUnifiedVariable('cookie', 'appOverride'),
   'requestDebugOff'     => funcUnifiedVariable('get', 'debugOff'),
   'requestSearchTerms'  => funcUnifiedVariable('get', 'terms')
 );
