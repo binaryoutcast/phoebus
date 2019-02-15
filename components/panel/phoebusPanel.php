@@ -59,7 +59,7 @@ function funcCheckAccessLevel($aLevel, $aReturnNull = null) {
 
 // == | Main | ========================================================================================================
 
-if (file_exists(ROOT_PATH . '/.nopanel') && !funcUnifiedVariable('cookie', 'overrideNoPanel')) {
+if (file_exists(ROOT_PATH . '/.disablePanel') && !funcUnifiedVariable('cookie', 'overrideDisablePanel')) {
   funcError('The Panel is currently disabled. Please try again later.');
 }
 
