@@ -1,0 +1,27 @@
+<h1>{$PAGE_TITLE}</h1>
+
+<p>We are currently working as a community to bring you more languages for Pale Moon. To be informed of progress (or to help out!), please go to the following <a href="https://forum.palemoon.org/viewtopic.php?f=30&t=13720">forum topic dedicated to localization</a>.</p>
+
+<p>If you prefer to have the Pale Moon user interface in your native language (not US-English), then these language packs can help you! They are originally based on the Mozilla Firefox language packs, with additional translations and improvements done by our community translators for Pale Moon. Pale Moon will not be released with installers in individual languages, but installing these language packs on top of the US-English browser will pretty much have the same effect.</p>
+
+<p><strong>Important:</strong><br />
+These language packs are for the latest versions of the browser. They will not work on older versions. If you are using an older version of the browser, <strong>please update to the current version</strong> first. If you for whatever reason decide you need to use an older version of the browser, please go to the <a href="//www.palemoon.org/archived.shtml" target="_blank">archived versions</a> page and download the appropriate language pack for your browser version.<br />
+</p>
+
+<div class="category-other">
+  {foreach $PAGE_DATA as $key}
+    <a href="{$key.url}" class="fake-table-row-search-plugin" style="height: 36px;">
+      <img src="{$key.icon}" class="alignleft" width="32px" height="32px">
+      <div style="margin-top: 7px;">
+        <strong>{$key.name}</strong>
+      </div>
+    </a>
+  {foreachelse}
+    <p><em>There are no available add-ons in this category.</em></p>
+  {/foreach}
+</div>
+
+<p><strong>Important note:</strong> These language packs are provided AS-IS. We, the authors of the actual Pale Moon browser, are not the authors of these language packs, and cannot provide support for the actual contents of them. This is a community effort! If you have any feedback on them, please either get involved on our <a href="https://crowdin.com/project/pale-moon" target="_blank">CrowdIn project</a> directly or go to the <a href="https://forum.palemoon.org/viewtopic.php?f=30&t=13720" target="_blank">forum</a>.</p>
+<p>Can't find your language?<br />
+We're sorry but these are the only languages that actually have a complete translation and have support from (near-)native speakers. We cannot support any other languages without a dedicated community translator for a language. Other languages are in the works but not complete yet.</p>
+{$key = null}

@@ -1,379 +1,322 @@
 <?php
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at http://mozilla.org/MPL
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// == | Vars | ================================================================
+// == | Setup | =======================================================================================================
 
-$strApplicationSiteName = 'Pale Moon - Add-ons';
-$strApplicationSkin = 'palemoon';
-$strContentBasePath = './components/site/content/';
-$strSkinBasePath = './skin/' . $strApplicationSkin . '/';
-$strObjDirSmartyCachePath = $strObjDirPath . 'smarty/frontend/';
+// URI Constants
+const URI_ROOT            = '/';
+const URI_ADDON_PAGE      = '/addon/';
+const URI_ADDON_RELEASES  = '/releases/';
+const URI_ADDON_LICENSE   = '/license/';
+const URI_EXTENSIONS      = '/extensions/';
+const URI_THEMES          = '/themes/';
+const URI_PERSONAS        = '/personas/';
+const URI_SEARCHPLUGINS   = '/search-plugins/';
+const URI_LANGPACKS       = '/language-packs/';
+const URI_DICTIONARIES    = '/dictionaries/';
+const URI_SEARCH          = '/search/';
 
-$strRequestSmartyDebug = funcHTTPGetValue('smartyDebug');
+// Include modules
+$arrayIncludes = ['database', 'readManifest', 'persona', 'generateContent'];
+foreach ($arrayIncludes as $_value) { require_once(MODULES[$_value]); }
 
-$arraySmartyPaths = array(
-    'cache' => $strObjDirSmartyCachePath . 'cache',
-    'compile' => $strObjDirSmartyCachePath . 'compile',
-    'config' => $strObjDirSmartyCachePath . 'config',
-    'plugins' => $strObjDirSmartyCachePath . 'plugins',
-    'templates' => $strObjDirSmartyCachePath . 'templates',
-);
+// Instantiate modules
+$moduleDatabase = new classDatabase();
+$moduleReadManifest = new classReadManifest();
+$modulePersona = new classPersona;
+$moduleGenerateContent = new classGenerateContent(true);
 
-$arrayStaticPages = array(
-    '/' => array(
-        'title' => 'Your browser, your way!',
-        'contentTemplate' => $strContentBasePath . 'frontpage.xhtml.tpl',
-    )
-);
+// ====================================================================================================================
 
-// ============================================================================
+// == | Functions | ===================================================================================================
 
-// == | funcGenAddonContent | =================================================
-
-function funcGenAddonContent($_strAddonSlug) {
-    $_addonManifest = new classAddonManifest();
-    $_arrayAddonMetadata = $_addonManifest->funcGetManifest($_strAddonSlug);
-
-    if ($_arrayAddonMetadata != null) {
-        $_arrayAddonMetadata['basePath'] = substr($_arrayAddonMetadata['basePath'], 1);
-        
-        $arrayPage = array(
-            'title' => $_arrayAddonMetadata['name'],
-            'contentTemplate' => $GLOBALS['strSkinBasePath'] . 'single-addon.tpl',
-            'contentData' => $_arrayAddonMetadata
-        );
-        
-        return $arrayPage;
-    }
-    else {
-        if ($GLOBALS['boolDebugMode'] == true) {
-            funcError('The requested add-on has a problem with it\'s manifest file');
-        }
-        else {
-            funcSendHeader('404');
-        }       
-    }
+/**********************************************************************************************************************
+* Strips path to obtain the slug
+*
+* @param $aPath     $arraySoftwareState['requestPath']
+* @param $aPrefix   Prefix to strip 
+* @returns          slug
+***********************************************************************************************************************/
+function funcStripPath($aPath, $aPrefix) {
+  return str_replace('/', '', str_replace($aPrefix, '', $aPath));
 }
 
-// ============================================================================
-
-// == | funcGenAllExtensions | ================================================
-
-function funcGenAllExtensions($_array) {
-    $arrayCategory = array();
-    
-    foreach ($_array as $_key => $_value) {
-        if ($_key != 'themes') {
-            $_arraySingleCategory = funcGenCategoryContent('extension', $_value);
-            foreach ($_arraySingleCategory["contentData"] as $_key2 => $_value2) {
-                $arrayCategory[$_key2] = $_value2;
-            }
-        }
+/**********************************************************************************************************************
+* Checks for enabled features
+*
+* @param $aFeature    feature
+* @param $aReturn     if true we will return a value else 404
+***********************************************************************************************************************/
+function funcCheckEnabledFeature($aFeature, $aReturn = null) {
+  $currentApplication = $GLOBALS['arraySoftwareState']['currentApplication'];
+  if (!in_array($aFeature, TARGET_APPLICATION_SITE[$currentApplication]['features'])) {
+    if(!$aReturn) {
+      funcSend404();
     }
-    
-    ksort($arrayCategory, SORT_NATURAL | SORT_FLAG_CASE);
-    
-    $arrayPage = array(
-        'title' => 'Extensions',
-        'contentType' => 'cat-all-extensions',
-        'contentTemplate' => $GLOBALS['strSkinBasePath'] . 'category-addons.tpl',
-        'contentData' => $arrayCategory
-    );
 
-    return $arrayPage;
-}
-
-// ============================================================================
-
-// == | funcGenCategoryContent | ==============================================
-
-function funcGenCategoryContent($_type, $_array) {
-    $_addonManifest = new classAddonManifest();
-    $arrayCategory = array();
-    $_strDatastoreBasePath = $GLOBALS['strApplicationDatastore'] . 'addons/';
-    
-    foreach ($_array as $_key => $_value) {
-        if (($_type === 'extension' || $_type == 'theme') && is_int($_key)) {
-            $_arrayAddonMetadata = $_addonManifest->funcGetManifest($_value);
-            if ($_arrayAddonMetadata != null) {
-                $arrayCategory[$_arrayAddonMetadata['name']] = $_arrayAddonMetadata;
-                unset($_arrayAddonMetadata);
-            }
-        }
-        elseif ($_key === 'externals') {
-            foreach($_array['externals'] as $_key2 => $_value2) {
-                $arrayCategory[$_value2['name']]['type'] = 'external';
-                $arrayCategory[$_value2['name']]['name'] = $_value2['name'];
-                $arrayCategory[$_value2['name']]['slug'] = $_value2['id'];
-                $arrayCategory[$_value2['name']]['url'] = $_value2['url'];
-                $arrayCategory[$_value2['name']]['shortDescription'] = $_value2['shortDescription'];
-
-                if ($_value2['id'] != 'default' && file_exists($_strDatastoreBasePath . $_value2['id'] . '/icon.png')) {
-                    $arrayCategory[$_value2['name']]['icon'] = substr($_strDatastoreBasePath . $_value2['id'] . '/icon.png', 1);
-                }
-                else {
-                    $arrayCategory[$_value2['name']]['icon'] = substr($_strDatastoreBasePath . 'default/' . $_type . '.png', 1);
-                    
-                }
-                
-                if ($_value2['id'] != 'default' && file_exists($_strDatastoreBasePath . $_value2['id'] . '/preview.png')) {
-                    $arrayCategory[$_value2['name']]['preview'] = substr($_strDatastoreBasePath . $_value2['id'] . '/preview.png', 1);
-                }
-                else {
-                    $arrayCategory[$_value2['name']]['preview'] = substr($_strDatastoreBasePath . 'default/preview.png', 1);
-                }                
-            }
-        }
-        elseif ($_type === 'language-pack') {
-            foreach($_array as $_key3 => $_value3) {
-                $arrayCategory[$_value3['name']] = $_value3;
-            }
-        }
-        elseif ($_type === 'search-plugin') {
-            $_arrayAddonMetadata = simplexml_load_file('./datastore/searchplugins/' . $_value);
-            $arrayCategory[(string)$_arrayAddonMetadata->ShortName]['type'] = 'search-plugin';
-            $arrayCategory[(string)$_arrayAddonMetadata->ShortName]['id'] = $_key;
-            $arrayCategory[(string)$_arrayAddonMetadata->ShortName]['name'] = (string)$_arrayAddonMetadata->ShortName;
-            $arrayCategory[(string)$_arrayAddonMetadata->ShortName]['slug'] = substr($_value, 0, -4);
-            $arrayCategory[(string)$_arrayAddonMetadata->ShortName]['icon'] = (string)$_arrayAddonMetadata->Image;
-            unset($_arrayAddonMetadata);
-        }
-    }
-    
-    ksort($arrayCategory, SORT_NATURAL | SORT_FLAG_CASE);
-    
-    if ($_type == 'extension') {
-        $arrayPage = array(
-            'title' => $_array['title'],
-            'contentTemplate' => $GLOBALS['strSkinBasePath'] . 'category-addons.tpl',
-            'contentType' => 'cat-extensions',
-            'contentData' => $arrayCategory
-        );
-    }
-    elseif ($_type == 'theme') {
-        $arrayPage = array(
-            'title' => $_array['title'],
-            'contentTemplate' => $GLOBALS['strSkinBasePath'] . 'category-addons.tpl',
-            'contentType' => 'cat-themes',
-            'contentData' => $arrayCategory
-        );
-    }
-    elseif ($_type == 'language-pack') {
-        $arrayPage = array(
-            'title' => 'Language Packs',
-            'contentTemplate' => $GLOBALS['strSkinBasePath'] . 'category-other.tpl',
-            'contentType' => 'cat-language-packs',
-            'contentData' => $arrayCategory
-        );
-    }
-    elseif ($_type == 'search-plugin') {
-        $arrayPage = array(
-            'title' => 'Search Plugins',
-            'contentTemplate' => $GLOBALS['strSkinBasePath'] . 'category-other.tpl',
-            'contentType' => 'cat-search-plugins',
-            'contentData' => $arrayCategory
-        );
-    }
-    
-    return $arrayPage;
-}
-
-// ============================================================================
-
-// == | funcGeneratePage | ====================================================
-
-function funcGeneratePage($_array) {
-    // Get the required template files
-    $_strSiteTemplate = file_get_contents($GLOBALS['strSkinBasePath'] . 'template.tpl');
-    $_strStyleSheet = file_get_contents($GLOBALS['strSkinBasePath'] . 'stylesheet.tpl');
-    $_strContentTemplate = file_get_contents($_array['contentTemplate']);
-
-    // Merge the stylesheet and the content template into the site template
-    $_strSiteTemplate = str_replace('{%PAGE_CONTENT}', $_strContentTemplate, $_strSiteTemplate);
-    $_strSiteTemplate = str_replace('{%SITE_STYLESHEET}', $_strStyleSheet, $_strSiteTemplate);
-    $_randomDownloadButtonName = 'PM-' . bin2hex(openssl_random_pseudo_bytes(4));
-    $_strSiteTemplate = str_replace('dllink_green', $_randomDownloadButtonName, $_strSiteTemplate);
-    unset($_strStyleSheet);
-    unset($_strContentTemplate);
-
-    // Load Smarty
-    require_once($GLOBALS['arrayModules']['smarty']);
-    $libSmarty = new Smarty();
-    
-    // Configure Smarty
-    $libSmarty->caching = 0;
-    $libSmarty->setCacheDir($GLOBALS['arraySmartyPaths']['cache'])
-        ->setCompileDir($GLOBALS['arraySmartyPaths']['compile'])
-        ->setConfigDir($GLOBALS['arraySmartyPaths']['config'])
-        ->addPluginsDir($GLOBALS['arraySmartyPaths']['plugins'])
-        ->setTemplateDir($GLOBALS['arraySmartyPaths']['templates']);
-
-    // Smarty Debug
-    if ($GLOBALS['strRequestSmartyDebug']) {
-        $libSmarty->debugging = $GLOBALS['boolDebugMode'];
-    }
-    else {
-        $libSmarty->debugging = false;
-    }
-    
-    // Assign data to Smarty
-    $libSmarty->assign('APPLICATION_DEBUG', $GLOBALS['boolDebugMode']);
-    $libSmarty->assign('SITE_NAME', $GLOBALS['strApplicationSiteName']);
-    $libSmarty->assign('SITE_DOMAIN', $GLOBALS['strRequestScheme'] . '://' . $GLOBALS['strApplicationURL']);
-    $libSmarty->assign('PAGE_TITLE', $_array['title']);
-    $libSmarty->assign('PAGE_PATH', $GLOBALS['strRequestPath']);
-    $libSmarty->assign('BASE_PATH', substr($GLOBALS['strSkinBasePath'], 1));
-    $libSmarty->assign('PHOEBUS_VERSION', $GLOBALS['strApplicationVersion']);
-    
-    if (array_key_exists('contentData', $_array)) {
-        $libSmarty->assign('PAGE_DATA', $_array['contentData']);
-    }
-    
-    if (array_key_exists('contentType', $_array)) {
-        $libSmarty->assign('PAGE_TYPE', $_array['contentType']);
-    }
-    
-    // Clear old compiled templates after one minute
-    $libSmarty->clearCompiledTemplate(null, null, 60);
-    
-    // Send html header and pass the final template to Smarty
-    funcSendHeader('html');
-    $libSmarty->display('string:' . $_strSiteTemplate);
-
-    // We are done here...
-    exit();
-}
-
-// ============================================================================
-
-// == | Main | ================================================================
-
-// Debug Conditions
-if ($boolDebugMode == true) {
-    // Git stuff
-    if (file_exists('./.git/HEAD')) {
-        $_strGitHead = file_get_contents('./.git/HEAD');
-        $_strGitSHA1 = file_get_contents('./.git/' . substr($_strGitHead, 5, -1));
-        $_strGitBranch = substr($_strGitHead, 16, -1);
-        $strApplicationSiteName = 'Phoebus Development - Version: ' . $strApplicationVersion . ' - ' .
-            'Branch: ' . $_strGitBranch . ' - ' .
-            'Commit: ' . substr($_strGitSHA1, 0, 7);
-    }
-    else {
-        $strApplicationSiteName = 'Phoebus Development - Version: ' . $strApplicationVersion;
-    }    
-}
-
-require_once($arrayModules['addonManifest']);
-$addonManifest = new classAddonManifest();
-
-if (startsWith($strRequestPath, '/addon/')) {
-    require_once($arrayModules['dbAddons']);
-    $strStrippedPath = str_replace('/', '', str_replace('/addon/', '', $strRequestPath));
-    $ArrayDBFlip = array_flip($arrayAddonsDB);
-    
-    if (array_key_exists($strStrippedPath,$ArrayDBFlip)) {
-        funcGeneratePage(funcGenAddonContent($strStrippedPath));
-    }
-    else {
-        funcSendHeader('404');
-    }
-}
-elseif (startsWith($strRequestPath, '/extensions/') || startsWith($strRequestPath, '/themes/')) {
-    require_once($arrayModules['dbCategories']);
-    
-    if ($strRequestPath == '/extensions/') {
-        funcGeneratePage(funcGenAllExtensions($arrayCategoriesDB));
-    }
-    elseif (startsWith($strRequestPath, '/extensions/')) {
-        $strStrippedPath = str_replace('/', '', str_replace('/extensions/', '', $strRequestPath));
-        
-        if (array_key_exists($strStrippedPath,$arrayCategoriesDB) && $strStrippedPath != 'themes') {
-            funcGeneratePage(funcGenCategoryContent('extension', $arrayCategoriesDB[$strStrippedPath]));
-        }
-        else {
-            // Nginx cannot easily handle the condition of non-matching-category slug so send non-matching slugs to /addon/[slug] and let that 404 if it isn't an extension
-            funcRedirect('/addon/' . $strStrippedPath);
-        }
-    }
-    elseif ($strRequestPath == '/themes/') {
-        funcGeneratePage(funcGenCategoryContent('theme', $arrayCategoriesDB['themes']));
-    }
-    else {
-        funcSendHeader('404');
-    }
-}
-elseif ($strRequestPath == '/language-packs/') {
-    require_once($arrayModules['langPacks']);
-    $langPacks = new classLangPacks;
-    $arrayLangPackDB = $langPacks->funcGetLanguagePacks();
-    
-    funcGeneratePage(funcGenCategoryContent('language-pack', $arrayLangPackDB));
-}
-elseif ($strRequestPath == '/search-plugins/') {
-    require_once($arrayModules['dbSearchPlugins']);
-    
-    funcGeneratePage(funcGenCategoryContent('search-plugin', $arraySearchPluginsDB));
-}
-elseif ($strRequestPath == '/search/') { 
-  $strSearchTearms = funcHTTPGetValue('terms');
-  $arrayResults = null;
-  $arrayFinalResults = null;
-  
-  if ($strSearchTearms != null) {
-    require_once($strApplicationDatastore . '/pm-admin/sql-read.php');
-    require_once($arrayModules['sql']);
-    $libSQL = new SafeMysql($arraySQLCreds);
-    $arrayResults = funcCheckVar(
-      $libSQL->getCol(
-        "SELECT `slug` FROM `search` WHERE MATCH(`tags`) AGAINST(?s IN NATURAL LANGUAGE MODE)",
-        $strSearchTearms
-      )
-    );
+    return null;
   }
 
-  if ($strSearchTearms == null || $arrayResults == null) {
-    $arrayPage = array(
-      'title' => 'No Search Results',
-      'contentType' => 'search',
-      'contentTemplate' => $strSkinBasePath . 'category-addons.tpl',
-      'contentData' => null
-    );
+  return true;
+}
+
+// ====================================================================================================================
+
+// == | Main | ========================================================================================================
+
+// Site Name
+$arraySoftwareState['currentName'] = TARGET_APPLICATION_SITE[$arraySoftwareState['currentApplication']]['name'];
+
+// When in debug mode it displays the software name and version and if git
+// is detected it will append the branch and short sha1 hash
+// else it will use the name defined in TARGET_APPLICATION_SITE
+if ($arraySoftwareState['debugMode']) {
+  $arraySoftwareState['currentName'] = SOFTWARE_NAME . ' Development - Version: ' . SOFTWARE_VERSION;
+  // Git stuff
+  if (file_exists('./.git/HEAD')) {
+    $_strGitHead = file_get_contents('./.git/HEAD');
+    $_strGitSHA1 = file_get_contents('./.git/' . substr($_strGitHead, 5, -1));
+    $_strGitBranch = substr($_strGitHead, 16, -1);
+    $arraySoftwareState['currentName'] = 
+      $arraySoftwareState['currentName'] . ' - ' .
+      'Branch: ' . $_strGitBranch . ' - ' .
+      'Commit: ' . substr($_strGitSHA1, 0, 7);
   }
-  else {
-    require_once($arrayModules['addonManifest']);
-    $addonManifest = new classAddonManifest();
-    foreach ($arrayResults as $_value) {
-      $arrayAddonMetadata = $addonManifest->funcGetManifest($_value);
-        if ($arrayAddonMetadata != null) {
-            $arrayFinalResults[] = $arrayAddonMetadata;
-            unset($arrayAddonMetadata);
+}
+
+// --------------------------------------------------------------------------------------------------------------------
+
+// Handle URIs
+switch ($arraySoftwareState['requestPath']) {
+  case URI_ROOT:
+    // Special Case: Interlink should go to Extensions instead of a front page
+    if ($arraySoftwareState['currentApplication'] == 'interlink') {
+      funcRedirect('/extensions/');
+    }
+
+    // Front Page
+    // Generate the frontpage from SITE content
+    $moduleGenerateContent->addonSite(
+      $arraySoftwareState['currentApplication'] . '-frontpage.xhtml', 'Explore Add-ons'
+    );
+    break;
+  case URI_SEARCH:
+    // Search Page
+    // Send the search terms to SQL
+    $searchManifest = $moduleReadManifest->getAddons('site-search', $arraySoftwareState['requestSearchTerms']);
+
+    // If no results generate a page indicating that
+    if (!$searchManifest) {
+      $moduleGenerateContent->addonSite('search', 'No search results');
+    }
+
+    // We have results so generate the page with them
+    $moduleGenerateContent->addonSite('search',
+      'Search results for "' . $arraySoftwareState['requestSearchTerms'] . '"',
+      $searchManifest
+    );
+    break;
+  case URI_EXTENSIONS:
+    // Extensions Category (Top Level)
+    // Find out if we should use Extension Subcategories or All Extensions
+    $arraySoftwareState['requestAllExtensions'] = funcUnifiedVariable('get', 'all');
+    $useExtensionSubcategories = funcCheckEnabledFeature('extensions-cat', true);
+
+    if ($useExtensionSubcategories && !$arraySoftwareState['requestAllExtensions']) {
+      // We are using Extension Subcategories so generate a page that lists all the subcategories
+      $moduleGenerateContent->addonSite('cat-extension-category',
+                                        'Extensions',
+                                        classReadManifest::EXTENSION_CATEGORY_SLUGS);
+    }
+
+    // We are doing an "All Extensions" Page
+    // Get all extensions from SQL
+    $categoryManifest = $moduleReadManifest->getAddons('site-all-extensions');
+
+    // If there are no extensions then 404
+    if (!$categoryManifest) {
+      $categoryManifest = [];
+    }
+
+    // Generate the "All Extensions" Page
+    $moduleGenerateContent->addonSite('cat-all-extensions',
+                                      'Extensions',
+                                      $categoryManifest,
+                                      classReadManifest::EXTENSION_CATEGORY_SLUGS);
+    break;
+  case URI_THEMES:
+    // Themes Category
+    // Check if Themes are enabled
+    funcCheckEnabledFeature('themes');
+
+    // Query SQL and get all themes
+    $categoryManifest = $moduleReadManifest->getAddons('site-addons-by-category', 'themes');
+
+    // If there are no themes then 404
+    if (!$categoryManifest) {
+      $categoryManifest = [];
+    }
+
+    // We have themes so generate the page
+    $moduleGenerateContent->addonSite('cat-themes', 'Themes', $categoryManifest);
+    break;
+  case URI_PERSONAS:
+    // Personas Category
+    // Check if Personas are enabled
+    funcCheckEnabledFeature('personas');
+
+    // Query SQL and get all personas
+    $categoryManifest = $modulePersona->getPersonas('site-all-personas');
+
+    // If there are no Personas then 404
+    if (!$categoryManifest) {
+      $categoryManifest = [];
+    }
+
+    // We have personas so generate the page
+    $moduleGenerateContent->addonSite('cat-personas', 'Personas', $categoryManifest);
+    break;
+  case URI_LANGPACKS:
+    // Language Packs Category
+    // See if LangPacks are enabled
+    funcCheckEnabledFeature('language-packs');
+
+    // Query SQL for langpacks
+    $categoryManifest = $moduleReadManifest->getAddons('site-addons-by-category', 'language-packs');
+
+    // If there are no langpacks then 404
+    if (!$categoryManifest) {
+      $categoryManifest = [];
+    }
+
+    // We have langpacks so generate the page
+    $moduleGenerateContent->addonSite('cat-language-packs', 'Language Packs', $categoryManifest);
+    break;
+  case URI_DICTIONARIES:
+    funcRedirect('https://addons.thunderbird.net/en-US/thunderbird/language-tools/');
+    break;
+  case URI_SEARCHPLUGINS:
+    // Search Engine Plugins Category
+    // See if Search Engine Plugins are enabled
+    funcCheckEnabledFeature('search-plugins');
+
+    // Get an array of hardcoded Search Engine Plugins from readManifest
+    $categoryManifest = $moduleReadManifest->getSearchPlugins();
+
+    // If for some reason there aren't any even though there is no error checking in the method, 404
+    if (!$categoryManifest) {
+      $categoryManifest = [];
+    }
+
+    // Generate the Search Engine Plugins category page
+    $moduleGenerateContent->addonSite('cat-search-plugins', 'Search Plugins', $categoryManifest);
+    break;
+  case URI_ADDON_PAGE:
+  case URI_ADDON_RELEASES:
+  case URI_ADDON_LICENSE:
+    // These have no content so send the client back to root
+    funcRedirect(URI_ROOT);
+    break;
+  default:
+    // Complex URIs need more complex conditional checking
+    // Extension Subcategories
+    if (startsWith($arraySoftwareState['requestPath'], URI_EXTENSIONS)) {
+      // Check if Extension Subcategories are enabled
+      funcCheckEnabledFeature('extensions-cat');
+
+      // Strip the path to get the slug
+      $strSlug = funcStripPath($arraySoftwareState['requestPath'], URI_EXTENSIONS);
+
+      // See if the slug exists in the category array
+      if (!array_key_exists($strSlug, classReadManifest::EXTENSION_CATEGORY_SLUGS)) {
+        funcSend404();
+      }
+
+      // Query SQL for extensions in this specific category
+      $categoryManifest = $moduleReadManifest->getAddons('site-addons-by-category', $strSlug);
+      
+      // If there are no extensions then 404
+      if (!$categoryManifest) {
+        funcSend404();
+      }
+
+      // We have extensions so generate the subcategory page
+      $moduleGenerateContent->addonSite('cat-extensions',
+                                        'Extensions: ' . classReadManifest::EXTENSION_CATEGORY_SLUGS[$strSlug],
+                                        $categoryManifest, classReadManifest::EXTENSION_CATEGORY_SLUGS);
+    }
+    // Add-on Page
+    elseif (startsWith($arraySoftwareState['requestPath'], URI_ADDON_PAGE)) {
+      // Strip the path to get the slug
+      $strSlug = funcStripPath($arraySoftwareState['requestPath'], URI_ADDON_PAGE);
+
+      // Query SQL for the add-on
+      $addonManifest = $moduleReadManifest->getAddon('by-slug', $strSlug);
+
+      // If there is no add-on, 404
+      if (!$addonManifest) {
+        funcSend404();
+      }
+
+      // Generate the Add-on Releases Page
+      $moduleGenerateContent->addonSite('addon-page', $addonManifest['name'], $addonManifest);
+    }
+    // Add-on Releases
+    elseif (startsWith($arraySoftwareState['requestPath'], URI_ADDON_RELEASES)) {
+      // Strip the path to get the slug
+      $strSlug = funcStripPath($arraySoftwareState['requestPath'], URI_ADDON_RELEASES);
+
+      // Query SQL for the add-on
+      $addonManifest = $moduleReadManifest->getAddon('by-slug', $strSlug);
+
+      // If there is no add-on, 404
+      if (!$addonManifest) {
+        funcSend404();
+      }
+
+      // Generate the Add-on Releases Page
+      $moduleGenerateContent->addonSite('addon-releases', $addonManifest['name'] . ' - Releases', $addonManifest);
+    }
+    // Add-on License
+    elseif (startsWith($arraySoftwareState['requestPath'], URI_ADDON_LICENSE)) {
+      // Strip the path to get the slug
+      $strSlug = funcStripPath($arraySoftwareState['requestPath'], URI_ADDON_LICENSE);
+
+      // Query SQL for the add-on
+      $addonManifest = $moduleReadManifest->getAddon('by-slug', $strSlug);
+
+      // If there is no add-on, 404
+      if (!$addonManifest) {
+        funcSend404();
+      }
+
+      // If there is a licenseURL then redirect to it
+      if ($addonManifest['licenseURL']) {
+        funcRedirect($addonManifest['licenseURL']);
+      }
+      
+      // If the license is public domain, copyright, or custom then we want to generate a page for it
+      if ($addonManifest['license'] == 'pd' || $addonManifest['license'] == 'copyright' ||
+          $addonManifest['license'] == 'custom') {
+        // If we have licenseText we want to convert newlines to xhtml line breaks
+        if ($addonManifest['licenseText']) {
+          $addonManifest['licenseText'] = nl2br($addonManifest['licenseText'], true);
         }
+
+        // Smarty will handle displaying content for these license types
+        $moduleGenerateContent->addonSite('addon-license', $addonManifest['name'] . ' - License', $addonManifest);
+      }
+
+      // The license is assumed to be an OSI license so redirect there
+      funcRedirect('https://opensource.org/licenses/' . $addonManifest['license']);
     }
 
-    $arrayPage = array(
-      'title' => 'Search Results for "' . $strSearchTearms . '"',
-      'contentType' => 'search',
-      'contentTemplate' => $strSkinBasePath . 'category-addons.tpl',
-      'contentData' => $arrayFinalResults
-    );
-  }
-  
-  funcGeneratePage($arrayPage);
-}
-elseif ($strRequestPath == '/incompatible/') {
-  funcRedirect('https://forum.palemoon.org/viewtopic.php?f=1&t=19727');
-}
-else {
-    if (array_key_exists($strRequestPath, $arrayStaticPages)) {
-        funcGeneratePage($arrayStaticPages[$strRequestPath]);
-    }
-    else {
-        funcSendHeader('404');
-    }
+    // There are no matches so 404
+    funcSend404(); 
 }
 
-// ============================================================================
+// ====================================================================================================================
+
 ?>

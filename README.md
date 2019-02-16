@@ -1,24 +1,25 @@
 Project Phoebus
 ===
-A cascading conditional include based PHP software written to serve the needs of the Pale Moon Add-ons Site
+A Cascading Conditional Include Procedural/Object Oriented based PHP software solution written to serve the needs of various Unified XUL Platform applications including Pale Moon and Basilisk.
 
 Licensing
 ===
 Phoebus Operational Code
 ---
-All operational code that is not contained within `lib` is licensed under the *Mozilla Public License Version 2.0*
+All operational code that is not contained within `libraries/` is licensed under the *Mozilla Public License Version 2.0*
 
 Skins
 ---
-Materials under `skin` including templates, html, css, and graphics are copyright and/or trademark of their respective owners.
+Materials under `components/*/skin/` including templates, html, css, and graphics are copyright and/or trademark of their respective owners.
 
 Which in the case of Pale Moon and Basilisk assets would be Moonchild Productions.
 
-The `skin/default` directory contents is exempt and should be considered under the *MPL 2.0*
+The `components/*/skin/default/` directory contents is exempt and should be considered under the *MPL 2.0* unless otherwise stated above.
 
-Lib
+Libraries (3rd Party)
 ---
-The code contained in `lib` is vendor'd from multiple sources. We will try to keep this list updated.
+The code contained in `libraries/` is vendor'd from multiple sources. We will try to keep this list updated.
 
+- Rdf_parser - *GNU General Public License 2.0*
+- SafeMySQL - *Apache License 2.0*
 - Smarty - *GNU Lesser General Public License 3.0*
-- RDFComponent/Rdf_parser - *MPL 1.1/GPL 2.0/LGPL 2.1 Tri-License*

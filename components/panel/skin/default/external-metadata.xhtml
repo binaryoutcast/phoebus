@@ -1,0 +1,106 @@
+<script>
+  function enableUpload(aElement) {
+    var elm = document.getElementById(aElement);
+    elm.setAttribute('form', 'addon-metadata');
+    elm.setAttribute('type', 'file');
+    elm.setAttribute('accept', 'image/png');
+    elm.removeAttribute('onclick');
+    elm.removeAttribute('value');
+  }
+</script>
+
+<h2>{$PAGE_TITLE}</h2>
+{assign "SUBMENU_STYLE" "vertical-align: middle; margin-left: 2px; margin-right: 2px"}
+{if $USER_LEVEL >= 3}
+<p>
+  <a href="/panel/administration/?task=list&what=extensions"><img src="{$BASE_PATH}../shared/plugin.png" style="{$SUBMENU_STYLE}"/>Extensions</a> 
+  <a href="/panel/administration/?task=list&what=externals"><img src="{$BASE_PATH}../shared/plugin_link.png" style="{$SUBMENU_STYLE}" />Externals</a> 
+  <a href="/panel/administration/?task=list&what=themes"><img src="{$BASE_PATH}../shared/palette.png" style="{$SUBMENU_STYLE}" />Themes</a> 
+  {if $USER_LEVEL >= 4}
+  <a href="/panel/administration/?task=list&what=langpacks"><img src="{$BASE_PATH}../shared/world.png" style="{$SUBMENU_STYLE}" />Language Packs</a>
+  {/if}
+  <a href="/panel/administration/?task=list&what=users"><img src="{$BASE_PATH}../shared/user.png" style="{$SUBMENU_STYLE}" />Users</a>
+</p>
+{/if}
+
+<table class="addonTable single-row" metadata>
+  <tr>
+    <th>Property</th>
+    <th>Value</th>
+  </tr>
+  <tr>
+    <td>Status</td>
+    <td><input form="addon-metadata" name="active" type="checkbox" value="1" {if $PAGE_DATA.active}checked{/if} /> Active</td>
+  </tr>
+  <tr>
+    <td>ID</td>
+    <td>{$PAGE_DATA.id}</td>
+  </tr>
+  <tr>
+    <td>Slug</td>
+    <td>{$PAGE_DATA.slug}</td>
+  </tr>
+  <tr>
+    <td>Name</td>
+    <td><input form="addon-metadata" name="name" type="text" size="80" value="{$PAGE_DATA.name}" /></td>
+  </tr>
+  <tr>
+    <td>Description</td>
+    <td><input form="addon-metadata" name="description" type="text" size="80" value="{$PAGE_DATA.description}" /></td>
+  </tr>
+  <tr>
+    <td>External URL</a></td>
+    <td><input form="addon-metadata" name="url" type="url" size="80" value="{$PAGE_DATA.url}" /></td>
+  </tr>
+  <tr>
+    <td>Search Tags</td>
+    <td>
+      <input form="addon-metadata" name="tags" type="text" size="80" value="{$PAGE_DATA.tags}" /> 
+      <em>(Up to 10 max)</em>
+    </td>
+  </tr>
+  <tr>
+    <td>Category</td>
+    <td>
+      <select form="addon-metadata" name="category" style="width: 175px;">
+        {assign "FOUND_CATEGORY" 0}
+        {foreach $EXTRA_DATA.categories as $key => $value}
+          {if $PAGE_DATA.category == $key}
+            <option selected="selected" value="{$key}">{$value}</option>
+            {assign "FOUND_CATEGORY" 1}
+            {continue}
+          {/if}
+           <option value="{$key}">{$value}</option>
+        {/foreach}
+        <option value="themes" {if $PAGE_DATA.category == 'themes'}{assign "FOUND_CATEGORY" 1}selected="selected"{/if}>Themes</option>
+        <option value="unlisted" {if $FOUND_CATEGORY == 0}selected="selected"{/if}>Unlisted</option>
+      </select> 
+    </td>
+  </tr>
+  <tr>
+    <td>Icon</td>
+    <td><input type="button" id="iconUpload" name="iconUpload" value="{if $PAGE_DATA.hasIcon}Change{else}Add{/if}&hellip;" onclick="enableUpload('iconUpload');"></td>
+  </tr>
+  <tr>
+    <td>Preview</td>
+    <td><input type="button" id="previewUpload" name="previewUpload" value="{if $PAGE_DATA.hasPreview}Change{else}Add{/if}&hellip;" onclick="enableUpload('previewUpload');"></td>
+  </tr>
+  <tr>
+    <td>Applications</td>
+    <td>
+      <input form="addon-metadata" name="palemoon" type="checkbox" value="1" {if $PAGE_DATA.palemoon}checked{/if} /> Pale Moon 
+      <input form="addon-metadata" name="basilisk" type="checkbox" value="1" {if $PAGE_DATA.basilisk}checked{/if} /> Basilisk 
+      <input form="addon-metadata" name="ambassador" type="checkbox" value="1" {if $PAGE_DATA.ambassador}checked{/if} /> Ambassador 
+      <input form="addon-metadata" name="borealis" type="checkbox" value="1" {if $PAGE_DATA.borealis}checked{/if} /> Borealis Navigator 
+      <input form="addon-metadata" name="interlink" type="checkbox" value="1" {if $PAGE_DATA.interlink}checked{/if} /> Interlink Mail &amp; News
+    </td>
+  </tr>
+</table>
+
+<br />
+
+<form id="addon-metadata" accept-charset="UTF-8" autocomplete="off" method="POST" enctype="multipart/form-data">
+  <input type="hidden" name="slug" value="{$PAGE_DATA.slug}" />
+  <input type="hidden" name="reviewed" value="1" />
+  <button type="submit" value="Submit" style="float: right;">Update</button><br />
+</form>

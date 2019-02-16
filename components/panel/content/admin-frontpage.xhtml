@@ -1,0 +1,13 @@
+<h2>{$PAGE_TITLE}</h2>
+<p>
+  <a href="/panel/administration/?task=list&what=extensions"><img src="{$BASE_PATH}../shared/plugin.png" style="vertical-align: middle; margin-left: 2px; margin-right: 2px"/>Extensions</a> 
+  <a href="/panel/administration/?task=list&what=externals"><img src="{$BASE_PATH}../shared/plugin_link.png" style="vertical-align: middle; margin-left: 4px; margin-right: 2px" />Externals</a> 
+  <a href="/panel/administration/?task=list&what=themes"><img src="{$BASE_PATH}../shared/palette.png" style="vertical-align: middle; margin-left: 4px; margin-right: 2px" />Themes</a> 
+  {if $USER_LEVEL >= 4}
+  <a href="/panel/administration/?task=list&what=langpacks"><img src="{$BASE_PATH}../shared/world.png" style="vertical-align: middle; margin-left: 4px; margin-right: 2px" />Language Packs</a>
+  {/if}
+  <a href="/panel/administration/?task=list&what=users"><img src="{$BASE_PATH}../shared/user.png" style="vertical-align: middle; margin-left: 4px; margin-right: 2px" />Users</a>
+</p>
+
+<h2>Important Information</h2>
+<p>Don't screw this up...</p>

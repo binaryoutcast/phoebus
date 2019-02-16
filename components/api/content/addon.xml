@@ -1,0 +1,26 @@
+  <addon>
+    <name>{%ADDON_NAME}</name>
+    <type id="{%ADDON_TYPE}" /> <!-- See: http://xref.palemoon.org/uxp-trunk/source/toolkit/mozapps/extensions/internal/AddonRepository.jsm#1087 -->
+    <guid>{%ADDON_ID}</guid>
+    <version>{%ADDON_VERSION}</version>
+    <homepage>{%ADDON_HOMEPAGEURL}</homepage> <!-- Optional: falls back to <learnmore /> -->
+    <learnmore>{%ADDON_URL}</learnmore>
+    <authors>
+      <author>
+        <name>{%ADDON_CREATOR}</name>
+        <link>{%ADDON_CREATORURL}</link> <!-- We do not have specific developer pages yet -->
+      </author>
+    </authors>
+    <summary><![CDATA[{%ADDON_DESCRIPTION}]]></summary>
+    <icon size="64">{%ADDON_ICON}</icon>
+    <icon size="32">{%ADDON_ICON}</icon>
+    <compatible_applications>
+      <application>
+        <appID>{%APPLICATION_ID}</appID>
+        <min_version>{%ADDON_MINVERSION}</min_version>
+        <max_version>{%ADDON_MAXVERSION}</max_version>
+      </application>
+    </compatible_applications>
+    <last_updated epoch="{%ADDON_EPOCH}" />
+    <install><![CDATA[{%ADDON_XPI}]]></install>
+  </addon>
