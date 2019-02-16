@@ -1,11 +1,7 @@
-<img src="{$PAGE_DATA.icon}" style="height: 48px; width: 48px; margin-top: 22px;" class="alignright">
-<h1>
-  {$PAGE_DATA.name}
-</h1>
+<img src="{$PAGE_DATA.icon}" style="height: 48px; width: 48px; margin-top: 12px;" class="alignright">
+<h1>{$PAGE_DATA.name}</h1>
 
-<p style="margin-top: -8px">
-  By: {$PAGE_DATA.creator}
-</p>
+<p style="margin-top: 0px;">By: {$PAGE_DATA.creator}</p>
 
 {if $PAGE_DATA.homepageURL != null || $PAGE_DATA.supportURL != null || $PAGE_DATA.supportEmail != null || $PAGE_DATA.repository != null || $PAGE_DATA.xpinstall|@count > 1}
     <h3>Resources</h3>
@@ -67,44 +63,36 @@
   {/if}
 
 
-<div class="category-addon" style="margin-bottom: 16px">
-  <div class="alignright" style="margin-top: 8px;">
-    <a class="button" style="margin-top: 8px; margin-right: 0px;" href="/?component=download&id={$PAGE_DATA.id}&version={$PAGE_DATA['xpinstall'][$PAGE_DATA['releaseXPI']]['version']}">
+<div class="category-addon" style="margin-bottom: 0px">
+  <div class="alignright" style="margin-top: 0px;">
+    <a class="button"
+       style="margin-top: 8px; margin-right: 0px;"
+       href="/?component=download&id={$PAGE_DATA.id}&version={$PAGE_DATA['xpinstall'][$PAGE_DATA['releaseXPI']]['version']}"
+       title="Compatible with Mozilla Version Equivalent {$PAGE_DATA['xpinstall'][$PAGE_DATA['releaseXPI']]['targetApplication'][$APPLICATION_ID]['minVersion']} to {$PAGE_DATA['xpinstall'][$PAGE_DATA['releaseXPI']]['targetApplication'][$APPLICATION_ID]['maxVersion']}">
     <span>Install Now</span>
   </a>
   </div>
   <p style="margin-top: 8px;">
     <strong>Version {$PAGE_DATA['xpinstall'][$PAGE_DATA['releaseXPI']]['version']}</strong><br />
-    <small>Released: {$PAGE_DATA['xpinstall'][$PAGE_DATA['releaseXPI']]['date']}<br />
-      Works with Basilisk {$PAGE_DATA['xpinstall'][$PAGE_DATA['releaseXPI']]['targetApplication'][$APPLICATION_ID]['minVersion']} to 
-      {if $PAGE_DATA['xpinstall'][$PAGE_DATA['releaseXPI']]['targetApplication'][$APPLICATION_ID]['maxVersion'] == '*'}
-        Unknown
-      {else}
-        {$PAGE_DATA['xpinstall'][$PAGE_DATA['releaseXPI']]['targetApplication'][$APPLICATION_ID]['maxVersion']}
-      {/if}
-    </small>
+    <small>Released: {$PAGE_DATA['xpinstall'][$PAGE_DATA['releaseXPI']]['date']}</small>
   </p>
 </div>
 {/if}
 
 {if $PAGE_TYPE == 'addon-releases'}
   {foreach $PAGE_DATA.xpinstall as $key}
-    <div class="category-addon" style="margin-bottom: 16px">
-      <div class="alignright" style="margin-top: 8px;">
-        <a class="button" style="margin-top: 8px; margin-right: 0px;" href="/?component=download&id={$PAGE_DATA.id}&version={$key.version}">
+    <div class="category-addon" style="margin-bottom: 0px">
+      <div class="alignright" style="margin-top: 0px;">
+        <a class="button"
+           style="margin-top: 8px; margin-right: 0px;"
+           href="/?component=download&id={$PAGE_DATA.id}&version={$key.version}"
+           title="Compatible with Mozilla Version Equivalent {$key['targetApplication'][$APPLICATION_ID]['minVersion']} to {$key['targetApplication'][$APPLICATION_ID]['maxVersion']}">
         <span>Install Now</span>
       </a>
       </div>
       <p style="margin-top: 8px;">
         <strong>Version {$key.version}</strong><br />
-        <small>Released: {$key.date}<br />
-          Works with Basilisk {$key['targetApplication'][$APPLICATION_ID]['minVersion']} to
-          {if $key['targetApplication'][$APPLICATION_ID]['maxVersion'] == '*'}
-            Unknown
-          {else}
-            {$key['targetApplication'][$APPLICATION_ID]['maxVersion']}
-          {/if}
-        </small>
+        <small>Released: {$key.date}</small>
       </p>
     </div>
   {/foreach}
