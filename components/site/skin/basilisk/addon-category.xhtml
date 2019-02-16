@@ -1,0 +1,58 @@
+<h1>{$PAGE_TITLE}</h1>
+
+{if $PAGE_TYPE == 'cat-all-extensions'}
+<p>
+  Extensions are small add-ons that add new functionality to Basilisk, from a simple toolbar button to a completely new feature. They allow you to customize the browser to fit your own needs and preferences, while letting us keep the core itself light and lean.
+</p>
+{elseif $PAGE_TYPE == 'cat-themes'}
+<p>
+  Themes allow you to change the look and feel of the user interface and personalize it to your tastes. A theme can simply change the colors of the UI or it can change every aspect of its appearance.
+</p>
+{elseif $PAGE_TYPE == 'search'}
+<p>
+  <form id="addonSearchForm" method="get" action="/search/">
+    <input
+      type="text"
+      class="addonSearchInput"
+      name="terms"
+{if $SEARCH_TERMS}
+      value="{$SEARCH_TERMS}"
+{/if}
+      placeholder="Find add-ons..."
+      size="32"
+      maxlength="48"
+      style="margin-left: 20px;"
+    >
+    <input type="submit" value="Search" class="addonSearchButton">
+  </form>
+</p>
+{/if}
+
+<div>
+  {foreach $PAGE_DATA as $key}
+  {if $key.type == 'external'}
+    <a href="{$key.url}"
+       target="_blank"
+       title="This add-on is hosted independently"
+       class="fake-table-row category-addon real-externals">
+  {else}
+    <a href="{$key.url}" class="fake-table-row category-addon hosted-extensions">
+  {/if}
+    <img src="{$key.icon}" class="category-addon-icon alignleft" width="32px" height="32px" />
+
+  {if $PAGE_TYPE == 'cat-themes'}
+      <div class="category-theme-preview alignright" style="background-image: url('{$key.preview}');"> </div>
+  {/if}
+      
+      <div class="category-addon-content"><strong>{$key.name}</strong>
+  {if $key.type == 'external'}
+        <small>[External]</small>
+  {/if}
+        <br />
+        <small>{if $PAGE_TYPE == 'cat-themes'}{$key.description|truncate:190:"&hellip;"}{else}{$key.description}{/if}</small>
+      </div>
+    </a>
+  {foreachelse}
+    {if $PAGE_TYPE != 'search'}<p><em>There are no available add-ons in this category.</em>{/if}
+  {/foreach}
+</div>

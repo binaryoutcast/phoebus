@@ -1,0 +1,115 @@
+<script>
+  function enableChangePassword() {
+    var elm = document.getElementById('account-password');
+    elm.setAttribute('form', 'account-metadata');
+    elm.setAttribute('type', 'password');
+    elm.setAttribute('size', '30');
+    elm.setAttribute('placeholder', 'New Password');
+    elm.setAttribute('minlength', '8');
+    elm.setAttribute('maxlength', '128');
+    elm.setAttribute('autocomplete', 'off');
+    elm.setAttribute('required', '');
+    elm.removeAttribute('onclick');
+    elm.removeAttribute('value');
+  }
+</script>
+
+<h2>{$PAGE_TITLE}</h2>
+{if $USER_LEVEL >= 3}
+{assign "SUBMENU_STYLE" "vertical-align: middle; margin-left: 2px; margin-right: 2px"}
+<p>
+  <a href="/panel/administration/?task=list&what=extensions"><img src="{$BASE_PATH}../shared/plugin.png" style="{$SUBMENU_STYLE}"/>Extensions</a> 
+  <a href="/panel/administration/?task=list&what=externals"><img src="{$BASE_PATH}../shared/plugin_link.png" style="{$SUBMENU_STYLE}" />Externals</a> 
+  <a href="/panel/administration/?task=list&what=themes"><img src="{$BASE_PATH}../shared/palette.png" style="{$SUBMENU_STYLE}" />Themes</a> 
+  {if $USER_LEVEL >= 4}
+  <a href="/panel/administration/?task=list&what=langpacks"><img src="{$BASE_PATH}../shared/world.png" style="{$SUBMENU_STYLE}" />Language Packs</a>
+  {/if}
+  <a href="/panel/administration/?task=list&what=users"><img src="{$BASE_PATH}../shared/user.png" style="{$SUBMENU_STYLE}" />Users</a>
+</p>
+{else}
+  {if !$PAGE_DATA.email || !$PAGE_DATA.displayName}
+    <p class="pulseText" style="text-align: center;"><strong>You must enter a valid e-mail address and display name before you may fully use the Phoebus Panel!</strong></p>
+  {/if}
+{/if}
+<table class="addonTable single-row" metadata>
+  <tr>
+    <th>Property</th>
+    <th>Value</th>
+  </tr>
+  <tr>
+    <td>Status</td>
+    <td>
+      {if $USER_LEVEL >= 3}
+      <input form="account-metadata" name="active" type="checkbox" value="1" {if $PAGE_DATA.active}checked{/if} />
+      {else}
+      <img src="{$BASE_PATH}../shared/{if $PAGE_DATA.active}accept{else}delete{/if}.png" class="aligntop" />
+      {/if}
+      Active 
+      {if $PAGE_DATA.extraData.verification} (<strong class="pulseText">Unverified</strong>) 
+      {if $USER_LEVEL >= 3}<em>Editing an account with pending verification will clear the pending verification state and activate this account if inactive</em>{/if}{/if}
+    </td>
+  </tr>
+  <tr>
+    <td>Level</td>
+    <td>
+      {if $USER_LEVEL >= 3}
+        <select form="account-metadata" name="level" style="width: 202px;">
+          <option {if $PAGE_DATA.level == 1}selected="selected" {/if}value="1">1 - Add-on Developer</option>
+          <option {if $PAGE_DATA.level == 2}selected="selected" {/if}value="2">2 - Advanced/Legacy Developer</option>
+          <option {if $PAGE_DATA.level == 3}selected="selected" {/if}{if $USER_LEVEL < 4}disabled {/if}value="3">3 - Add-ons Team Member</option>
+          {if $USER_LEVEL >= 4}
+          <option {if $PAGE_DATA.level == 4}selected="selected" {/if}{if $USER_LEVEL < 5}disabled {/if}value="4">4 - Add-ons Team Leader</option>
+          {/if}
+          {if $USER_LEVEL >= 5}
+          <option {if $PAGE_DATA.level == 5}selected="selected" {/if}value="5">5 - Phoebus Administrator</option>
+          {/if}
+        </select>
+      {else}
+        {if $PAGE_DATA.level == 1}
+          1 - Add-on Developer 
+        {elseif $PAGE_DATA.level == 2}
+          2 - Advanced/Legacy Add-on Developer
+        {elseif $PAGE_DATA.level == 3}
+          3 - Add-ons Team Member
+        {elseif $PAGE_DATA.level == 4}
+          4 - Add-ons Team Leader
+        {elseif $PAGE_DATA.level == 5}
+          5 - Phoebus Administrator
+        {else}
+          Unknown
+        {/if}
+      {/if}
+    </td>
+  </tr>
+  <tr>
+    <td>Registered</td>
+    <td>{$PAGE_DATA.extraData.regDate}</td>
+  </tr>
+  <tr>
+    <td>Username</td>
+    <td>{$PAGE_DATA.username}</td>
+  </tr>
+  <tr>
+    <td>Display Name</td>
+    <td><input form="account-metadata" name="displayName" type="text" size="30" value="{$PAGE_DATA.displayName}" {if $USER_LEVEL < 3}required{/if} /> {if $USER_LEVEL < 3}<em>* Required</em>{/if}</td>
+  </tr>
+  <tr>
+    <td>E-mail Address</td>
+    <td>
+      <input form="account-metadata" name="email" type="email" size="30" value="{$PAGE_DATA.email}" {if $USER_LEVEL < 3}required{/if} /> 
+      {if $USER_LEVEL < 3}<em>* Required - You will be required to re-verify your account</em>{/if}
+    </td>
+  </tr>
+  <tr>
+    <td>Password</td>
+    <td><input id="account-password" name="password" type="button" value="Change&hellip;" onclick="enableChangePassword();" />
+    </td>
+  </tr>
+</table>
+
+<br />
+
+<form id="account-metadata" accept-charset="UTF-8" autocomplete="off" method="POST" >
+  <input type="hidden" name="username" value="{$PAGE_DATA.username}" />
+  <button type="submit" value="Submit" style="float: right;">Update</button><br />
+</form>

@@ -1,0 +1,30 @@
+<script>
+  function setTheme(node) {
+    var event = document.createEvent("Events");
+    event.initEvent("InstallBrowserTheme", true, false);
+    node.dispatchEvent(event);
+  }
+</script>
+
+<h1>{$PAGE_TITLE}</h1>
+
+<p>
+  Personas are lightweight themes which apply a background image and minimal styling to the application.
+</p>
+
+<div>
+  {foreach $PAGE_DATA as $key}
+    <a href="" class="fake-table-row category-addon hosted-extensions" onclick="setTheme(this); return false;" data-browsertheme='{$key|json_encode:320 nofilter}'>
+      <img src="{$key.iconURL|substr:5}" class="category-addon-icon alignleft" width="32px" height="32px" />
+      <div class="category-theme-preview alignright" style="background-image: url('{$key.previewURL|substr:5}');"> </div>     
+      <div class="category-addon-content">
+        <strong>{$key.name}</strong><br />
+        <small>{$key.description}</small>
+      </div>
+    </a>
+  {foreachelse}
+    <p><em>There are no available add-ons in this category.</em></p>
+  {/foreach}
+</div>
+
+{$key = null}
