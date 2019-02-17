@@ -147,7 +147,6 @@ class classReadManifest {
       case 'panel-by-slug':
         $returnInactive = true;
         $returnUnreviewed = true;
-        $xpInstallFixup = true;
         $query = "SELECT *
                   FROM `addon`
                   JOIN `client` ON addon.id = client.addonID
@@ -163,7 +162,11 @@ class classReadManifest {
       return null;
     }
 
-    $addonManifest = $this->processManifest($queryResult, $returnInactive, $returnUnreviewed, $processContent);
+    $addonManifest = $this->processManifest($queryResult,
+                                            $returnInactive,
+                                            $returnUnreviewed,
+                                            $processContent,
+                                            $xpInstallFixup);
     
     if (!$addonManifest) {
       return null;
@@ -356,10 +359,13 @@ class classReadManifest {
       return null;
     }
 
+    // In the PANEL we join the client table but we only need it for externals
     if ($GLOBALS['arraySoftwareState']['requestComponent'] == 'panel' && $addonManifest['type'] != 'external') {
       foreach (TARGET_APPLICATION_ID as $_key => $_value) {
         unset($addonManifest[$_key]);
       }
+
+      unset($addonManifest['addonID']);
     }
 
     // Actions on xpinstall key
