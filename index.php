@@ -20,6 +20,7 @@ const SOFTWARE_VERSION    = '2.1.0a1';
 const DATASTORE_RELPATH   = '/datastore/';
 const OBJ_RELPATH         = '/.obj/';
 const COMPONENTS_RELPATH  = '/components/';
+const DATABASES_RELPATH   = '/databases/';
 const MODULES_RELPATH     = '/modules/';
 const LIB_RELPATH         = '/libraries/';
 const NEW_LINE            = "\n";
@@ -45,6 +46,13 @@ const MODULES = array(
   'readManifest'    => ROOT_PATH . MODULES_RELPATH . 'classReadManifest.php',
   'writeManifest'   => ROOT_PATH . MODULES_RELPATH . 'classWriteManifest.php',
   'vc'              => ROOT_PATH . MODULES_RELPATH . 'nsIVersionComparator.php',
+);
+
+// Define databases
+const DATABASES = array(
+  'amoAddonIDs'     => ROOT_PATH . DATABASES_RELPATH . 'amoAddonIDs.php',
+  'emailBlacklist'  => ROOT_PATH . DATABASES_RELPATH . 'emailBlacklist.php',
+  'searchPlugins'   => ROOT_PATH . DATABASES_RELPATH . 'searchPlugins.php',
 );
 
 // Define libraries

@@ -105,6 +105,7 @@ switch ($arraySoftwareState['requestPath']) {
   case URI_SEARCH:
     // Search Page
     // Send the search terms to SQL
+    $arraySoftwareState['requestSearchTerms'] = str_replace('*', '', $arraySoftwareState['requestSearchTerms']);
     $searchManifest = $moduleReadManifest->getAddons('site-search', $arraySoftwareState['requestSearchTerms']);
 
     // If no results generate a page indicating that

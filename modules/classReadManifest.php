@@ -12,6 +12,7 @@ class classReadManifest {
   // ------------------------------------------------------------------------------------------------------------------
 
   // The current category slugs
+  // There is also themes and language-packs in addition to the extension categories
   const EXTENSION_CATEGORY_SLUGS = array(
     'alerts-and-updates' => 'Alerts &amp; Updates',
     'appearance' => 'Appearance',
@@ -25,45 +26,6 @@ class classReadManifest {
     'web-development' => 'Web Development',
     'other' => 'Other'
   );
-
-  // ------------------------------------------------------------------------------------------------------------------
-
-  const SEARCH_PLUGINS_DB = array(
-      'search-100' => 'google.xml',
-      'search-101' => 'youtube.xml',
-      'search-102' => 'google-play.xml',
-      'search-103' => 'ask.xml',
-      'search-104' => 'merriam-webster.xml',
-      'search-105' => 'facebook.xml',
-      'search-106' => 'abbreviations-com.xml',
-      'search-107' => 'accuweather.xml',
-      'search-108' => 'amazon-com.xml',
-      'search-109' => 'amazon-co-uk.xml',
-      'search-110' => 'baidu.xml',
-      'search-111' => 'dictionary-com.xml',
-      'search-112' => 'dogpile.xml',
-      'search-113' => 'ebay.xml',
-      'search-114' => 'european-search-engine.xml',
-      'search-115' => 'imdb.xml',
-      'search-116' => 'imgur.xml',
-      'search-117' => 'ixquick.xml',
-      'search-118' => 'openstreetmap.xml',
-      'search-119' => 'pale-moon-add-ons-site.xml',
-      'search-120' => 'pale-moon-forum.xml',
-      'search-121' => 'pcnet.xml',
-      'search-122' => 'qwant.xml',
-      'search-123' => 'reference-com.xml',
-      'search-124' => 'searx.xml',
-      'search-125' => 'startpage.xml',
-      'search-126' => 'the-online-slang-dictionary.xml',
-      'search-127' => 'the-weather-channel.xml',
-      'search-128' => 'tumblr.xml',
-      'search-129' => 'urban-dictionary.xml',
-      'search-130' => 'webopedia.xml',
-      'search-131' => 'wiktionary.xml',
-      'search-132' => 'yandex.xml',
-    //'search-133' => 'pale-moon-add-ons-google.xml'
-    );
 
   // ------------------------------------------------------------------------------------------------------------------
 
@@ -304,7 +266,7 @@ class classReadManifest {
     $datastorePath = ROOT_PATH . DATASTORE_RELPATH . '/searchplugins/';
     $arraySearchPlugins = array();
 
-    $searchPluginsDB = self::SEARCH_PLUGINS_DB;
+    require_once(DATABASES['searchPlugins']);
 
     asort($searchPluginsDB, SORT_NATURAL);
 

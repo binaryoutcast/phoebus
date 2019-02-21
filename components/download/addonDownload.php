@@ -109,27 +109,31 @@ if ($strRequestAddonID == null) {
 }
 
 // Search for add-ons in our databases
-// Search Plugins
-if (array_key_exists($strRequestAddonID, classReadManifest::SEARCH_PLUGINS_DB)) {
-  funcDownloadSearchPlugin(classReadManifest::SEARCH_PLUGINS_DB[$strRequestAddonID], $boolRequestBinaryStream);
+if ($boolRequestPanel) {
+  $addonManifest = $moduleReadManifest->getAddon('panel-by-id', $strRequestAddonID);
+  $boolRequestBinaryStream = true;
 }
 else {
-  if ($boolRequestPanel) {
-    $addonManifest = $moduleReadManifest->getAddon('panel-by-id', $strRequestAddonID);
-    $boolRequestBinaryStream = true;
+  $addonManifest = $moduleReadManifest->getAddon('by-id', $strRequestAddonID);
+}
+
+if ($addonManifest != null) {
+  $addonManifest['release'] = $addonManifest['releaseXPI'];
+  funcDownloadXPI($addonManifest, $strRequestAddonVersion, $boolRequestBinaryStream);
+}
+else {  
+  // Search Plugins
+  require_once(DATABASES['searchPlugins']);
+  if (array_key_exists($strRequestAddonID, $searchPluginsDB)) {
+    funcDownloadSearchPlugin($searchPluginsDB[$strRequestAddonID], $boolRequestBinaryStream);
   }
   else {
-    $addonManifest = $moduleReadManifest->getAddon('by-id', $strRequestAddonID);
-  }
-
-  if ($addonManifest != null) {
-    $addonManifest['release'] = $addonManifest['releaseXPI'];
-    funcDownloadXPI($addonManifest, $strRequestAddonVersion, $boolRequestBinaryStream);
-  }
-  else {  
     funcError('Add-on could not be found in our database');
   }
 }
+
+
+
 
 // ============================================================================
 ?>
