@@ -50,7 +50,6 @@ const MODULES = array(
 
 // Define databases
 const DATABASES = array(
-  'amoAddonIDs'     => ROOT_PATH . DATABASES_RELPATH . 'amoAddonIDs.php',
   'emailBlacklist'  => ROOT_PATH . DATABASES_RELPATH . 'emailBlacklist.php',
   'searchPlugins'   => ROOT_PATH . DATABASES_RELPATH . 'searchPlugins.php',
 );
