@@ -70,6 +70,9 @@ class classDatabase {
       case 'rows':
         $result = $this->libSafeMySQL->getAll(...$aExtraArgs);
         break;
+      case 'col':
+        $result = $this->libSafeMySQL->getCol(...$aExtraArgs);
+        break;
       case 'normal':
         $result = $this->libSafeMySQL->query(...$aExtraArgs);
         break;

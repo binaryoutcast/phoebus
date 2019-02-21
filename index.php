@@ -16,10 +16,11 @@ define('ROOT_PATH', $_SERVER['DOCUMENT_ROOT']);
 
 // Define basic constants for the software
 const SOFTWARE_NAME       = 'Phoebus';
-const SOFTWARE_VERSION    = '2.0.0';
+const SOFTWARE_VERSION    = '2.0.1';
 const DATASTORE_RELPATH   = '/datastore/';
 const OBJ_RELPATH         = '/.obj/';
 const COMPONENTS_RELPATH  = '/components/';
+const DATABASES_RELPATH   = '/databases/';
 const MODULES_RELPATH     = '/modules/';
 const LIB_RELPATH         = '/libraries/';
 const NEW_LINE            = "\n";
@@ -45,6 +46,12 @@ const MODULES = array(
   'readManifest'    => ROOT_PATH . MODULES_RELPATH . 'classReadManifest.php',
   'writeManifest'   => ROOT_PATH . MODULES_RELPATH . 'classWriteManifest.php',
   'vc'              => ROOT_PATH . MODULES_RELPATH . 'nsIVersionComparator.php',
+);
+
+// Define databases
+const DATABASES = array(
+  'emailBlacklist'  => ROOT_PATH . DATABASES_RELPATH . 'emailBlacklist.php',
+  'searchPlugins'   => ROOT_PATH . DATABASES_RELPATH . 'searchPlugins.php',
 );
 
 // Define libraries

@@ -8,4 +8,11 @@
 <p>On the banner at the top right you can select <a href="/panel/addons/">Your Add-ons</a> to manage your extensions and themes. Additionally, you can select <a href="/panel/account/">Your Account</a> to alter your account settings such as your display name and password.</p>
 
 <h2>Important Information</h2>
-<p><em>None at this time</em></p>
+
+<h4>Firefox and Thunderbird ID em:targetApplication blocks in Pale Moon Extensions</h4>
+<p>Many Pale Moon Extensions still retain their Firefox and Thunderbird em:targetApplication entries from the fantastic forking efforts. However, now that Basilisk and Interlink exist and Phoebus is multi-application aware, this is a problem because Basilisk uses Firefox's ID and Interlink uses Thunderbird's and will display any add-on that claims support in their install manifest file.</p>
+
+<p>Thus, we ask you to re-evaluate your extensions for Basilisk and Interlink compatiblity and if support is not desired to remove the relevant em:targetApplication blocks from the install manifest as soon as possible.</p>
+
+<p>This will help to avoid unwanted issue and support requests from those, understandably, trying to run your extensions in Basilisk or Interlink.</p>
+  

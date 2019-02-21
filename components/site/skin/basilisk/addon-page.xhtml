@@ -23,6 +23,7 @@
       {/if}
       {if $PAGE_DATA.repository != null}
         <a href="{$PAGE_DATA.repository}" target="_blank">Source Repository</a><br />
+        <a href="{$PAGE_DATA.repository}" target="_blank">Source Repository</a><br />
       {/if}
     </p>
 {/if}
@@ -68,7 +69,7 @@
     <a class="button"
        style="margin-top: 8px; margin-right: 0px;"
        href="/?component=download&id={$PAGE_DATA.id}&version={$PAGE_DATA['xpinstall'][$PAGE_DATA['releaseXPI']]['version']}"
-       title="Compatible with Mozilla Version Equivalent {$PAGE_DATA['xpinstall'][$PAGE_DATA['releaseXPI']]['targetApplication'][$APPLICATION_ID]['minVersion']} to {$PAGE_DATA['xpinstall'][$PAGE_DATA['releaseXPI']]['targetApplication'][$APPLICATION_ID]['maxVersion']}">
+       title="Basilisk Add-on Compatiblity Version {$PAGE_DATA['xpinstall'][$PAGE_DATA['releaseXPI']]['targetApplication'][$APPLICATION_ID]['minVersion']} to {$PAGE_DATA['xpinstall'][$PAGE_DATA['releaseXPI']]['targetApplication'][$APPLICATION_ID]['maxVersion']}">
     <span>Install Now</span>
   </a>
   </div>
@@ -86,7 +87,7 @@
         <a class="button"
            style="margin-top: 8px; margin-right: 0px;"
            href="/?component=download&id={$PAGE_DATA.id}&version={$key.version}"
-           title="Compatible with Mozilla Version Equivalent {$key['targetApplication'][$APPLICATION_ID]['minVersion']} to {$key['targetApplication'][$APPLICATION_ID]['maxVersion']}">
+           title="Basilisk Add-on Compatiblity Version {$key['targetApplication'][$APPLICATION_ID]['minVersion']} to {$key['targetApplication'][$APPLICATION_ID]['maxVersion']}">
         <span>Install Now</span>
       </a>
       </div>
