@@ -62,6 +62,15 @@ class classWriteManifest {
       return $this->error('The the add-on id or slug you chose is not available. Please select another.', $aAccumulateErrors);
     }
 
+    $addonAMO = $this->addonAMO($this->validatorData['installManifest']['id']);
+
+    if ($addonAMO && $GLOBALS['arraySoftwareState']['authentication']['level'] < 3) {
+      return $this->error('The add-on id <strong>' . $this->validatorData['installManifest']['id'] . '</strong> is known to have existed on the Mozilla Add-ons Site.</li><li>' .
+                          'If you are the original developer of this add-on, you will need to contact a member of the Add-ons Team or a Phoebus Administrator to check the validity of this submission and verify your identity.</li><li>' .
+                          'If this add-on is a proper fork, you can simply change the add-on\'s id and submit again.',
+                          $aAccumulateErrors);
+    }
+
     $addonType = null;
     switch($this->validatorData['installManifest']['type']) {
       case 2: $addonType = 'extension'; break;
@@ -801,12 +810,6 @@ class classWriteManifest {
     // ----------------------------------------------------------------------------------------------------------------
 
     // Check to make sure that the add-on ID is valid and is not restricted
-    // ID validity and restriction checks only apply to public and submit scopes for legacy reasons
-    // IF a widely used extension not previously submitted needs an exception.. The developer should contact
-    // the Add-ons Team which then should contact a Phoebus Administrator to manually submit it and reassign ownership
-    // in SQL. This will be slightly improved in later versions of Phoebus where the Add-ons Team will be able to edit
-    // Ownership and assignments. However, bypassing restrictions for submission will still need to be handled by the
-    // Add-ons Team but Phoebus Administrator intervention will be eliminated. DEAL WITH IT!
     if ($aCheckID) {
       if (preg_match($strRegexGUID, $this->validatorData['installManifest']['id']) ||
           preg_match($strRegexID, $this->validatorData['installManifest']['id'])) {
@@ -909,6 +912,20 @@ class classWriteManifest {
   private function addonExists($aID, $aSlug) {
     $query = "SELECT `id`, `slug` FROM `addon` WHERE `id` = ?s OR `slug` = ?s";
     $result = $GLOBALS['moduleDatabase']->query('rows', $query, $aID, $aSlug);
+
+    if ($result) {
+      return true;
+    }
+
+    return null;
+  }
+
+  /********************************************************************************************************************
+  * Checks if an ID was known to be on AMO
+  ********************************************************************************************************************/
+  private function addonAMO($aSlug) {
+    $query = "SELECT `id`, `blocked` FROM `amo` WHERE `id` = ?s AND `blocked` = 1";
+    $result = $GLOBALS['moduleDatabase']->query('rows', $query, $aSlug);
 
     if ($result) {
       return true;
