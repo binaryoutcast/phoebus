@@ -30,7 +30,9 @@
   {/if}
 
   <p style="text-align: center; padding: 10px; margin-top: 20px; margin-bottom: 20px;">
-    <a class="dllink_green" href="/?component=download&id={$PAGE_DATA.id}&version={$PAGE_DATA['xpinstall'][$PAGE_DATA['releaseXPI']]['version']}">
+    <a class="dllink_green"
+       href="/?component=download&id={$PAGE_DATA.id}&version={$PAGE_DATA['xpinstall'][$PAGE_DATA['releaseXPI']]['version']}"
+       title="Interlink Add-on Compatiblity Version {$PAGE_DATA['xpinstall'][$PAGE_DATA['releaseXPI']]['targetApplication'][$APPLICATION_ID]['minVersion']} to {$PAGE_DATA['xpinstall'][$PAGE_DATA['releaseXPI']]['targetApplication'][$APPLICATION_ID]['maxVersion']}">
       <img border="0" src="{$BASE_PATH}../palemoon/download.png" alt="" style="width: 24px; height: 24px; position: relative; top: 7px; right: 4px;" />
       <span>Download Now</span>
     </a>
@@ -48,7 +50,7 @@
       <p style="margin-top: 8px;">
         <strong>Version {$key.version}</strong><br />
         <small>Released: {$key.date}<br />
-          Works with Interlink {$key['targetApplication'][$APPLICATION_ID]['minVersion']} to
+          Interlink Add-on Compatiblity Version {$key['targetApplication'][$APPLICATION_ID]['minVersion']} to
           {if $key['targetApplication'][$APPLICATION_ID]['maxVersion'] == '*'}
             Unknown
           {else}
@@ -78,6 +80,7 @@
     </div>
 
 
+    <!--
     <div id="BinOC-Content-Sidebar-Block">
       <div id="BinOC-Content-Sidebar-Block-Title">
         Compatiblity
@@ -93,6 +96,7 @@
         </li></ul>
       </div>
     </div>
+    -->
 {/if}
 
 {if $PAGE_DATA.license != null && $PAGE_DATA.license != 'copyright'}

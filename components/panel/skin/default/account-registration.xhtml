@@ -7,7 +7,8 @@
 {if $PAGE_TYPE == 'panel-account-registration'}
 <p>To submit and manage your extensions and themes, you will need to register for an account.</p>
 {/if}
-<p>You will be sent an email from <em>Phoebus Account Registration &lt;phoebus@addons.palemoon.org&gt;</em> regardless of the domain name you initally registered from. This will include a link and code you will have to navigate to in order to activate your newly registered account. You may have to check your email account's spam folder just in case it was misidentified. {if $PAGE_TYPE == 'panel-account-registration'}You will be reminded of this upon successful registration.{/if}</p>
+
+<p>{if $PAGE_TYPE == 'panel-account-registration'}You will be sent an e-mail{else}We have sent and e-mail to <em>&lt;{$PAGE_DATA}&gt;</em>{/if} from <em>Phoebus Account Registration &lt;phoebus@addons.palemoon.org&gt;</em> regardless of the domain name you initally registered from. This will include a link and code you will have to navigate to in order to activate your newly registered account. You may have to check your email account's spam folder just in case it was misidentified. {if $PAGE_TYPE == 'panel-account-registration'}You will be reminded of this upon successful registration.{/if}</p>
 
 <p>If you have any issues please contact the Pale Moon Add-ons Team or a Phoebus Administrator.</p>
 
@@ -18,7 +19,7 @@
       <strong>Username:</strong> <em title="Regular Expression: /[^a-z0-9_\-]/">(3-32 characters, lowercase alphanumerics, underscores, and dashes</em><br />
       <input form="account-registration" name="username" type="text" size="80" minlength="3" maxlength="32" required><br /><br />
       <strong>Password:</strong> <em>(8-64 characters)</em><br />
-      <input form="account-registration" name="password" type="password" size="80" minlength="3" maxlength="32" required><br /><br />
+      <input form="account-registration" name="password" type="password" size="80" minlength="3" maxlength="64" required><br /><br />
       <strong>E-mail Address:</strong> <em>(A Valid address is required for account activation)</em><br />
       <input form="account-registration" name="email" type="email" size="80" required><br /><br />
       <strong>Display Name:</strong> <em>(A friendly name such as your own)</em><br />

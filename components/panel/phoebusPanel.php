@@ -92,7 +92,7 @@ switch ($arraySoftwareState['requestPath']) {
         funcError('Something has gone horribly wrong!');
       }
 
-      $moduleGenerateContent->addonSite('panel-account-registration-done', 'Registration Complete');
+      $moduleGenerateContent->addonSite('panel-account-registration-done', 'Registration Complete', $moduleAccount->validationEmail);
     }
 
     $moduleGenerateContent->addonSite('panel-account-registration', 'Registration');
