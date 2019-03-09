@@ -658,6 +658,10 @@ class classWriteManifest {
     $this->validatorData['installManifest'] =
       $GLOBALS['moduleMozillaRDF']->parseInstallManifest($this->validatorData['installManifest']);
 
+    if (is_string($this->validatorData['installManifest'])) {
+      funcError('RDF Parsing Error: ' . $this->validatorData['installManifest'], $aAccumulateErrors);
+    }
+
     if (is_array($this->validatorData['installManifest'])) {
       $this->validatorData['status']['installManifestExists'] = true;
     }
