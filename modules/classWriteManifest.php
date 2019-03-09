@@ -661,9 +661,6 @@ class classWriteManifest {
     if (is_array($this->validatorData['installManifest'])) {
       $this->validatorData['status']['installManifestExists'] = true;
     }
-    else {
-      funcError('RDF Parsing error: ' . $this->validatorData['installManifest']);
-    }
 
     // ----------------------------------------------------------------------------------------------------------------
 
