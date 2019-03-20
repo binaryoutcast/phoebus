@@ -129,7 +129,7 @@ a:hover {
   width: 280px;
   height: 100%;
   display: table-cell;
-  padding: 8px 10px 10px;
+  padding: 6px 10px 10px;
   vertical-align: top;
 }
 
@@ -198,8 +198,9 @@ background: linear-gradient(to right, rgba(240,240,240,1) 50%,rgba(255,255,255,0
 }
 
 .category-extensions-list {
+  padding-top: 2px;
   position: sticky;
-  top: 22px;
+  top: 4px;
 }
 
 .category-theme-preview {
