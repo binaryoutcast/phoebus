@@ -16,7 +16,7 @@ define('ROOT_PATH', $_SERVER['DOCUMENT_ROOT']);
 
 // Define basic constants for the software
 const SOFTWARE_NAME       = 'Phoebus';
-const SOFTWARE_VERSION    = '2.0.1';
+const SOFTWARE_VERSION    = '2.0.2';
 const DATASTORE_RELPATH   = '/datastore/';
 const OBJ_RELPATH         = '/.obj/';
 const COMPONENTS_RELPATH  = '/components/';
@@ -44,6 +44,7 @@ const MODULES = array(
   'mozillaRDF'      => ROOT_PATH . MODULES_RELPATH . 'classMozillaRDF.php',
   'persona'         => ROOT_PATH . MODULES_RELPATH . 'classPersona.php',
   'readManifest'    => ROOT_PATH . MODULES_RELPATH . 'classReadManifest.php',
+  'tap'             => ROOT_PATH . MODULES_RELPATH . 'classTap.php',
   'writeManifest'   => ROOT_PATH . MODULES_RELPATH . 'classWriteManifest.php',
   'vc'              => ROOT_PATH . MODULES_RELPATH . 'nsIVersionComparator.php',
 );
@@ -439,11 +440,15 @@ $arraySoftwareState = array(
   'currentScheme'       => funcUnifiedVariable('server', 'SCHEME'),
   'currentDomain'       => null,
   'debugMode'           => null,
+  'tap'                 => funcUnifiedVariable('var', file_exists(ROOT_PATH . '/.tap')),
   'phpServerName'       => funcUnifiedVariable('server', 'SERVER_NAME'),
   'phpRequestURI'       => funcUnifiedVariable('server', 'REQUEST_URI'),
+  'remoteAddr'          => funcUnifiedVariable('server', 'HTTP_X_FORWARDED_FOR') ??
+                           funcUnifiedVariable('server', 'REMOTE_ADDR'),
   'requestComponent'    => funcUnifiedVariable('get', 'component'),
   'requestPath'         => funcUnifiedVariable('get', 'path'),
-  'requestApplication'  => funcUnifiedVariable('get', 'appOverride') ?? funcUnifiedVariable('cookie', 'appOverride'),
+  'requestApplication'  => funcUnifiedVariable('get', 'appOverride') ??
+                           funcUnifiedVariable('cookie', 'appOverride'),
   'requestDebugOff'     => funcUnifiedVariable('get', 'debugOff'),
   'requestSearchTerms'  => funcUnifiedVariable('get', 'terms')
 );
