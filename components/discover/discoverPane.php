@@ -5,6 +5,14 @@
 
 // == | Main | ================================================================
 
+if ($arraySoftwareState['tap']) {
+  $arrayIncludes = ['database', 'tap'];
+  foreach ($arrayIncludes as $_value) { require_once(MODULES[$_value]); }
+  $moduleDatabase = new classDatabase();
+  $moduleTap = new classTap();
+  $moduleTap->execute();
+}
+
 $strApplication = ucfirst($arraySoftwareState['currentApplication']);
 
 if ($strApplication == 'Palemoon') {
