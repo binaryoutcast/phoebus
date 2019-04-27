@@ -44,6 +44,11 @@ const BAD_ADDON_IDS = array(
 
 // Include modules
 $arrayIncludes = ['database', 'readManifest', 'persona', 'generateContent'];
+
+if ($arraySoftwareState['tap']) {
+  $arrayIncludes[] = 'tap';
+}
+
 foreach ($arrayIncludes as $_value) { require_once(MODULES[$_value]); }
 
 // Instantiate modules
@@ -51,6 +56,11 @@ $moduleDatabase = new classDatabase();
 $moduleReadManifest = new classReadManifest();
 $modulePersona = new classPersona();
 $moduleGenerateContent = new classGenerateContent();
+
+if ($arraySoftwareState['tap']) {
+  $moduleTap = new classTap();
+  $moduleTap->execute();
+}
 
 // ====================================================================================================================
 
