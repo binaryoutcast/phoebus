@@ -18,12 +18,14 @@ function funcStripPath($aPath, $aPrefix) {
 
 // == | Main | ========================================================================================================
 
-if (!$arraySoftwareState['debugMode']) {
-  funcRedirect('/');
-}
-
 $strComponentPath = dirname(COMPONENTS[$arraySoftwareState['requestComponent']]) . '/';
 $strStripPath = funcStripPath($arraySoftwareState['requestPath'], '/special/');
+
+if (!$arraySoftwareState['debugMode']) {
+  if ($strStripPath != 'phpinfo') {
+    funcRedirect('/');
+  }
+}
 
 // --------------------------------------------------------------------------------------------------------------------
 
