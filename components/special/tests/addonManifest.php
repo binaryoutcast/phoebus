@@ -13,7 +13,7 @@ foreach ($arrayIncludes as $_value) { require_once(MODULES[$_value]); }
 $moduleDatabase        = new classDatabase();
 $moduleReadManifest    = new classReadManifest();
 
-$addonManifest = $moduleReadManifest->getAddon('panel-by-id', 'abprime@projects.binaryoutcast.com');
+$addonManifest = $moduleReadManifest->getAddon('panel-by-slug', 'abprime');
 
 funcGenerateContent('Manifest', $addonManifest);
 
