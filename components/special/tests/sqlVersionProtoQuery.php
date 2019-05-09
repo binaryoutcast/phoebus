@@ -17,7 +17,8 @@ $query = "SELECT `id`, `slug`, `releaseXPI`, NULL as `aid`, NULL as `version`
           FROM addon WHERE `id` = 'inspector@mozilla.org'
           UNION
           SELECT NULL, NULL, NULL, `aid`, `version`
-          FROM version WHERE `id` = 'inspector@mozilla.org'"
+          FROM version WHERE `id` = 'inspector@mozilla.org'";
+
 $addonManifest = $moduleDatabase->query('rows', $query);
 
 funcGenerateContent('SQL Version ProtoQuery', $addonManifest);
