@@ -41,14 +41,6 @@ switch ($strStripPath) {
     $moduleAccount->authenticate();
     funcGenerateContent('Authenticated Software State', $arraySoftwareState);
     break;
-  case 'migrator':
-    if (file_exists(ROOT_PATH . '/.migration')) {
-      require_once($strComponentPath . 'addonMigrator.php');
-    }
-    else {
-      funcRedirect('/');
-    }
-    break;
   case 'test':
     $arraySoftwareState['requestTestCase'] = funcUnifiedVariable('get', 'case');
     $arrayTestsGlob = glob($strComponentPath . 'tests/*.php');
