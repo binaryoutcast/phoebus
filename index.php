@@ -62,43 +62,7 @@ const LIBRARIES = array(
   'rdfParser'       => ROOT_PATH . LIB_RELPATH . 'rdf/rdf_parser.php',
 );
 
-// Define the target applications that the site will accomidate with
-// the enabled site features
-const TARGET_APPLICATION_SITE = array(
-  'palemoon' => array(
-    'enabled'       => true,
-    'name'          => 'Pale Moon - Add-ons',
-    'domain'        => array('live' => 'addons.palemoon.org', 'dev' => 'addons-dev.palemoon.org'),
-    'features'      => array('https', 'extensions', 'extensions-cat', 'themes',
-                             'personas', 'language-packs', 'search-plugins')
-  ),
-  'basilisk' => array(
-    'enabled'       => true,
-    'name'          => 'Basilisk: add-ons',
-    'domain'        => array('live' => 'addons.basilisk-browser.org', 'dev' => null),
-    'features'      => array('https', 'extensions', 'themes', 'personas', 'search-plugins')
-  ),
-  'ambassador' => array(
-    'enabled'       => true,
-    'name'          => 'Add-ons - Ambassador',
-    'domain'        => array('live' => 'ab-addons.thereisonlyxul.org', 'dev' => null),
-    'features'      => array('extensions', 'themes', 'disable-xpinstall')
-  ),
-  'borealis' => array(
-    'enabled'       => false,
-    'name'          => 'Borealis Add-ons - Binary Outcast',
-    'domain'        => array('live' => 'borealis-addons.binaryoutcast.com', 'dev' => null),
-    'features'      => array('extensions', 'search-plugins')
-  ),
-  'interlink' => array(
-    'enabled'       => true,
-    'name'          => 'Interlink Add-ons - Binary Outcast',
-    'domain'        => array('live' => 'interlink-addons.binaryoutcast.com', 'dev' => null),
-    'features'      => array('extensions', 'themes', 'search-plugins', 'disable-xpinstall')
-  ),
-);
-
-/* Define Application IDs
+/* Known Application IDs
  * Application IDs are normally in the form of a {GUID} or user@host ID.
  *
  * Firefox:          {ec8030f7-c20a-464f-9b0e-13a3a9e97384}
@@ -109,15 +73,58 @@ const TARGET_APPLICATION_SITE = array(
  * Sunbird:          {718e30fb-e89b-41dd-9da7-e25a45638b28}
  * Instantbird:      {33cb9019-c295-46dd-be21-8c4936574bee}
  * Adblock Browser:  {55aba3ac-94d3-41a8-9e25-5c21fe874539} */
-const TARGET_APPLICATION_ID = array(
-  'toolkit'         => 'toolkit@mozilla.org',
-  'palemoon'        => '{8de7fcbb-c55c-4fbe-bfc5-fc555c87dbc4}',
-  'basilisk'        => '{ec8030f7-c20a-464f-9b0e-13a3a9e97384}',
-  'ambassador'      => '{4523665a-317f-4a66-9376-3763d1ad1978}',
-  'borealis'        => '{a3210b97-8e8a-4737-9aa0-aa0e607640b9}',
-  'interlink'       => '{3550f703-e582-4d05-9a08-453d09bdfdc6}',
-);
+const TOOLKIT_ID          = 'toolkit@mozilla.org';
+const TOOLKIT_BIT         = 1;
 
+// Define application metadata
+const TARGET_APPLICATION = array(
+  'palemoon' => array(
+    'enabled'       => true,
+    'id'            => '{8de7fcbb-c55c-4fbe-bfc5-fc555c87dbc4}',
+    'bit'           => 2,
+    'name'          => 'Pale Moon',
+    'siteTitle'     => 'Pale Moon - Add-ons',
+    'domain'        => array('live' => 'addons.palemoon.org', 'dev' => 'addons-dev.palemoon.org'),
+    'features'      => array('https', 'extensions', 'extensions-cat', 'themes',
+                             'personas', 'language-packs', 'search-plugins')
+  ),
+  'basilisk' => array(
+    'enabled'       => true,
+    'id'            => '{ec8030f7-c20a-464f-9b0e-13a3a9e97384}',
+    'bit'           => 4,
+    'name'          => 'Basilisk',
+    'siteTitle'     => 'Basilisk: add-ons',
+    'domain'        => array('live' => 'addons.basilisk-browser.org', 'dev' => null),
+    'features'      => array('https', 'extensions', 'themes', 'personas', 'search-plugins')
+  ),
+  'ambassador' => array(
+    'enabled'       => true,
+    'id'            => '{4523665a-317f-4a66-9376-3763d1ad1978}',
+    'bit'           => 8,
+    'name'          => 'Ambassador',
+    'siteTitle'     => 'Add-ons - Ambassador',
+    'domain'        => array('live' => 'ab-addons.thereisonlyxul.org', 'dev' => null),
+    'features'      => array('extensions', 'themes', 'disable-xpinstall')
+  ),
+  'borealis' => array(
+    'enabled'       => false,
+    'id'            => '{a3210b97-8e8a-4737-9aa0-aa0e607640b9}',
+    'bit'           => 16,
+    'name'          => 'Borealis',
+    'siteTitle'     => 'Borealis Add-ons - Binary Outcast',
+    'domain'        => array('live' => 'borealis-addons.binaryoutcast.com', 'dev' => null),
+    'features'      => array('extensions', 'search-plugins')
+  ),
+  'interlink' => array(
+    'enabled'       => true,
+    'id'            => '{3550f703-e582-4d05-9a08-453d09bdfdc6}',
+    'bit'           => 32,
+    'name'          => 'Interlink',
+    'siteTitle'     => 'Interlink Add-ons - Binary Outcast',
+    'domain'        => array('live' => 'interlink-addons.binaryoutcast.com', 'dev' => null),
+    'features'      => array('extensions', 'themes', 'search-plugins', 'disable-xpinstall')
+  ),
+);
 
 // ====================================================================================================================
 
@@ -134,7 +141,7 @@ $arraySoftwareState = array(
   'authentication'      => null,
   'currentApplication'  => null,
   'orginalApplication'  => null,
-  'currentName'         => null,
+  'currentSiteTitle'    => null,
   'currentScheme'       => funcUnifiedVariable('server', 'SCHEME'),
   'currentDomain'       => null,
   'debugMode'           => null,
@@ -153,7 +160,7 @@ $arraySoftwareState = array(
 
 // --------------------------------------------------------------------------------------------------------------------
 // If the entire site is offline but nothing above is busted.. We want to serve proper but empty responses
-if (file_exists(ROOT_PATH . '/.offline') && !funcUnifiedVariable('cookie', 'overrideOffline')) {
+if (file_exists(ROOT_PATH . '/.offline')) {
   $strOfflineMessage = 'Phoebus, and by extension this Add-ons Site, is currently unavailable. Please try again later.';
   // Root (/) won't set a component or path
   if (!$arraySoftwareState['requestComponent'] && !$arraySoftwareState['requestPath']) {
@@ -189,10 +196,8 @@ if (file_exists(ROOT_PATH . '/.offline') && !funcUnifiedVariable('cookie', 'over
           funcSendHeader('404');
       }
       break;
-    case 'discover':
-      funcSend404();
-    default:
-      funcError($strOfflineMessage);
+    case 'discover': funcSend404();
+    default: funcError($strOfflineMessage);
   }
 }
 
@@ -200,14 +205,16 @@ if (file_exists(ROOT_PATH . '/.offline') && !funcUnifiedVariable('cookie', 'over
 
 // Decide which application by domain that the software will be serving
 // and if debug is enabled
-foreach (TARGET_APPLICATION_SITE as $_key => $_value) {
+foreach (TARGET_APPLICATION as $_key => $_value) {
   switch ($arraySoftwareState['phpServerName']) {
     case $_value['domain']['live']:
       $arraySoftwareState['currentApplication'] = $_key;
+      $arraySoftwareState['targetApplicationID'] = $_value['id'];
       $arraySoftwareState['currentDomain'] = $_value['domain']['live'];
       break;
     case $_value['domain']['dev']:
       $arraySoftwareState['currentApplication'] = $_key;
+      $arraySoftwareState['targetApplicationID'] = $_value['id'];
       $arraySoftwareState['currentDomain'] = $_value['domain']['dev'];
       $arraySoftwareState['debugMode'] = true;
       break;
@@ -230,7 +237,7 @@ if ($arraySoftwareState['debugMode']) {
   // Override currentApplication by query
   // If requestApplication is set and it exists in the array constant set the currentApplication to that
   if ($arraySoftwareState['requestApplication']) {
-    if (array_key_exists($arraySoftwareState['requestApplication'], TARGET_APPLICATION_SITE)) {
+    if (array_key_exists($arraySoftwareState['requestApplication'], TARGET_APPLICATION)) {
       $arraySoftwareState['orginalApplication'] = $arraySoftwareState['currentApplication'];
       $arraySoftwareState['currentApplication'] = $arraySoftwareState['requestApplication'];
     }
@@ -258,7 +265,7 @@ if (!$arraySoftwareState['currentApplication']) {
 }
 
 // We cannot contine if the application is not enabled
-if (!TARGET_APPLICATION_SITE[$arraySoftwareState['currentApplication']]['enabled']) {
+if (!TARGET_APPLICATION[$arraySoftwareState['currentApplication']]['enabled']) {
   funcError('This ' . ucfirst($arraySoftwareState['currentApplication']) . ' Add-ons Site has been disabled. ' .
             'Please contact the Phoebus Administrator');
 }

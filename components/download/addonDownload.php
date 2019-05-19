@@ -100,7 +100,7 @@ function funcDownloadSearchPlugin($aSearchPluginName, $aBinaryStream = null) {
 $strRequestAddonID = funcUnifiedVariable('get', 'id');
 $strRequestAddonVersion = funcUnifiedVariable('get', 'version') ?? 'latest';
 $boolRequestPanel = funcUnifiedVariable('get', 'panel');
-$boolRequestBinaryStream = in_array('disable-xpinstall', TARGET_APPLICATION_SITE[$arraySoftwareState['currentApplication']]['features']);
+$boolRequestBinaryStream = in_array('disable-xpinstall', TARGET_APPLICATION[$arraySoftwareState['currentApplication']]['features']);
                     
 
 // Sanity

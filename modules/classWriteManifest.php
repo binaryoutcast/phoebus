@@ -847,8 +847,8 @@ class classWriteManifest {
     // ----------------------------------------------------------------------------------------------------------------
 
     // Check to make sure there is at least one supported targetApplication
-    foreach (TARGET_APPLICATION_ID as $_key => $_value) {
-      if (array_key_exists($_value, $this->validatorData['installManifest']['targetApplication'])) {
+    foreach (TARGET_APPLICATION as $_key => $_value) {
+      if (array_key_exists($_value['id'], $this->validatorData['installManifest']['targetApplication'])) {
         $this->validatorData['supportedApplications'][$_key] = true;
 
         if ($_key != 'toolkit') {

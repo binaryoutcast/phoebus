@@ -19,15 +19,6 @@ class classGenerateContent {
   * Class constructor that sets inital state of things
   ********************************************************************************************************************/
   function __construct($aUseSmarty = null) {
-    // Assign current software state to a class property by reference
-    $GLOBALS['arraySoftwareState'] = &$GLOBALS['arraySoftwareState'];
-
-    // Set the Application ID
-    $GLOBALS['arraySoftwareState']['targetApplicationID'] =
-      TARGET_APPLICATION_ID[$GLOBALS['arraySoftwareState']['currentApplication']];
-
-    // ----------------------------------------------------------------------------------------------------------------
-
     // Component Path
     $componentPath = dirname(COMPONENTS[$GLOBALS['arraySoftwareState']['requestComponent']]);
 
@@ -211,7 +202,7 @@ class classGenerateContent {
     $this->libSmarty->assign('PAGE_PATH', $GLOBALS['arraySoftwareState']['requestPath']);
     $this->libSmarty->assign('BASE_PATH', $GLOBALS['arraySoftwareState']['componentSkinRelPath']);
     $this->libSmarty->assign('PHOEBUS_VERSION', SOFTWARE_VERSION);
-    $this->libSmarty->assign('SITE_NAME', $GLOBALS['arraySoftwareState']['currentName']);
+    $this->libSmarty->assign('SITE_NAME', $GLOBALS['arraySoftwareState']['currentSiteTitle']);
     $this->libSmarty->assign('SEARCH_TERMS', $GLOBALS['arraySoftwareState']['requestSearchTerms']);
     $this->libSmarty->assign('APPLICATION_ID', $GLOBALS['arraySoftwareState']['targetApplicationID']);
     $this->libSmarty->assign('PAGE_TYPE', $aType);

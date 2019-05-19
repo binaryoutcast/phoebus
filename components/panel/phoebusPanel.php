@@ -59,8 +59,8 @@ function funcCheckAccessLevel($aLevel, $aReturnNull = null) {
 
 // == | Main | ========================================================================================================
 
-if (file_exists(ROOT_PATH . '/.disablePanel') && !funcUnifiedVariable('cookie', 'overrideDisablePanel')) {
-  funcError('The Panel is currently disabled. Please try again later.');
+if (file_exists(ROOT_PATH . '/.disablePanel')) {
+  funcError('The Panel is currently unavailable. Please try again later.');
 }
 
 $strComponentPath = dirname(COMPONENTS[$arraySoftwareState['requestComponent']]) . '/';
@@ -69,8 +69,8 @@ $boolHasPostData = !empty($_POST);
 // --------------------------------------------------------------------------------------------------------------------
 
 // The Panel can ONLY be used on HTTPS so redirect those sites without https to Pale Moon
-if (!in_array('https', TARGET_APPLICATION_SITE[$arraySoftwareState['currentApplication']]['features'])) {
-  funcRedirect('https://addons.palemoon.org/panel/');
+if (!in_array('https', TARGET_APPLICATION[$arraySoftwareState['currentApplication']]['features'])) {
+  funcRedirect('https://' . TARGET_APPLICATION['palemoon']['domain']['live'] . '/panel/');
 }
 
 if ($arraySoftwareState['currentScheme'] != 'https') {

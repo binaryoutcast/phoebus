@@ -51,7 +51,7 @@ function funcStripPath($aPath, $aPrefix) {
 ***********************************************************************************************************************/
 function funcCheckEnabledFeature($aFeature, $aReturn = null) {
   $currentApplication = $GLOBALS['arraySoftwareState']['currentApplication'];
-  if (!in_array($aFeature, TARGET_APPLICATION_SITE[$currentApplication]['features'])) {
+  if (!in_array($aFeature, TARGET_APPLICATION[$currentApplication]['features'])) {
     if(!$aReturn) {
       funcSend404();
     }
@@ -67,20 +67,20 @@ function funcCheckEnabledFeature($aFeature, $aReturn = null) {
 // == | Main | ========================================================================================================
 
 // Site Name
-$arraySoftwareState['currentName'] = TARGET_APPLICATION_SITE[$arraySoftwareState['currentApplication']]['name'];
+$arraySoftwareState['currentSiteTitle'] = TARGET_APPLICATION[$arraySoftwareState['currentApplication']]['siteTitle'];
 
 // When in debug mode it displays the software name and version and if git
 // is detected it will append the branch and short sha1 hash
-// else it will use the name defined in TARGET_APPLICATION_SITE
+// else it will use the name defined in TARGET_APPLICATION
 if ($arraySoftwareState['debugMode']) {
-  $arraySoftwareState['currentName'] = SOFTWARE_NAME . ' Development - Version: ' . SOFTWARE_VERSION;
+  $arraySoftwareState['currentSiteTitle'] = SOFTWARE_NAME . ' Development - Version: ' . SOFTWARE_VERSION;
   // Git stuff
   if (file_exists('./.git/HEAD')) {
     $_strGitHead = file_get_contents('./.git/HEAD');
     $_strGitSHA1 = file_get_contents('./.git/' . substr($_strGitHead, 5, -1));
     $_strGitBranch = substr($_strGitHead, 16, -1);
-    $arraySoftwareState['currentName'] = 
-      $arraySoftwareState['currentName'] . ' - ' .
+    $arraySoftwareState['currentSiteTitle'] = 
+      $arraySoftwareState['currentSiteTitle'] . ' - ' .
       'Branch: ' . $_strGitBranch . ' - ' .
       'Commit: ' . substr($_strGitSHA1, 0, 7);
   }

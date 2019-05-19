@@ -57,7 +57,7 @@ class classReadManifest {
     
     // Assign currentApplication
     $this->currentApplication = $GLOBALS['arraySoftwareState']['currentApplication'];
-    $this->currentAppID = TARGET_APPLICATION_ID[$GLOBALS['arraySoftwareState']['currentApplication']];
+    $this->currentAppID = $GLOBALS['arraySoftwareState']['targetApplicationID'];
   }
 
  /********************************************************************************************************************
@@ -323,7 +323,7 @@ class classReadManifest {
 
     // In the PANEL we join the client table but we only need it for externals
     if ($GLOBALS['arraySoftwareState']['requestComponent'] == 'panel' && $addonManifest['type'] != 'external') {
-      foreach (TARGET_APPLICATION_ID as $_key => $_value) {
+      foreach (TARGET_APPLICATION as $_key => $_value) {
         unset($addonManifest[$_key]);
       }
 
