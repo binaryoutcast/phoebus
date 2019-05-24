@@ -97,7 +97,7 @@ class classAccount {
       if (contains($this->postData['username'], $_value) || contains($this->postData['email'], $_value)) {
         funcError('Yourself or someone like you has been permanently banned from using this software and service.</li><li>' . 
                   'If this automatic determination is in error please contact the Add-ons Team or a Phoebus Administrator.</li><li>' .
-                  'Have a nice day!')
+                  'Have a nice day!');
       }
     }
 
