@@ -636,6 +636,7 @@ class classWriteManifest {
       'mattatobin.com',
       'mozilla.org',
       'lootyhoof-pm',
+      'srazzano.com' // BANNED FOR LIFE
     );
 
     // ----------------------------------------------------------------------------------------------------------------

@@ -232,7 +232,7 @@ switch ($arraySoftwareState['requestPath']) {
 
       // See if the slug exists in the category array
       if (!array_key_exists($strSlug, classReadManifest::EXTENSION_CATEGORY_SLUGS)) {
-        funcSend404();
+        funcRedirect('/addon/' . $strSlug);
       }
 
       // Query SQL for extensions in this specific category
