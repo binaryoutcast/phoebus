@@ -57,9 +57,9 @@ const DATABASES = array(
 
 // Define libraries
 const LIBRARIES = array(
-  'smarty'          => ROOT_PATH . LIB_RELPATH . 'smarty/Smarty.class.php',
+  'smarty'          => ROOT_PATH . LIB_RELPATH . 'smarty/libs/Smarty.class.php',
   'safeMySQL'       => ROOT_PATH . LIB_RELPATH . 'safemysql/safemysql.class.php',
-  'rdfParser'       => ROOT_PATH . LIB_RELPATH . 'rdf/rdf_parser.php',
+  'rdfParser'       => ROOT_PATH . LIB_RELPATH . 'librdf/rdf_parser.php',
 );
 
 // Define the target applications that the site will accomidate with

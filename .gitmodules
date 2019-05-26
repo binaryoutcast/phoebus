@@ -1,0 +1,9 @@
+[submodule "libraries/smarty"]
+	path = libraries/smarty
+	url = https://github.com/smarty-php/smarty.git
+[submodule "libraries/safemysql"]
+	path = libraries/safemysql
+	url = https://github.com/colshrapnel/safemysql.git
+[submodule "libraries/librdf"]
+	path = libraries/librdf
+	url = https://github.com/binoc-lab01/librdf.git
