@@ -20,6 +20,6 @@ Libraries (3rd Party)
 ---
 The code contained in `libraries/` is vendor'd from multiple sources. We will try to keep this list updated.
 
-- Rdf_parser - *GNU General Public License 2.0*
+- Rdf_parser - *GNU Lesser General Public License v2.1*
 - SafeMySQL - *Apache License 2.0*
 - Smarty - *GNU Lesser General Public License 3.0*
