@@ -1,27 +1,29 @@
 <?php
-/* Rdf_parser - A port to PHP of the Repat an RDF parser by Jason Diammond 
- * Copyright (C) 2002 Luis Argerich <lrargerich@yahoo.com>
-
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- *
- * Contributor(s):
- *
- * Justin Scott <fligtar@gmail.com>
- * Matt A. Tobin <email@mattatobin.com>
- *
- */
+// ##################################################################################
+// Title                     : Class Rdf_parser
+// Version                   : 1.0
+// Author                    : Jason Diammond -repat RDF parser-
+//                           : Luis Argerich -PHP version of repat- (lrargerich@yahoo.com)
+//                           : Matt A. Tobin -Compat with PHP 7.x- (email@mattatobin.com)
+// Last modification date    : 06-13-2002
+// Description               : A port to PHP of the Repat an RDF parser.
+//                             This parser based on expat parses RDF files producing events
+//                             proper of RDF documents.
+// ##################################################################################
+// History:
+// 06-13-2002                : First version of this class.
+// 07-17-2002                : Minor bugfix (Leandro Mariano Lopez)
+// 08-16-2006                : Allowed for user callback function to be in a class
+//                             (Justin Scott)
+// 10-05-2017                : Fixed issues with PHP 7 namely the ereg() polyfill
+// 12-21-2018                : Fix rdf parser lib for outdated usage of call_user_func 
+// ##################################################################################
+// To-Dos:
+//
+// ##################################################################################
+// How to use it:
+// Read the documentation in rdf_parser.html
+// ##################################################################################
 
 class Rdf_parser {
   const XML_NAMESPACE_URI = 'http://www.w3.org/XML/1998/namespace';
