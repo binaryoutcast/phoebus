@@ -16,10 +16,6 @@ Which in the case of Pale Moon and Basilisk assets would be Moonchild Production
 
 The `components/*/skin/default/` directory contents is exempt and should be considered under the *MPL 2.0* unless otherwise stated above.
 
-Libraries (3rd Party)
+Libraries
 ---
-The code contained in `libraries/` is vendor'd from multiple sources. We will try to keep this list updated.
-
-- Rdf_parser - *GNU Lesser General Public License v2.1*
-- SafeMySQL - *Apache License 2.0*
-- Smarty - *GNU Lesser General Public License 3.0*
+The code contained in `libraries/` is owned and licensed by their respective owners.
