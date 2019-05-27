@@ -159,49 +159,6 @@ $arraySoftwareState = array(
 );
 
 // --------------------------------------------------------------------------------------------------------------------
-// If the entire site is offline but nothing above is busted.. We want to serve proper but empty responses
-if (file_exists(ROOT_PATH . '/.offline')) {
-  $strOfflineMessage = 'Phoebus, and by extension this Add-ons Site, is currently unavailable. Please try again later.';
-  // Root (/) won't set a component or path
-  if (!$arraySoftwareState['requestComponent'] && !$arraySoftwareState['requestPath']) {
-    $arraySoftwareState['requestComponent'] = 'site';
-    $arraySoftwareState['requestPath'] = '/';
-  }
-
-  switch ($arraySoftwareState['requestComponent']) {
-    case 'aus':
-      funcSendHeader('xml');
-      print('<?xml version="1.0" encoding="UTF-8"?><RDF:RDF xmlns:RDF="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:em="http://www.mozilla.org/2004/em-rdf#" />');
-      exit();
-      break;
-    case 'integration':
-      $arraySoftwareState['requestAPIScope'] = funcUnifiedVariable('get', 'type');
-      $arraySoftwareState['requestAPIFunction'] = funcUnifiedVariable('get', 'request');
-      if ($arraySoftwareState['requestAPIScope'] != 'internal') {
-        funcSendHeader('404');
-      }
-      switch ($arraySoftwareState['requestAPIFunction']) {
-        case 'search':
-          funcSendHeader('xml');
-          print('<?xml version="1.0" encoding="utf-8" ?><searchresults total_results="0" />');
-          exit();
-          break;      
-        case 'get':
-        case 'recommended':
-          funcSendHeader('xml');
-          print('<?xml version="1.0" encoding="utf-8" ?><addons />');
-          exit();
-          break;
-        default:
-          funcSendHeader('404');
-      }
-      break;
-    case 'discover': funcSend404();
-    default: funcError($strOfflineMessage);
-  }
-}
-
-// --------------------------------------------------------------------------------------------------------------------
 
 // Decide which application by domain that the software will be serving
 // and if debug is enabled
@@ -250,6 +207,13 @@ if ($arraySoftwareState['debugMode']) {
       funcError('It makes no sense to appOverride the same application');
     }
   }
+}
+
+// --------------------------------------------------------------------------------------------------------------------
+
+// If the entire site is offline but nothing above is busted.. We want to serve proper but empty responses
+if (file_exists(ROOT_PATH . '/.offline')) {
+  require_once(ROOT_PATH . '/mini.php');
 }
 
 // --------------------------------------------------------------------------------------------------------------------
