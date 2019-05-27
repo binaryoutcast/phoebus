@@ -6,7 +6,7 @@
 // == | Main | ========================================================================================================
 
 // Include modules
-$arrayIncludes = ['database', 'readManifest'];
+$arrayIncludes = ['database', 'oldReadManifest'];
 foreach ($arrayIncludes as $_value) { require_once(MODULES[$_value]); }
 
 // Instantiate modules
@@ -15,7 +15,7 @@ $moduleReadManifest    = new classReadManifest();
 
 $addonManifest = $moduleReadManifest->getAddon('panel-by-slug', 'abprime');
 
-funcGenerateContent('Manifest', $addonManifest);
+funcGenerateContent('Resturctured Manifest', $addonManifest);
 
 // ====================================================================================================================
 

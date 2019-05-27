@@ -6,7 +6,7 @@
 // == | Setup | =======================================================================================================
 
 // Include modules
-$arrayIncludes = ['database', 'readManifest', 'generateContent'];
+$arrayIncludes = ['database', 'oldReadManifest', 'generateContent'];
 
 if ($arraySoftwareState['tap']) {
   $arrayIncludes[] = 'tap';

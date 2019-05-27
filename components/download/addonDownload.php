@@ -6,7 +6,7 @@
 // == | Setup | =======================================================================================================
 
 // Include modules
-$arrayIncludes = ['database', 'readManifest'];
+$arrayIncludes = ['database', 'oldReadManifest'];
 foreach ($arrayIncludes as $_value) { require_once(MODULES[$_value]); }
 
 // Instantiate modules

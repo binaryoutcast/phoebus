@@ -19,7 +19,7 @@ const URI_DICTIONARIES    = '/dictionaries/';
 const URI_SEARCH          = '/search/';
 
 // Include modules
-$arrayIncludes = ['database', 'readManifest', 'persona', 'generateContent'];
+$arrayIncludes = ['database', 'oldReadManifest', 'persona', 'generateContent'];
 foreach ($arrayIncludes as $_value) { require_once(MODULES[$_value]); }
 
 // Instantiate modules
@@ -232,7 +232,7 @@ switch ($arraySoftwareState['requestPath']) {
 
       // See if the slug exists in the category array
       if (!array_key_exists($strSlug, classReadManifest::EXTENSION_CATEGORY_SLUGS)) {
-        funcSend404();
+        funcRedirect('/addon/' . $strSlug);
       }
 
       // Query SQL for extensions in this specific category

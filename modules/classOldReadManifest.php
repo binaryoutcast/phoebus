@@ -8,6 +8,7 @@
 class classReadManifest {
   private $currentApplication;
   private $currentAppID;
+  private $currentAppBit;
 
   // ------------------------------------------------------------------------------------------------------------------
 
@@ -57,7 +58,8 @@ class classReadManifest {
     
     // Assign currentApplication
     $this->currentApplication = $GLOBALS['arraySoftwareState']['currentApplication'];
-    $this->currentAppID = $GLOBALS['arraySoftwareState']['targetApplicationID'];
+    $this->currentAppID = TARGET_APPLICATION[$this->currentApplication]['id'];
+    $this->currentAppBit = TARGET_APPLICATION[$this->currentApplication]['bit'];
   }
 
  /********************************************************************************************************************
@@ -71,6 +73,7 @@ class classReadManifest {
     $query = null;
     $returnInactive = null;
     $returnUnreviewed = null;
+    $returnUserDisabled = null;
     $processContent = null;
     $xpInstallFixup = null;
 
@@ -116,6 +119,18 @@ class classReadManifest {
                   AND `type` IN ('extension', 'theme', 'external', 'langpack')";
         $queryResult = $GLOBALS['moduleDatabase']->query('row', $query, $aQueryData);
         break;
+      case 'r-panel-by-slug':
+        $returnInactive = true;
+        $returnUnreviewed = true;
+        $query = "SELECT *
+                  FROM `addonDB`
+                  JOIN `addonMetadata` ON addonDB.id = addonMetadata.id
+                  JOIN `addonVersions` ON addonDB.id = addonMetadata.id
+                  WHERE addonDB.slug = ?s
+                  AND addonVersions.version = addonDB.releaseVersion
+                  AND addonDB.type IN ('extension', 'theme', 'external', 'langpack')";
+        $queryResult = $GLOBALS['moduleDatabase']->query('row', $query, $aQueryData);
+      break;
       default:
         funcError(__CLASS__ . '::' . __FUNCTION__ . ' - Unknown query type');
     }

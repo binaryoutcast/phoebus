@@ -43,7 +43,7 @@ const BAD_ADDON_IDS = array(
 );
 
 // Include modules
-$arrayIncludes = ['database', 'readManifest', 'persona', 'generateContent'];
+$arrayIncludes = ['database', 'oldReadManifest', 'persona', 'generateContent'];
 
 if ($arraySoftwareState['tap']) {
   $arrayIncludes[] = 'tap';
