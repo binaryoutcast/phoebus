@@ -43,6 +43,7 @@ const MODULES = array(
   'generateContent' => ROOT_PATH . MODULES_RELPATH . 'classGenerateContent.php',
   'mozillaRDF'      => ROOT_PATH . MODULES_RELPATH . 'classMozillaRDF.php',
   'persona'         => ROOT_PATH . MODULES_RELPATH . 'classPersona.php',
+  'oldReadManifest' => ROOT_PATH . MODULES_RELPATH . 'classOldReadManifest.php',
   'readManifest'    => ROOT_PATH . MODULES_RELPATH . 'classReadManifest.php',
   'tap'             => ROOT_PATH . MODULES_RELPATH . 'classTap.php',
   'writeManifest'   => ROOT_PATH . MODULES_RELPATH . 'classWriteManifest.php',
@@ -98,7 +99,7 @@ const TARGET_APPLICATION = array(
     'features'      => array('https', 'extensions', 'themes', 'personas', 'search-plugins')
   ),
   'ambassador' => array(
-    'enabled'       => true,
+    'enabled'       => false,
     'id'            => '{4523665a-317f-4a66-9376-3763d1ad1978}',
     'bit'           => 8,
     'name'          => 'Ambassador',
@@ -125,10 +126,6 @@ const TARGET_APPLICATION = array(
     'features'      => array('extensions', 'themes', 'search-plugins', 'disable-xpinstall')
   ),
 );
-
-// ====================================================================================================================
-
-// == | Functions | ===================================================================================================
 
 require_once(ROOT_PATH . MODULES_RELPATH . 'basicFunctions.php');
 
