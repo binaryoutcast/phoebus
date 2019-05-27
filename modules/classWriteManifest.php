@@ -13,6 +13,7 @@ class classWriteManifest {
   * Class constructor that sets inital state of things
   ********************************************************************************************************************/
   function __construct() {  
+    funcError(__CLASS__ . ' is currently busted.');
     if (!funcCheckModule('database')) {
       funcError(__CLASS__ . '::' . __FUNCTION__ . ' - database is required to be included in the global scope');
     }
@@ -636,6 +637,7 @@ class classWriteManifest {
       'mattatobin.com',
       'mozilla.org',
       'lootyhoof-pm',
+      'srazzano.com' // BANNED FOR LIFE
     );
 
     // ----------------------------------------------------------------------------------------------------------------
