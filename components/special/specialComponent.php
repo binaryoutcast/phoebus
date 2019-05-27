@@ -41,6 +41,9 @@ switch ($strStripPath) {
     $moduleAccount->authenticate();
     funcGenerateContent('Authenticated Software State', $arraySoftwareState);
     break;
+  case 'restructure':
+    require_once($strComponentPath . 'migrateRestructure.php');
+    break;
   case 'test':
     $arraySoftwareState['requestTestCase'] = funcUnifiedVariable('get', 'case');
     $arrayTestsGlob = glob($strComponentPath . 'tests/*.php');
@@ -67,10 +70,11 @@ switch ($strStripPath) {
 
     $testsHTML = '<ul>' . $testsHTML . '</ul>';
 
-    funcGenerateContent('Special Test Cases', $testsHTML);
+    funcGenerateContent('Test Cases - Special Component', $testsHTML);
     break;
   default:
-    $rootHTML = '<a href="/special/test/">Test Cases</a></li><li>' .
+    $rootHTML = '<a href="/special/restructure/">Restructure SQL Data</a></li><li>' . 
+                '<a href="/special/test/">Test Cases</a></li><li>' .
                 '<a href="/special/phpinfo/">PHP Info</a></li><li>' .
                 '<a href="/special/software-state/">Authenticated Software State</a>';
     funcGenerateContent('Special Component', $rootHTML, null, true);

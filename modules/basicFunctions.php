@@ -49,6 +49,10 @@ function funcGenerateContent($aTitle, $aContent, $aTextBox = null, $aList = null
                   '<title>' . $aTitle . ' - ' . SOFTWARE_NAME . ' ' . SOFTWARE_VERSION . '</title>',
                   $templateHead);
 
+  if (contains(SOFTWARE_VERSION, 'a') || contains(SOFTWARE_VERSION, 'b') || contains(SOFTWARE_VERSION, 'pre')) {
+    $templateHead = str_replace('<!-- Special -->', '<li><a href="/special/">Special</a></li>', $templateHead);
+  }
+
   // If we are generating an error from funcError we want to clean the output buffer
   if ($aError) {
     ob_get_clean();
