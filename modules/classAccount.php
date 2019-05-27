@@ -20,6 +20,7 @@
 class classAccount {
   public $validationEmail;
   private $postData;
+  private $banned;
 
   /********************************************************************************************************************
   * Class constructor that sets inital state of things
@@ -38,12 +39,16 @@ class classAccount {
       'email'         => funcUnifiedVariable('post', 'email'),
       'verification'  => funcUnifiedVariable('post', 'verification'),
     );
+
+    $this->banned = array(
+      'srazzano'
+    );
   }
 
   /********************************************************************************************************************
   * Register an account
   ********************************************************************************************************************/
-  public function registerUser() {
+  public function registerUser() {   
     $regex = '/[^a-z0-9_\-]/';
 
     $this->postData['active'] = false;
@@ -86,6 +91,14 @@ class classAccount {
     if ($isUsernameOrEmailExisting || $isEmailBlacklisted) {
       funcError('Your username or e-mail address is not available. Please select another.</li>' .
                 '<li>You may only have one account per valid e-mail address.');
+    }
+
+    foreach ($this->banned as $_value) {
+      if (contains($this->postData['username'], $_value) || contains($this->postData['email'], $_value)) {
+        funcError('Yourself or someone like you has been permanently banned from using this software and service.</li><li>' . 
+                  'If this automatic determination is in error please contact the Add-ons Team or a Phoebus Administrator.</li><li>' .
+                  'Have a nice day!');
+      };
     }
 
     $code = $this->generateCode($this->postData['username'], $this->postData['email']);
@@ -450,7 +463,7 @@ class classAccount {
   private function checkEmailAgainstBlacklist($aEmailAddress) {
     // E-mail blacklist $emailBlacklistDB
     require_once(DATABASES['emailBlacklist']);
-
+    
     // Check passed email address against blacklist
     foreach($emailBlacklistDB as $_value) {
       if (fnmatch($_value, $aEmailAddress)) {

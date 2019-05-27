@@ -4,9 +4,9 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 class classDatabase {
+  public $connection;
   private $arraySoftwareState;
   private $libSafeMySQL;
-  private $connection;
   
   /********************************************************************************************************************
   * Class constructor that sets inital state of things
@@ -74,7 +74,17 @@ class classDatabase {
         $result = $this->libSafeMySQL->getCol(...$aExtraArgs);
         break;
       case 'normal':
+      case 'standard':
         $result = $this->libSafeMySQL->query(...$aExtraArgs);
+        break;
+      case 'parse':
+        $result = $this->libSafeMySQL->parse(...$aExtraArgs);
+        break;
+      case 'singleRaw':
+        $result = mysqli_query($this->connection, $aExtraArgs[0]);
+        break;
+      case 'multiRaw':
+        $result = mysqli_multi_query($this->connection, $aExtraArgs[0]);
         break;
       default:
         funcError(__CLASS__ . '::' . __FUNCTION__ . ' - Unknown query type');
