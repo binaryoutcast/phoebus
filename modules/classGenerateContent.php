@@ -334,7 +334,7 @@ class classGenerateContent {
           $_addonType = 2;
           break;
         case 'langpack':
-          $_addonType = 6;
+          $_addonType = 8;
           break;
         default:
           $_addonType = 0;
