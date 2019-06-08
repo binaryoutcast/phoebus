@@ -196,7 +196,7 @@ switch ($arraySoftwareState['requestPath']) {
     $moduleGenerateContent->addonSite('cat-language-packs', 'Language Packs', $categoryManifest);
     break;
   case URI_DICTIONARIES:
-    funcRedirect('https://addons.thunderbird.net/en-US/thunderbird/language-tools/');
+    funcRedirect('http://repository.binaryoutcast.com/dicts/');
     break;
   case URI_SEARCHPLUGINS:
     // Search Engine Plugins Category
