@@ -389,7 +389,8 @@ class classReadManifest {
     // XXX: Why the fuck do we need this?
     // Set baseURL if applicable
     if ($addonManifest['type'] != 'external') {
-      $addonManifest['baseURL'] = 'http://' .
+      $forcedScheme = funcCheckEnabledFeature('https', true) ? 'https://' : 'http://';
+      $addonManifest['baseURL'] = $forcedScheme .
                                   $GLOBALS['arraySoftwareState']['currentDomain'] .
                                   '/?component=download&version=latest&id=';
     }

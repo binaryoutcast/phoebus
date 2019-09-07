@@ -119,7 +119,7 @@ $arraySoftwareState['requestMozXPIUpdate'] = funcUnifiedVariable('server', 'HTTP
 if (!$arraySoftwareState['requestAddonID'] || !$arraySoftwareState['requestAddonVersion'] ||
     !$arraySoftwareState['requestAppID'] || !$arraySoftwareState['requestAppVersion'] ||
     !$arraySoftwareState['requestAddonCompatMode']) {
-  if (!arraySoftwareState['debugMode']) {
+  if (!$arraySoftwareState['debugMode']) {
     // Send blank rdf response
     $moduleGenerateContent->addonUpdateService(null);
   }

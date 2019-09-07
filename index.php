@@ -16,7 +16,7 @@ define('ROOT_PATH', $_SERVER['DOCUMENT_ROOT']);
 
 // Define basic constants for the software
 const SOFTWARE_NAME       = 'Phoebus';
-const SOFTWARE_VERSION    = '2.0.3';
+const SOFTWARE_VERSION    = '2.0.4';
 const DATASTORE_RELPATH   = '/datastore/';
 const OBJ_RELPATH         = '/.obj/';
 const COMPONENTS_RELPATH  = '/components/';
@@ -392,6 +392,25 @@ function funcSend404() {
 }
 
 /**********************************************************************************************************************
+* Checks for enabled features
+*
+* @param $aFeature    feature
+* @param $aReturn     if true we will return a value else 404
+***********************************************************************************************************************/
+function funcCheckEnabledFeature($aFeature, $aReturn = null) {
+  $currentApplication = $GLOBALS['arraySoftwareState']['currentApplication'];
+  if (!in_array($aFeature, TARGET_APPLICATION_SITE[$currentApplication]['features'])) {
+    if(!$aReturn) {
+      funcSend404();
+    }
+
+    return null;
+  }
+
+  return true;
+}
+
+/**********************************************************************************************************************
 * Polyfills for missing functions
 * startsWith, endsWith, contains
 *
@@ -563,6 +582,15 @@ if (!$arraySoftwareState['currentApplication']) {
 if (!TARGET_APPLICATION_SITE[$arraySoftwareState['currentApplication']]['enabled']) {
   funcError('This ' . ucfirst($arraySoftwareState['currentApplication']) . ' Add-ons Site has been disabled. ' .
             'Please contact the Phoebus Administrator');
+}
+
+// --------------------------------------------------------------------------------------------------------------------
+
+// Freaks want https only so we will redirect everything if we are https enabled except for discover
+// This will be less hackish in the next version of Phoebus
+if ($arraySoftwareState['requestComponent'] != 'discover' &&
+    ($arraySoftwareState['currentScheme'] == 'http' && funcCheckEnabledFeature('https', true))) {
+  funcRedirect('https://' . $arraySoftwareState['currentDomain'] . $arraySoftwareState['phpRequestURI']);
 }
 
 // --------------------------------------------------------------------------------------------------------------------
