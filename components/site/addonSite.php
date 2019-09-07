@@ -43,25 +43,6 @@ function funcStripPath($aPath, $aPrefix) {
   return str_replace('/', '', str_replace($aPrefix, '', $aPath));
 }
 
-/**********************************************************************************************************************
-* Checks for enabled features
-*
-* @param $aFeature    feature
-* @param $aReturn     if true we will return a value else 404
-***********************************************************************************************************************/
-function funcCheckEnabledFeature($aFeature, $aReturn = null) {
-  $currentApplication = $GLOBALS['arraySoftwareState']['currentApplication'];
-  if (!in_array($aFeature, TARGET_APPLICATION_SITE[$currentApplication]['features'])) {
-    if(!$aReturn) {
-      funcSend404();
-    }
-
-    return null;
-  }
-
-  return true;
-}
-
 // ====================================================================================================================
 
 // == | Main | ========================================================================================================
