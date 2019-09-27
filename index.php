@@ -16,7 +16,7 @@ define('ROOT_PATH', $_SERVER['DOCUMENT_ROOT']);
 
 // Define basic constants for the software
 const SOFTWARE_NAME       = 'Phoebus';
-const SOFTWARE_VERSION    = '2.0.4';
+const SOFTWARE_VERSION    = '2.0.4.1';
 const DATASTORE_RELPATH   = '/datastore/';
 const OBJ_RELPATH         = '/.obj/';
 const COMPONENTS_RELPATH  = '/components/';
@@ -88,13 +88,13 @@ const TARGET_APPLICATION_SITE = array(
     'enabled'       => false,
     'name'          => 'Borealis Add-ons - Binary Outcast',
     'domain'        => array('live' => 'borealis-addons.binaryoutcast.com', 'dev' => null),
-    'features'      => array('extensions', 'search-plugins')
+    'features'      => array('https', 'extensions', 'themes', 'search-plugins')
   ),
   'interlink' => array(
     'enabled'       => true,
     'name'          => 'Interlink Add-ons - Binary Outcast',
     'domain'        => array('live' => 'interlink-addons.binaryoutcast.com', 'dev' => null),
-    'features'      => array('extensions', 'themes', 'search-plugins', 'disable-xpinstall')
+    'features'      => array('https', 'extensions', 'themes', 'search-plugins', 'disable-xpinstall')
   ),
 );
 
@@ -582,15 +582,6 @@ if (!$arraySoftwareState['currentApplication']) {
 if (!TARGET_APPLICATION_SITE[$arraySoftwareState['currentApplication']]['enabled']) {
   funcError('This ' . ucfirst($arraySoftwareState['currentApplication']) . ' Add-ons Site has been disabled. ' .
             'Please contact the Phoebus Administrator');
-}
-
-// --------------------------------------------------------------------------------------------------------------------
-
-// Freaks want https only so we will redirect everything if we are https enabled except for discover
-// This will be less hackish in the next version of Phoebus
-if ($arraySoftwareState['requestComponent'] != 'discover' &&
-    ($arraySoftwareState['currentScheme'] == 'http' && funcCheckEnabledFeature('https', true))) {
-  funcRedirect('https://' . $arraySoftwareState['currentDomain'] . $arraySoftwareState['phpRequestURI']);
 }
 
 // --------------------------------------------------------------------------------------------------------------------
