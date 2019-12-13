@@ -22,7 +22,7 @@ $strComponentPath = dirname(COMPONENTS[$arraySoftwareState['requestComponent']])
 $strStripPath = funcStripPath($arraySoftwareState['requestPath'], '/special/');
 
 if (!$arraySoftwareState['debugMode']) {
-  if ($strStripPath != 'phpinfo') {
+  if ($strStripPath != 'phpinfo' && $arraySoftwareState['phpRequestURI'] != '/special/test/?case=validator') {
     funcRedirect('/');
   }
 }
