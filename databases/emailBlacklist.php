@@ -618,6 +618,16 @@ $emailBlacklistDB = array(
   '*@zippymail.info',
   '*@zoaxe.com',
   '*@zoemail.org',
+  '*@moakt.cc',
+  '*@disbox.net',
+  '*@tmpmail.org',
+  '*@tmpmail.net',
+  '*@tmails.net',
+  '*@disbox.org',
+  '*@moakt.co',
+  '*@moakt.ws',
+  '*@bareed.ws',
+  '*@tmail.ws',
   '*disposable*'
 );
 ?>
