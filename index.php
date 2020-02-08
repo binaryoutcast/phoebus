@@ -118,6 +118,26 @@ const TARGET_APPLICATION_ID = array(
   'interlink'       => '{3550f703-e582-4d05-9a08-453d09bdfdc6}',
 );
 
+const EXTENSION_CATEGORY_SLUGS = array(
+  'alerts-and-updates' => 'Alerts &amp; Updates',
+  'appearance' => 'Appearance',
+  'bookmarks-and-tabs' => 'Bookmarks &amp; Tabs',
+  'download-management' => 'Download Management',
+  'feeds-news-and-blogging' => 'Feeds, News, &amp; Blogging',
+  'privacy-and-security' => 'Privacy &amp; Security',
+  'search-tools' => 'Search Tools',
+  'social-and-communication' => 'Social &amp; Communication',
+  'tools-and-utilities' => 'Tools &amp; Utilities',
+  'web-development' => 'Web Development',
+  'other' => 'Other'
+);
+
+const OTHER_CATEGORY_SLUGS = array(
+  'themes'                    => 'Themes',
+  'personas'                  => 'Personas',
+  'search-plugins'            => 'Search Plugins',
+  'language-packs'            => 'Language Packs',
+);
 
 // ====================================================================================================================
 
