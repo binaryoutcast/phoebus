@@ -132,6 +132,13 @@ const EXTENSION_CATEGORY_SLUGS = array(
   'other' => 'Other'
 );
 
+const OTHER_CATEGORY_SLUGS = array(
+  'themes'                    => 'Themes',
+  'personas'                  => 'Personas',
+  'search-plugins'            => 'Search Plugins',
+  'language-packs'            => 'Language Packs',
+);
+
 // ====================================================================================================================
 
 // == | Functions | ===================================================================================================
