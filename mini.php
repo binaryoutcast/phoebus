@@ -8,7 +8,7 @@
 if (!defined('ROOT_PATH')) {
   define('SOFTWARE_NAME', 'Compy');
   define('SOFTWARE_VERSION', '386');
-  require_once('./modules/basicFunctions.php');
+  require_once('./globalFunctions.php');
   $strTitle = 'strongbad_email.exe';
   $strMessage = 'ert+' . "\n" .
                 'y76p; \'0lu8jykee;u4p;e\'/Rh' . "\n" .

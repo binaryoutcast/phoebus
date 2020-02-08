@@ -30,39 +30,8 @@ class classReadManifest {
 
   // The current category slugs
   // There is also themes and language-packs in addition to the extension categories
-  const EXTENSION_CATEGORY_SLUGS = array(
-    'alerts-and-updates' => 'Alerts &amp; Updates',
-    'appearance' => 'Appearance',
-    'bookmarks-and-tabs' => 'Bookmarks &amp; Tabs',
-    'download-management' => 'Download Management',
-    'feeds-news-and-blogging' => 'Feeds, News, &amp; Blogging',
-    'privacy-and-security' => 'Privacy &amp; Security',
-    'search-tools' => 'Search Tools',
-    'social-and-communication' => 'Social &amp; Communication',
-    'tools-and-utilities' => 'Tools &amp; Utilities',
-    'web-development' => 'Web Development',
-    'other' => 'Other'
-  );
-
-  // ------------------------------------------------------------------------------------------------------------------
-
-  const LICENSES = array(
-      'Apache-2.0' => 'Apache License 2.0',
-      'Apache-1.1' => 'Apache License 1.1',
-      'BSD-3-Clause' => 'BSD 3-Clause',
-      'BSD-2-Clause' => 'BSD 2-Clause',
-      'GPL-3.0' => 'GNU General Public License 3.0',
-      'GPL-2.0' => 'GNU General Public License 2.0',
-      'LGPL-3.0' => 'GNU Lesser General Public License 3.0',
-      'LGPL-2.1' => 'GNU Lesser General Public License 2.1',
-      'AGPL-3.0' => 'GNU Affero General Public License v3',
-      'MIT' => 'MIT License',
-      'MPL-2.0' => 'Mozilla Public License 2.0',
-      'MPL-1.1' => 'Mozilla Public License 1.1',
-      'Custom' => 'Custom License',
-      'PD' => 'Public Domain',
-      'COPYRIGHT' => ''
-    );
+  const EXTENSION_CATEGORY_SLUGS = EXTENSION_CATEGORY_SLUGS;
+  const LICENSES = LICENSES;
 
   /********************************************************************************************************************
   * Class constructor that sets inital state of things
