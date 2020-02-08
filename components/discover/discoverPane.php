@@ -56,7 +56,7 @@ $strAMOButton = '<a class="amobutton" href="http://' . $arraySoftwareState['curr
 $strPageButtons = '';
 
 
-if (in_array('extensions-cat', TARGET_APPLICATION[$arraySoftwareState['currentApplication']]['features']) &&
+if (in_array('extensions-cat', TARGET_APPLICATION_SITE[$arraySoftwareState['currentApplication']]['features']) &&
     $arraySoftwareState['currentApplication'] == 'palemoon') {
   foreach (array_merge(EXTENSION_CATEGORY_SLUGS, OTHER_CATEGORY_SLUGS) as $_key => $_value) {
     $strCategoryURL = 'https://' . $arraySoftwareState['currentDomain'] . '/';
