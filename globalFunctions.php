@@ -206,7 +206,7 @@ function gfSuperVar($_type, $_value, $_allowFalsy = null) {
 * @param $_value    A module
 * @returns          true or null depending on if $_value is in $arrayIncludes
 **********************************************************************************************************************/
-function funcCheckModule($_value) {
+function gfEnsureModule($_value) {
   if (!array_key_exists('arrayIncludes', $GLOBALS)) {
     gfError('$arrayIncludes is not defined');
   }

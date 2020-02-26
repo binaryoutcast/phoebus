@@ -26,7 +26,7 @@ class classAccount {
   * Class constructor that sets inital state of things
   ********************************************************************************************************************/
   function __construct() {
-    if (!funcCheckModule('database')) {
+    if (!gfEnsureModule('database')) {
       gfError(__CLASS__ . '::' . __FUNCTION__ . ' - database module is required to be included in the global scope');
     }
 
