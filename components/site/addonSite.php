@@ -129,7 +129,7 @@ switch ($gaRuntime['requestPath']) {
       // We are using Extension Subcategories so generate a page that lists all the subcategories
       $moduleGenerateContent->addonSite('cat-extension-category',
                                         'Extensions',
-                                        classReadManifest::EXTENSION_CATEGORY_SLUGS);
+                                        EXTENSION_CATEGORY_SLUGS);
     }
 
     // We are doing an "All Extensions" Page
@@ -145,7 +145,7 @@ switch ($gaRuntime['requestPath']) {
     $moduleGenerateContent->addonSite('cat-all-extensions',
                                       'Extensions',
                                       $categoryManifest,
-                                      classReadManifest::EXTENSION_CATEGORY_SLUGS);
+                                      EXTENSION_CATEGORY_SLUGS);
     break;
   case URI_THEMES:
     // Themes Category
@@ -231,7 +231,7 @@ switch ($gaRuntime['requestPath']) {
       $strSlug = funcStripPath($gaRuntime['requestPath'], URI_EXTENSIONS);
 
       // See if the slug exists in the category array
-      if (!array_key_exists($strSlug, classReadManifest::EXTENSION_CATEGORY_SLUGS)) {
+      if (!array_key_exists($strSlug, EXTENSION_CATEGORY_SLUGS)) {
         gfRedirect('/addon/' . $strSlug);
       }
 
@@ -245,8 +245,8 @@ switch ($gaRuntime['requestPath']) {
 
       // We have extensions so generate the subcategory page
       $moduleGenerateContent->addonSite('cat-extensions',
-                                        'Extensions: ' . classReadManifest::EXTENSION_CATEGORY_SLUGS[$strSlug],
-                                        $categoryManifest, classReadManifest::EXTENSION_CATEGORY_SLUGS);
+                                        'Extensions: ' . EXTENSION_CATEGORY_SLUGS[$strSlug],
+                                        $categoryManifest, EXTENSION_CATEGORY_SLUGS);
     }
     // Add-on Page
     elseif (str_starts_with($gaRuntime['requestPath'], URI_ADDON_PAGE)) {

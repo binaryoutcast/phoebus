@@ -801,7 +801,7 @@ class classWriteManifest {
       // We support an em:license with a value matching the LICENSES array class constant in classReadManifest
       // Except for custom of course.. That will have to be done through the panel
       if ($this->validatorData['installManifest']['license'] ?? false) {
-        $arrayLicenses = array_keys(array_change_key_case($GLOBALS['moduleReadManifest']::LICENSES, CASE_LOWER));
+        $arrayLicenses = array_keys(array_change_key_case(LICENSES, CASE_LOWER));
         $licenseCode = strtolower($this->validatorData['installManifest']['license']);
     
         if (!in_array($licenseCode, $arrayLicenses) || $licenseCode == 'custom') {

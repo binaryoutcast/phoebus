@@ -184,11 +184,11 @@ switch ($gaRuntime['requestPanelTask']) {
 
         // Create an array to hold extra data to send to smarty
         // Such as the list of licenses
-        $arrayExtraData = array('licenses' => array_keys($moduleReadManifest::LICENSES));
+        $arrayExtraData = array('licenses' => array_keys(LICENSES));
 
         // Extensions need the associative array of extension categories as well
         if ($addonManifest['type'] != 'theme') {
-          $arrayExtraData['categories'] = $moduleReadManifest::EXTENSION_CATEGORY_SLUGS;
+          $arrayExtraData['categories'] = EXTENSION_CATEGORY_SLUGS;
         }
 
         $strMetadataType = 'addon';

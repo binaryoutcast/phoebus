@@ -8,7 +8,7 @@ if ($aQueryData == 'search-plugins') {
   return $this->getSearchPlugins();
 }
 
-$categories = array_merge(array_keys(self::EXTENSION_CATEGORY_SLUGS),
+$categories = array_merge(array_keys(EXTENSION_CATEGORY_SLUGS),
                          ['themes', 'language-packs', 'dictionaries']);
 
 if (!in_array($aQueryData, $categories)) {
@@ -25,13 +25,6 @@ class classReadManifest {
   private $addonManifest;
   private $addonTypes;
   private $querySelect;
-
-  // ------------------------------------------------------------------------------------------------------------------
-
-  // The current category slugs
-  // There is also themes and language-packs in addition to the extension categories
-  const EXTENSION_CATEGORY_SLUGS = EXTENSION_CATEGORY_SLUGS;
-  const LICENSES = LICENSES;
 
   /********************************************************************************************************************
   * Class constructor that sets inital state of things
