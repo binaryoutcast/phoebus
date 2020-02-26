@@ -243,12 +243,12 @@ function gfHeader($aHeader) {
         gfError($headers[$aHeader]);
       }
       else {
-        header($headers[$_value]);
+        header($headers[$aHeader]);
         exit();
       }
     }
 
-    header($headers[$_value]);
+    header($headers[$aHeader]);
   }
 }
 
