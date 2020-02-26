@@ -74,7 +74,7 @@ switch ($gaRuntime['requestPanelTask']) {
           }
 
           // Add-on Submitted go to edit metadata
-          funcRedirect(URI_ADMIN . '?task=update&what=metadata' . '&slug=' . $finalSlug);
+          gfRedirect(URI_ADMIN . '?task=update&what=metadata' . '&slug=' . $finalSlug);
         }
 
         // Generate the submit page
@@ -91,7 +91,7 @@ switch ($gaRuntime['requestPanelTask']) {
           }
 
           // External Submitted go to edit metadata
-          funcRedirect(URI_ADMIN . '?task=update&what=metadata' . '&slug=' . $finalSlug);
+          gfRedirect(URI_ADMIN . '?task=update&what=metadata' . '&slug=' . $finalSlug);
         }
 
         // Generate the submit page
@@ -140,7 +140,7 @@ switch ($gaRuntime['requestPanelTask']) {
           }
 
           // Add-on Submitted go to edit metadata
-          funcRedirect(URI_ADMIN . '?task=list&what=' . $finalType);
+          gfRedirect(URI_ADMIN . '?task=list&what=' . $finalType);
         }
 
         $moduleGenerateContent->addonSite('panel-update-release', 'Release new version', $addonManifest['slug']);
@@ -179,7 +179,7 @@ switch ($gaRuntime['requestPanelTask']) {
           }
 
           // Manifest updated go somewhere
-          funcRedirect(URI_ADMIN . '?task=list&what=' . $addonManifest['type'] . 's');
+          gfRedirect(URI_ADMIN . '?task=list&what=' . $addonManifest['type'] . 's');
         }
 
         // Create an array to hold extra data to send to smarty
@@ -234,7 +234,7 @@ switch ($gaRuntime['requestPanelTask']) {
           }
 
           // Manifest updated go somewhere
-          funcRedirect(URI_ADMIN . '?task=list&what=users');
+          gfRedirect(URI_ADMIN . '?task=list&what=users');
         }
 
         $moduleGenerateContent->addonSite('admin-edit-account-metadata',
@@ -262,7 +262,7 @@ switch ($gaRuntime['requestPanelTask']) {
             $moduleGenerateContent->addonSite('addon-bulk-upload-result', 'Bulk Upload Report', $finalResult);
           }
 
-          funcRedirect(URI_ADMIN . '?task=list&what=langpacks');
+          gfRedirect(URI_ADMIN . '?task=list&what=langpacks');
         }
 
         $moduleGenerateContent->addonSite('addon-bulk-upload-langpack', 'Bulk Upload Language Packs');

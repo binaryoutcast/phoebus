@@ -49,7 +49,7 @@ function funcCheckAccessLevel($aLevel, $aReturnNull = null) {
   }
 
   if (!$aReturnNull) {
-    funcRedirect('/panel/login/');
+    gfRedirect('/panel/login/');
   }
 
   return null;
@@ -70,11 +70,11 @@ $boolHasPostData = !empty($_POST);
 
 // The Panel can ONLY be used on HTTPS so redirect those sites without https to Pale Moon
 if (!in_array('https', TARGET_APPLICATION[$gaRuntime['currentApplication']]['features'])) {
-  funcRedirect('https://' . TARGET_APPLICATION['palemoon']['domain']['live'] . '/panel/');
+  gfRedirect('https://' . TARGET_APPLICATION['palemoon']['domain']['live'] . '/panel/');
 }
 
 if ($gaRuntime['currentScheme'] != 'https') {
-  funcRedirect('https://' . $gaRuntime['currentDomain'] . '/panel/');
+  gfRedirect('https://' . $gaRuntime['currentDomain'] . '/panel/');
 }
 
 // --------------------------------------------------------------------------------------------------------------------
@@ -105,16 +105,16 @@ switch ($gaRuntime['requestPath']) {
         gfError('Something has gone horribly wrong!');
       }
 
-      funcRedirect(URI_LOGIN);
+      gfRedirect(URI_LOGIN);
     }
     $moduleGenerateContent->addonSite('panel-account-validation', 'Account Verification');
     break;
   case URI_LOGIN:
     $moduleAccount->authenticate();
     if (funcCheckAccessLevel(3, true)) {
-      funcRedirect(URI_ADMIN);
+      gfRedirect(URI_ADMIN);
     }
-    funcRedirect(URI_DEV);
+    gfRedirect(URI_DEV);
     break;
   case URI_LOGOUT:
     $moduleAccount->authenticate('logout');

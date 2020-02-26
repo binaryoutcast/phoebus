@@ -8,7 +8,7 @@
 switch ($gaRuntime['requestPath']) {
   case URI_DEV:
     if (funcCheckAccessLevel(3, true)) {
-      funcRedirect(URI_ADMIN);
+      gfRedirect(URI_ADMIN);
     }
 
     $moduleGenerateContent->addonSite('developer-frontpage.xhtml', 'Add-on Developer');
@@ -16,7 +16,7 @@ switch ($gaRuntime['requestPath']) {
   case URI_ACCOUNT:
     // Users level 3 or above should use the administration codepath
     if (funcCheckAccessLevel(3, true)) {
-      funcRedirect(URI_ADMIN . '?task=update&what=user&slug=' . $gaRuntime['authentication']['username']);
+      gfRedirect(URI_ADMIN . '?task=update&what=user&slug=' . $gaRuntime['authentication']['username']);
     }
 
     $userManifest = $moduleAccount->getSingleUser($gaRuntime['authentication']['username'], true);
@@ -36,7 +36,7 @@ switch ($gaRuntime['requestPath']) {
       }
 
       // Manifest updated go somewhere
-      funcRedirect(URI_DEV);
+      gfRedirect(URI_DEV);
     }
 
     $moduleGenerateContent->addonSite('developer-account', 'Your Account', $gaRuntime['authentication']);
@@ -46,7 +46,7 @@ switch ($gaRuntime['requestPath']) {
     if ($gaRuntime['requestPath'] == URI_ADDONS && !$gaRuntime['requestPanelTask']) {
       // Users level 3 or above should use the administration codepath
       if (funcCheckAccessLevel(3, true)) {
-        funcRedirect(URI_ADMIN . '?task=list&what=user-addons&slug=' . $gaRuntime['authentication']['username']);
+        gfRedirect(URI_ADMIN . '?task=list&what=user-addons&slug=' . $gaRuntime['authentication']['username']);
       }
 
       $addons = $moduleReadManifest->getAddons('panel-user-addons', $gaRuntime['authentication']['addons']) ?? [];
@@ -55,7 +55,7 @@ switch ($gaRuntime['requestPath']) {
 
     // Users level 3 and above should redirect to the administration codepath
     if (funcCheckAccessLevel(3, true)) {
-      funcRedirect(str_replace(URI_ADDONS, URI_ADMIN, $gaRuntime['phpRequestURI']));
+      gfRedirect(str_replace(URI_ADDONS, URI_ADMIN, $gaRuntime['phpRequestURI']));
     }
 
     switch ($gaRuntime['requestPanelTask']) {
@@ -75,7 +75,7 @@ switch ($gaRuntime['requestPath']) {
               }
 
               // Add-on Submitted go to edit metadata
-              funcRedirect(URI_ADDONS . '?task=update&what=metadata' . '&slug=' . $finalSlug);
+              gfRedirect(URI_ADDONS . '?task=update&what=metadata' . '&slug=' . $finalSlug);
             }
 
             // Generate the submit page
@@ -114,7 +114,7 @@ switch ($gaRuntime['requestPath']) {
               }
 
               // Add-on Submitted go to edit metadata
-              funcRedirect(URI_ADDONS);
+              gfRedirect(URI_ADDONS);
             }
 
             $moduleGenerateContent->addonSite('panel-update-release', 'Release new version Add-on', $addonManifest['slug']);
@@ -147,7 +147,7 @@ switch ($gaRuntime['requestPath']) {
               }
 
               // Manifest updated go somewhere
-              funcRedirect(URI_ADDONS);
+              gfRedirect(URI_ADDONS);
             }
 
             // Create an array to hold extra data to send to smarty

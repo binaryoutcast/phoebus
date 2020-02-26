@@ -70,18 +70,18 @@ if ($gaRuntime['requestAPIScope'] == 'internal') {
 elseif ($gaRuntime['requestAPIScope'] == 'external') {
   switch ($gaRuntime['requestAPIFunction']) {
     case 'search':
-      funcRedirect(
+      gfRedirect(
         '/search/?terms=' . $gaRuntime['requestAPISearchQuery']
       );
     case 'themes':
-      funcRedirect('/themes/');
+      gfRedirect('/themes/');
     case 'searchplugins':
-      funcRedirect('/search-plugins/');
+      gfRedirect('/search-plugins/');
     case 'devtools':
-      funcRedirect('/extensions/web-development/');
+      gfRedirect('/extensions/web-development/');
     case 'recommended':
     default:
-      funcRedirect('/');
+      gfRedirect('/');
   }
 }
 

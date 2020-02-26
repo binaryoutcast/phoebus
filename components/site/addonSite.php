@@ -93,7 +93,7 @@ switch ($gaRuntime['requestPath']) {
   case URI_ROOT:
     // Special Case: Interlink should go to Extensions instead of a front page
     if ($gaRuntime['currentApplication'] == 'interlink') {
-      funcRedirect('/extensions/');
+      gfRedirect('/extensions/');
     }
 
     // Front Page
@@ -196,7 +196,7 @@ switch ($gaRuntime['requestPath']) {
     $moduleGenerateContent->addonSite('cat-language-packs', 'Language Packs', $categoryManifest);
     break;
   case URI_DICTIONARIES:
-    funcRedirect('https://addons.thunderbird.net/en-US/thunderbird/language-tools/');
+    gfRedirect('https://addons.thunderbird.net/en-US/thunderbird/language-tools/');
     break;
   case URI_SEARCHPLUGINS:
     // Search Engine Plugins Category
@@ -218,7 +218,7 @@ switch ($gaRuntime['requestPath']) {
   case URI_ADDON_RELEASES:
   case URI_ADDON_LICENSE:
     // These have no content so send the client back to root
-    funcRedirect(URI_ROOT);
+    gfRedirect(URI_ROOT);
     break;
   default:
     // Complex URIs need more complex conditional checking
@@ -232,7 +232,7 @@ switch ($gaRuntime['requestPath']) {
 
       // See if the slug exists in the category array
       if (!array_key_exists($strSlug, classReadManifest::EXTENSION_CATEGORY_SLUGS)) {
-        funcRedirect('/addon/' . $strSlug);
+        gfRedirect('/addon/' . $strSlug);
       }
 
       // Query SQL for extensions in this specific category
@@ -295,7 +295,7 @@ switch ($gaRuntime['requestPath']) {
 
       // If there is a licenseURL then redirect to it
       if ($addonManifest['licenseURL']) {
-        funcRedirect($addonManifest['licenseURL']);
+        gfRedirect($addonManifest['licenseURL']);
       }
       
       // If the license is public domain, copyright, or custom then we want to generate a page for it
@@ -311,7 +311,7 @@ switch ($gaRuntime['requestPath']) {
       }
 
       // The license is assumed to be an OSI license so redirect there
-      funcRedirect('https://opensource.org/licenses/' . $addonManifest['license']);
+      gfRedirect('https://opensource.org/licenses/' . $addonManifest['license']);
     }
 
     // There are no matches so 404

@@ -73,7 +73,7 @@ if ($gaRuntime['tap']) {
 * @param $aAppVersion   Application Version that we are claiming to be
 **********************************************************************************************************************/
 function funcSendToAMO($aAppID, $aAppVersion) {
-  funcRedirect( 
+  gfRedirect( 
     'https://versioncheck.addons.mozilla.org/update/VersionCheck.php?reqVersion=2' .
     '&id=' . $GLOBALS['gaRuntime']['requestAddonID'] .
     '&version=' . $GLOBALS['gaRuntime']['requestAddonVersion'] .

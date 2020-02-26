@@ -23,7 +23,7 @@ $strStripPath = funcStripPath($gaRuntime['requestPath'], '/special/');
 
 if (!$gaRuntime['debugMode']) {
   if ($strStripPath != 'phpinfo') {
-    funcRedirect('/');
+    gfRedirect('/');
   }
 }
 

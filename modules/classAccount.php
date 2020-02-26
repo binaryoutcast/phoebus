@@ -381,7 +381,7 @@ class classAccount {
 
     // Not validated then send to validation page
     if ($userManifest['extraData']['verification']) {
-      funcRedirect(URI_VERIFY);
+      gfRedirect(URI_VERIFY);
     }
 
     // Deal with inactive users.. If inactive prompt forever
@@ -393,7 +393,7 @@ class classAccount {
     // Levels 1 and 2 need to add their email and displayName so force them
     if ($userManifest['level'] < 3 && $GLOBALS['gaRuntime']['requestPath'] != '/panel/account/') {
       if (!$userManifest['email'] || !$userManifest['displayName']) {
-        funcRedirect('/panel/account/');
+        gfRedirect('/panel/account/');
       }
     }
 

@@ -257,8 +257,8 @@ function gfHeader($aHeader) {
 * @param $_strURL   URL to redirect to
 **********************************************************************************************************************/
 // This function sends a redirect header
-function funcRedirect($_strURL) {
-	header('Location: ' . $_strURL , true, 302);
+function gfRedirect($aURL) {
+	header('Location: ' . $aURL , true, 302);
   
   // We are done here
   exit();
