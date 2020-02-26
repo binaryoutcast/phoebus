@@ -129,7 +129,7 @@ foreach ($arrayFilterSubstitute as $_key => $_value) {
   $strHTMLTemplate = str_replace($_key, $_value, $strHTMLTemplate);
 }
 
-funcSendHeader('html');
+gfHeader('html');
 print($strHTMLTemplate);
 
 // We are done here...

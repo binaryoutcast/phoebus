@@ -92,7 +92,7 @@ $gaRuntime['requestPersona'] = gfSuperVar('get', 'persona');
 if ($gaRuntime['requestPersona']) {
   $personaManifest = $modulePersona->getPersonaByID($gaRuntime['requestPersona']);
 
-  funcSendHeader('json');
+  gfHeader('json');
 
   if (!$personaManifest) {
     print('{}');

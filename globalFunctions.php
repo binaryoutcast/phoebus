@@ -223,7 +223,7 @@ function gfEnsureModule($_value) {
 *
 * @param $_value    Short name of header
 **********************************************************************************************************************/
-function funcSendHeader($_value) {
+function gfHeader($_value) {
   $_arrayHeaders = array(
     '404'           => 'HTTP/1.0 404 Not Found',
     '501'           => 'HTTP/1.0 501 Not Implemented',
@@ -266,7 +266,7 @@ function funcRedirect($_strURL) {
 ***********************************************************************************************************************/
 function funcSend404() {
   if (!$GLOBALS['gaRuntime']['debugMode']) {
-    funcSendHeader('404');
+    gfHeader('404');
   }
   gfError('404 - Not Found');
 }

@@ -60,7 +60,7 @@ if ($gaRuntime['requestAPIScope'] == 'internal') {
       $moduleGenerateContent->amSearch($searchManifest);
     case 'recommended':
       // This is apperently not used anymore but provide an empty response
-      funcSendHeader('xml');
+      gfHeader('xml');
       print('<?xml version="1.0" encoding="utf-8" ?>' . NEW_LINE . '<addons />');
       exit();
     default:

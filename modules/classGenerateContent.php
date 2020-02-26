@@ -222,7 +222,7 @@ class classGenerateContent {
     }
 
     // Send html header
-    funcSendHeader('html');
+    gfHeader('html');
     
     // Send the final template to smarty and output
     $this->libSmarty->display('string:' . $finalTemplate);
@@ -245,7 +245,7 @@ class classGenerateContent {
 
     if (!$aAddonManifest) {
       // Send XML header
-      funcSendHeader('xml');
+      gfHeader('xml');
 
       // Print XML Tag and Empty RDF Response
       print(self::XML_TAG . NEW_LINE . self::RDF_AUS_BLANK);
@@ -280,7 +280,7 @@ class classGenerateContent {
     }
 
     // Send XML header
-    funcSendHeader('xml');
+    gfHeader('xml');
 
     // Print Update RDF
     print($updateRDF);
@@ -297,7 +297,7 @@ class classGenerateContent {
   public function amSearch($aSearchManifest = null) {
     if (!$aSearchManifest) {
       // Send XML header
-      funcSendHeader('xml');
+      gfHeader('xml');
 
       // Print XML Tag and Empty RDF Response
       print(self::XML_TAG . NEW_LINE . self::XML_API_SEARCH_BLANK);
@@ -368,7 +368,7 @@ class classGenerateContent {
     $searchXML .= '</searchresults>';
     
     // Send XML header
-    funcSendHeader('xml');
+    gfHeader('xml');
 
     // Print Update RDF
     print($searchXML);

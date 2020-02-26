@@ -352,7 +352,7 @@ class classAccount {
     // It will not work without javascript or on IE but then again neither will the PANEL
     if ($aLogout) {
       $url = 'https://logout:logout@' . $GLOBALS['gaRuntime']['currentDomain'] . '/panel/logout/';
-      funcSendHeader('html');
+      gfHeader('html');
       die(
         '<html><head><script>' .
         'var xmlHttp = new XMLHttpRequest();' .

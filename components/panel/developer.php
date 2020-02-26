@@ -170,7 +170,7 @@ switch ($gaRuntime['requestPath']) {
         }
         break;
       default:
-        funcSendHeader('501');
+        gfHeader('501');
     }
     break;
 }

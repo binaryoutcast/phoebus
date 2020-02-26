@@ -41,7 +41,7 @@ if (!$gaRuntime['requestComponent'] && !$gaRuntime['requestPath']) {
 
 switch ($gaRuntime['requestComponent']) {
   case 'aus':
-    funcSendHeader('xml');
+    gfHeader('xml');
     print('<?xml version="1.0" encoding="UTF-8"?><RDF:RDF xmlns:RDF="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:em="http://www.mozilla.org/2004/em-rdf#" />');
     exit();
     break;
@@ -49,22 +49,22 @@ switch ($gaRuntime['requestComponent']) {
     $gaRuntime['requestAPIScope'] = gfSuperVar('get', 'type');
     $gaRuntime['requestAPIFunction'] = gfSuperVar('get', 'request');
     if ($gaRuntime['requestAPIScope'] != 'internal') {
-      funcSendHeader('404');
+      gfHeader('404');
     }
     switch ($gaRuntime['requestAPIFunction']) {
       case 'search':
-        funcSendHeader('xml');
+        gfHeader('xml');
         print('<?xml version="1.0" encoding="utf-8" ?><searchresults total_results="0" />');
         exit();
         break;      
       case 'get':
       case 'recommended':
-        funcSendHeader('xml');
+        gfHeader('xml');
         print('<?xml version="1.0" encoding="utf-8" ?><addons />');
         exit();
         break;
       default:
-        funcSendHeader('404');
+        gfHeader('404');
     }
     break;
   case 'discover': funcSend404();
