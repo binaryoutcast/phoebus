@@ -111,7 +111,7 @@ function gfError($aValue, $aMode = 0) {
 * PHP Error Handler
 **********************************************************************************************************************/
 
-function funcPHPErrorHandler($errno, $errstr, $errfile, $errline) {
+function gfErrorHandler($errno, $errstr, $errfile, $errline) {
   $errorCodes = array(
     E_ERROR => 'Fatal Error',
     E_WARNING => 'Warning',
@@ -140,7 +140,7 @@ function funcPHPErrorHandler($errno, $errstr, $errfile, $errline) {
   }
 }
 
-set_error_handler("funcPHPErrorHandler");
+set_error_handler("gfErrorHandler");
 
 /**********************************************************************************************************************
 * Unified Var Checking
