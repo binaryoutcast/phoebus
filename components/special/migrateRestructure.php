@@ -109,7 +109,7 @@ if ($strRequestSlug) {
     funcError('Unknown slug or is an external');
   }
 
-  funcGenerateContent('Restructured Data', funcRestructureAddons($addonManifest));
+  gfGenContent('Restructured Data', funcRestructureAddons($addonManifest));
 }
 
 // --------------------------------------------------------------------------------------------------------------------
@@ -172,14 +172,14 @@ if ($strRequestProcess) {
     funcError('Something when very VERY wrong when executing the massive SQL operation...');
   }
 
-  funcGenerateContent('Restructured Data - Query Statements', $result);
+  gfGenContent('Restructured Data - Query Statements', $result);
 }
 
 // --------------------------------------------------------------------------------------------------------------------
 
 
 // Output an array containing every statement
-funcGenerateContent('Restructured Data', $arrayRestructuredData);
+gfGenContent('Restructured Data', $arrayRestructuredData);
 
 // ====================================================================================================================
 

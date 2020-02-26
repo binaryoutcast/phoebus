@@ -1056,7 +1056,7 @@ class classWriteManifest {
           $validatorErrors .= '<li>' . $_value . '</li>';
         }
 
-        funcGenerateContent('Add-on Validator Error', '<ul>' . $validatorErrors . '</ul>');
+        gfGenContent('Add-on Validator Error', '<ul>' . $validatorErrors . '</ul>');
       }
 
       funcError($aErrorMessage);

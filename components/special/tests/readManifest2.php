@@ -15,7 +15,7 @@ $moduleReadManifest    = new classReadManifest();
 
 $addonManifest = $moduleReadManifest->getAddonsByType('extension', 'site');
 
-funcGenerateContent('Read Manifest 2', $addonManifest);
+gfGenContent('Read Manifest 2', $addonManifest);
 
 // ====================================================================================================================
 

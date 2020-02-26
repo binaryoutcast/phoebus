@@ -15,7 +15,7 @@ if (!defined('ROOT_PATH')) {
                 'Strong ba15456`-------++++++gf' . "\n" .
                 '+++++-//==========/*8901ikg' . "\n\n" .
                 'a>_';
-  funcGenerateContent($strTitle, $strMessage, true);
+  gfGenContent($strTitle, $strMessage, true);
 }
 
 $strOfflineMessage = 'Phoebus, and by extension this Add-ons Site, is currently unavailable. Please try again later.';

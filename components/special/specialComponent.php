@@ -39,7 +39,7 @@ switch ($strStripPath) {
     $moduleDatabase = new classDatabase();
     $moduleAccount = new classAccount();
     $moduleAccount->authenticate();
-    funcGenerateContent('Authenticated Software State', $gaRuntime);
+    gfGenContent('Authenticated Software State', $gaRuntime);
     break;
   case 'restructure':
     require_once($strComponentPath . 'migrateRestructure.php');
@@ -70,14 +70,14 @@ switch ($strStripPath) {
 
     $testsHTML = '<ul>' . $testsHTML . '</ul>';
 
-    funcGenerateContent('Test Cases - Special Component', $testsHTML);
+    gfGenContent('Test Cases - Special Component', $testsHTML);
     break;
   default:
     $rootHTML = '<a href="/special/restructure/">Restructure SQL Data</a></li><li>' . 
                 '<a href="/special/test/">Test Cases</a></li><li>' .
                 '<a href="/special/phpinfo/">PHP Info</a></li><li>' .
                 '<a href="/special/software-state/">Authenticated Software State</a>';
-    funcGenerateContent('Special Component', $rootHTML, null, true);
+    gfGenContent('Special Component', $rootHTML, null, true);
 }
 
 exit();

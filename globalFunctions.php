@@ -6,7 +6,7 @@
 /**********************************************************************************************************************
 * Basic Content Generation using the Special Component's Template
 ***********************************************************************************************************************/
-function funcGenerateContent($aTitle, $aContent, $aTextBox = null, $aList = null, $aError = null) {
+function gfGenContent($aTitle, $aContent, $aTextBox = null, $aList = null, $aError = null) {
   $templateHead = @file_get_contents('./components/special/skin/default/template-header.xhtml');
   $templateFooter = @file_get_contents('./components/special/skin/default/template-footer.xhtml');
 
@@ -93,15 +93,15 @@ function funcError($aValue, $aMode = 0) {
         print($varExport);
       }
       break;
-    case 1: funcGenerateContent($pageHeader['php'], $aValue, null, true, true);
+    case 1: gfGenContent($pageHeader['php'], $aValue, null, true, true);
             break;
-    // Deprecated, use funcGenerateContent
-    case 98: funcGenerateContent($pageHeader['output'], $jsonEncode, true);
+    // Deprecated, use gfGenContent
+    case 98: gfGenContent($pageHeader['output'], $jsonEncode, true);
              break;
-    // Deprecated, use funcGenerateContent
-    case 99: funcGenerateContent($pageHeader['output'], $varExport, true);
+    // Deprecated, use gfGenContent
+    case 99: gfGenContent($pageHeader['output'], $varExport, true);
              break;
-    default: funcGenerateContent($pageHeader['default'], $aValue, null, true, true);
+    default: gfGenContent($pageHeader['default'], $aValue, null, true, true);
   }
 
   exit();

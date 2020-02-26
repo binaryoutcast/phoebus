@@ -15,7 +15,7 @@ $moduleReadManifest    = new classReadManifest();
 
 $addonManifest = $moduleReadManifest->getAddon('panel-by-slug', 'abprime');
 
-funcGenerateContent('Resturctured Manifest', $addonManifest);
+gfGenContent('Resturctured Manifest', $addonManifest);
 
 // ====================================================================================================================
 
