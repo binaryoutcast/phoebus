@@ -46,8 +46,8 @@ switch ($arraySoftwareState['requestComponent']) {
     exit();
     break;
   case 'integration':
-    $arraySoftwareState['requestAPIScope'] = funcUnifiedVariable('get', 'type');
-    $arraySoftwareState['requestAPIFunction'] = funcUnifiedVariable('get', 'request');
+    $arraySoftwareState['requestAPIScope'] = gfSuperVar('get', 'type');
+    $arraySoftwareState['requestAPIFunction'] = gfSuperVar('get', 'request');
     if ($arraySoftwareState['requestAPIScope'] != 'internal') {
       funcSendHeader('404');
     }

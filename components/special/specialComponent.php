@@ -45,7 +45,7 @@ switch ($strStripPath) {
     require_once($strComponentPath . 'migrateRestructure.php');
     break;
   case 'test':
-    $arraySoftwareState['requestTestCase'] = funcUnifiedVariable('get', 'case');
+    $arraySoftwareState['requestTestCase'] = gfSuperVar('get', 'case');
     $arrayTestsGlob = glob($strComponentPath . 'tests/*.php');
     $arrayFinalTests = [];
 

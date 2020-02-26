@@ -45,7 +45,7 @@ class classGenerateContent {
       require_once(LIBRARIES['smarty']);
 
       // Get smartyDebug HTTP GET Argument
-      $GLOBALS['arraySoftwareState']['requestSmartyDebug'] = funcUnifiedVariable('get', 'smartyDebug');
+      $GLOBALS['arraySoftwareState']['requestSmartyDebug'] = gfSuperVar('get', 'smartyDebug');
 
       // Initalize Smarty
       $this->libSmarty = new Smarty();

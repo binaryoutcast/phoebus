@@ -136,12 +136,12 @@ class classReadManifest {
     foreach($queryResult as $_value) {
       $this->addonManifest = $_value;
       $this->processManifest($returnDisabled, true);
-      if (funcUnifiedVariable('var', $this->addonManifest)) {
+      if (gfSuperVar('var', $this->addonManifest)) {
         $addonManifests[] = $this->addonManifest;
       }
     }
 
-    if (!funcUnifiedVariable('var', $addonManifests)) {
+    if (!gfSuperVar('var', $addonManifests)) {
       return null;
     }
 
@@ -253,12 +253,12 @@ class classReadManifest {
     foreach($queryResult as $_value) {
       $this->addonManifest = $_value;
       $this->processManifest($returnDisabled, $returnUnreviewed);
-      if (funcUnifiedVariable('var', $this->addonManifest)) {
+      if (gfSuperVar('var', $this->addonManifest)) {
         $addonManifests[] = $this->addonManifest;
       }
     }
 
-    if (!funcUnifiedVariable('var', $addonManifests)) {
+    if (!gfSuperVar('var', $addonManifests)) {
       return null;
     }
 
@@ -313,12 +313,12 @@ class classReadManifest {
     foreach($queryResult as $_value) {
       $this->addonManifest = $_value;
       $this->processManifest($returnDisabled, $returnUnreviewed);
-      if (funcUnifiedVariable('var', $this->addonManifest)) {
+      if (gfSuperVar('var', $this->addonManifest)) {
         $addonManifests[] = $this->addonManifest;
       }
     }
 
-    if (!funcUnifiedVariable('var', $addonManifests)) {
+    if (!gfSuperVar('var', $addonManifests)) {
       return null;
     }
 
@@ -371,12 +371,12 @@ class classReadManifest {
     foreach($queryResult as $_value) {
       $this->addonManifest = $_value;
       $this->processManifest();
-      if (funcUnifiedVariable('var', $this->addonManifest)) {
+      if (gfSuperVar('var', $this->addonManifest)) {
         $addonManifests[] = $this->addonManifest;
       }
     }
 
-    if (!funcUnifiedVariable('var', $addonManifests)) {
+    if (!gfSuperVar('var', $addonManifests)) {
       return null;
     }
 
@@ -437,12 +437,12 @@ class classReadManifest {
     foreach($queryResult as $_value) {
       $this->addonManifest = $_value;
       $this->processManifest($returnDisabled, $returnUnreviewed);
-      if (funcUnifiedVariable('var', $this->addonManifest)) {
+      if (gfSuperVar('var', $this->addonManifest)) {
         $addonManifests[] = $this->addonManifest;
       }
     }
 
-    if (!funcUnifiedVariable('var', $addonManifests)) {
+    if (!gfSuperVar('var', $addonManifests)) {
       return null;
     }
 
@@ -685,7 +685,7 @@ class classReadManifest {
   * Internal method to generate a select string from $this->querySelect
   *******************************************************************************************************************/
   private function generateSelectString() {
-    if (!funcUnifiedVariable('var', $this->querySelect)) {
+    if (!gfSuperVar('var', $this->querySelect)) {
       return "addonBase.*, addonMetadata.*, addonVersions.*";
     }
 

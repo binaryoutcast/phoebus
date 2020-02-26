@@ -18,10 +18,10 @@ class classWriteManifest {
       funcError(__CLASS__ . '::' . __FUNCTION__ . ' - database is required to be included in the global scope');
     }
 
-    $this->xpiUpload          = funcUnifiedVariable('files', 'xpiUpload');
-    $this->iconUpload         = funcUnifiedVariable('files', 'iconUpload');
-    $this->previewUpload      = funcUnifiedVariable('files', 'previewUpload');
-    $this->bulkUpload         = funcUnifiedVariable('files', 'bulkUpload');
+    $this->xpiUpload          = gfSuperVar('files', 'xpiUpload');
+    $this->iconUpload         = gfSuperVar('files', 'iconUpload');
+    $this->previewUpload      = gfSuperVar('files', 'previewUpload');
+    $this->bulkUpload         = gfSuperVar('files', 'bulkUpload');
   }
 
   /********************************************************************************************************************
@@ -30,7 +30,7 @@ class classWriteManifest {
   public function submitNewAddon($aLangPack = null, $aAccumulateErrors = null) {
     // Populate Post Data with data from $_POST
     $this->postData = array(
-      'slug'          => funcUnifiedVariable('post', 'slug'),
+      'slug'          => gfSuperVar('post', 'slug'),
     );
 
     if (!$aLangPack) {
@@ -147,7 +147,7 @@ class classWriteManifest {
   public function updateAddonRelease($aAddonManifest, $aLangPack = null, $aAccumulateErrors = null) {
     // Populate Post Data with data from $_POST
     $this->postData = array(
-      'slug'          => funcUnifiedVariable('post', 'slug'),
+      'slug'          => gfSuperVar('post', 'slug'),
     );
 
     if (!$aAccumulateErrors) {
@@ -248,18 +248,18 @@ class classWriteManifest {
   public function updateAddonMetadata($aAddonManifest) {
     // Populate Post Data with data from $_POST
     $this->postData = array(
-      'slug'          => funcUnifiedVariable('post', 'slug'),
-      'active'        => (bool)funcUnifiedVariable('post', 'active'),
-      'reviewed'      => (bool)funcUnifiedVariable('post', 'reviewed'),
-      'category'      => funcUnifiedVariable('post', 'category'),
-      'license'       => funcUnifiedVariable('post', 'license'),
-      'licenseText'   => funcUnifiedVariable('post', 'licenseText'),
-      'repository'    => funcUnifiedVariable('post', 'repository'),
-      'supportURL'    => funcUnifiedVariable('post', 'supportURL'),
-      'supportEmail'  => funcUnifiedVariable('post', 'supportEmail'),
-      'tags'          => funcUnifiedVariable('post', 'tags'),
+      'slug'          => gfSuperVar('post', 'slug'),
+      'active'        => (bool)gfSuperVar('post', 'active'),
+      'reviewed'      => (bool)gfSuperVar('post', 'reviewed'),
+      'category'      => gfSuperVar('post', 'category'),
+      'license'       => gfSuperVar('post', 'license'),
+      'licenseText'   => gfSuperVar('post', 'licenseText'),
+      'repository'    => gfSuperVar('post', 'repository'),
+      'supportURL'    => gfSuperVar('post', 'supportURL'),
+      'supportEmail'  => gfSuperVar('post', 'supportEmail'),
+      'tags'          => gfSuperVar('post', 'tags'),
       'url'           => '/addon/' . $aAddonManifest['slug'] . '/',
-      'content'       => funcUnifiedVariable('post', 'content')
+      'content'       => gfSuperVar('post', 'content')
     );
 
     // Sanity
@@ -318,7 +318,7 @@ class classWriteManifest {
   public function submitNewExternal() {
     // Populate Post Data with data from $_POST
     $this->postData = array(
-      'slug'          => funcUnifiedVariable('post', 'slug'),
+      'slug'          => gfSuperVar('post', 'slug'),
       'active'        => false,
       'reviewed'      => true,
       'type'          => 'external'
@@ -355,22 +355,22 @@ class classWriteManifest {
   public function updateExternalMetadata($aAddonManifest) {
     // Populate Post Data with data from $_POST
     $this->postData = array(
-      'slug'          => funcUnifiedVariable('post', 'slug'),
-      'active'        => (bool)funcUnifiedVariable('post', 'active'),
+      'slug'          => gfSuperVar('post', 'slug'),
+      'active'        => (bool)gfSuperVar('post', 'active'),
       'reviewed'      => true,
-      'category'      => funcUnifiedVariable('post', 'category'),
-      'name'          => funcUnifiedVariable('post', 'name'),
-      'description'   => funcUnifiedVariable('post', 'description'),
-      'url'           => funcUnifiedVariable('post', 'url'),
-      'tags'          => funcUnifiedVariable('post', 'tags'),
+      'category'      => gfSuperVar('post', 'category'),
+      'name'          => gfSuperVar('post', 'name'),
+      'description'   => gfSuperVar('post', 'description'),
+      'url'           => gfSuperVar('post', 'url'),
+      'tags'          => gfSuperVar('post', 'tags'),
     );
 
     $arrayApplications = array(
-      'palemoon'      => (bool)funcUnifiedVariable('post', 'palemoon'),
-      'basilisk'      => (bool)funcUnifiedVariable('post', 'basilisk'),
-      'ambassador'    => (bool)funcUnifiedVariable('post', 'ambassador'),
-      'borealis'      => (bool)funcUnifiedVariable('post', 'borealis'),
-      'interlink'     => (bool)funcUnifiedVariable('post', 'interlink'),
+      'palemoon'      => (bool)gfSuperVar('post', 'palemoon'),
+      'basilisk'      => (bool)gfSuperVar('post', 'basilisk'),
+      'ambassador'    => (bool)gfSuperVar('post', 'ambassador'),
+      'borealis'      => (bool)gfSuperVar('post', 'borealis'),
+      'interlink'     => (bool)gfSuperVar('post', 'interlink'),
     );
 
     // Sanity
@@ -901,7 +901,7 @@ class classWriteManifest {
   * Read file from zip
   ********************************************************************************************************************/
   private function readFileFromArchive($aArchive, $aFile, $aCheckExistance = null) {
-    $file = funcUnifiedVariable('var', @file_get_contents('zip://' . $aArchive . "#" . $aFile));
+    $file = gfSuperVar('var', @file_get_contents('zip://' . $aArchive . "#" . $aFile));
 
     if (!$file) {
       return null;

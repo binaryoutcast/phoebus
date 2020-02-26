@@ -29,10 +29,10 @@ if ($arraySoftwareState['tap']) {
 // == | Main | ========================================================================================================
 
 // Assign HTTP GET arguments to the software state
-$arraySoftwareState['requestAPIScope'] = funcUnifiedVariable('get', 'type');
-$arraySoftwareState['requestAPIFunction'] = funcUnifiedVariable('get', 'request');
-$arraySoftwareState['requestAPISearchQuery'] = funcUnifiedVariable('get', 'q');
-$arraySoftwareState['requestAPISearchGUID'] = funcUnifiedVariable('get', 'addonguid');
+$arraySoftwareState['requestAPIScope'] = gfSuperVar('get', 'type');
+$arraySoftwareState['requestAPIFunction'] = gfSuperVar('get', 'request');
+$arraySoftwareState['requestAPISearchQuery'] = gfSuperVar('get', 'q');
+$arraySoftwareState['requestAPISearchGUID'] = gfSuperVar('get', 'addonguid');
 
 // --------------------------------------------------------------------------------------------------------------------
 

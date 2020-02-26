@@ -21,20 +21,20 @@ $arraySoftwareState = array(
   'currentApplication'  => null,
   'orginalApplication'  => null,
   'currentSiteTitle'    => null,
-  'currentScheme'       => funcUnifiedVariable('server', 'SCHEME'),
+  'currentScheme'       => gfSuperVar('server', 'SCHEME'),
   'currentDomain'       => null,
   'debugMode'           => null,
-  'tap'                 => funcUnifiedVariable('var', file_exists(ROOT_PATH . '/.tap')),
-  'phpServerName'       => funcUnifiedVariable('server', 'SERVER_NAME'),
-  'phpRequestURI'       => funcUnifiedVariable('server', 'REQUEST_URI'),
-  'remoteAddr'          => funcUnifiedVariable('server', 'HTTP_X_FORWARDED_FOR') ??
-                           funcUnifiedVariable('server', 'REMOTE_ADDR'),
-  'requestComponent'    => funcUnifiedVariable('get', 'component'),
-  'requestPath'         => funcUnifiedVariable('get', 'path'),
-  'requestApplication'  => funcUnifiedVariable('get', 'appOverride') ??
-                           funcUnifiedVariable('cookie', 'appOverride'),
-  'requestDebugOff'     => funcUnifiedVariable('get', 'debugOff'),
-  'requestSearchTerms'  => funcUnifiedVariable('get', 'terms')
+  'tap'                 => gfSuperVar('var', file_exists(ROOT_PATH . '/.tap')),
+  'phpServerName'       => gfSuperVar('server', 'SERVER_NAME'),
+  'phpRequestURI'       => gfSuperVar('server', 'REQUEST_URI'),
+  'remoteAddr'          => gfSuperVar('server', 'HTTP_X_FORWARDED_FOR') ??
+                           gfSuperVar('server', 'REMOTE_ADDR'),
+  'requestComponent'    => gfSuperVar('get', 'component'),
+  'requestPath'         => gfSuperVar('get', 'path'),
+  'requestApplication'  => gfSuperVar('get', 'appOverride') ??
+                           gfSuperVar('cookie', 'appOverride'),
+  'requestDebugOff'     => gfSuperVar('get', 'debugOff'),
+  'requestSearchTerms'  => gfSuperVar('get', 'terms')
 );
 
 // --------------------------------------------------------------------------------------------------------------------

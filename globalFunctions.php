@@ -150,7 +150,7 @@ set_error_handler("funcPHPErrorHandler");
 * @param $_allowFalsy     Optional - Allow falsey returns (really only works with case var)
 * @returns                Value or null
 **********************************************************************************************************************/
-function funcUnifiedVariable($_type, $_value, $_allowFalsy = null) {
+function gfSuperVar($_type, $_value, $_allowFalsy = null) {
   $finalValue = null;
 
   switch ($_type) {

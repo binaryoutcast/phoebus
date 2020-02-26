@@ -87,7 +87,7 @@ function funcSendToAMO($aAppID, $aAppVersion) {
 // == | Main | ========================================================================================================
 
 // Deal with Personas before anything else
-$arraySoftwareState['requestPersona'] = funcUnifiedVariable('get', 'persona');
+$arraySoftwareState['requestPersona'] = gfSuperVar('get', 'persona');
 
 if ($arraySoftwareState['requestPersona']) {
   $personaManifest = $modulePersona->getPersonaByID($arraySoftwareState['requestPersona']);
@@ -106,12 +106,12 @@ if ($arraySoftwareState['requestPersona']) {
 // --------------------------------------------------------------------------------------------------------------------
 
 // Assign HTTP GET arguments to the software state
-$arraySoftwareState['requestAddonID'] = funcUnifiedVariable('get', 'id');
-$arraySoftwareState['requestAddonVersion'] = funcUnifiedVariable('get', 'version');
-$arraySoftwareState['requestAppID'] = funcUnifiedVariable('get', 'appID');
-$arraySoftwareState['requestAppVersion'] = funcUnifiedVariable('get', 'appVersion');
-$arraySoftwareState['requestAddonCompatMode'] = funcUnifiedVariable('get', 'compatMode');
-$arraySoftwareState['requestMozXPIUpdate'] = funcUnifiedVariable('server', 'HTTP_MOZ_XPI_UPDATE') ?? funcUnifiedVariable('get', 'updateOverride');
+$arraySoftwareState['requestAddonID'] = gfSuperVar('get', 'id');
+$arraySoftwareState['requestAddonVersion'] = gfSuperVar('get', 'version');
+$arraySoftwareState['requestAppID'] = gfSuperVar('get', 'appID');
+$arraySoftwareState['requestAppVersion'] = gfSuperVar('get', 'appVersion');
+$arraySoftwareState['requestAddonCompatMode'] = gfSuperVar('get', 'compatMode');
+$arraySoftwareState['requestMozXPIUpdate'] = gfSuperVar('server', 'HTTP_MOZ_XPI_UPDATE') ?? gfSuperVar('get', 'updateOverride');
 
 // --------------------------------------------------------------------------------------------------------------------
 

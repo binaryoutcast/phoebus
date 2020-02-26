@@ -31,13 +31,13 @@ class classAccount {
     }
 
     $this->postData = array(
-      'username'      => funcUnifiedVariable('post', 'username'),
-      'password'      => funcUnifiedVariable('post', 'password'),
-      'active'        => (bool)funcUnifiedVariable('post', 'active'),
-      'level'         => (int)funcUnifiedVariable('post', 'level'),
-      'displayName'   => funcUnifiedVariable('post', 'displayName'),
-      'email'         => funcUnifiedVariable('post', 'email'),
-      'verification'  => funcUnifiedVariable('post', 'verification'),
+      'username'      => gfSuperVar('post', 'username'),
+      'password'      => gfSuperVar('post', 'password'),
+      'active'        => (bool)gfSuperVar('post', 'active'),
+      'level'         => (int)gfSuperVar('post', 'level'),
+      'displayName'   => gfSuperVar('post', 'displayName'),
+      'email'         => gfSuperVar('post', 'email'),
+      'verification'  => gfSuperVar('post', 'verification'),
     );
 
     $this->banned = array(
@@ -341,8 +341,8 @@ class classAccount {
   ********************************************************************************************************************/
   public function authenticate($aLogout = null) {
     // Get Username and Password from HTTP Basic Authentication 
-    $strUsername = funcUnifiedVariable('server', 'PHP_AUTH_USER');
-    $strPassword = funcUnifiedVariable('server', 'PHP_AUTH_PW');
+    $strUsername = gfSuperVar('server', 'PHP_AUTH_USER');
+    $strPassword = gfSuperVar('server', 'PHP_AUTH_PW');
 
     // Check for the existance of username and password as well as the special 'logout' user
     if (!$strUsername || $strUsername == 'logout' || !$strPassword ) {
@@ -423,7 +423,7 @@ class classAccount {
   ********************************************************************************************************************/
   private function generateCode($aUsername, $aEmail) {
     $secretFile = ROOT_PATH . DATASTORE_RELPATH . '.phoebus/code';
-    $secret = funcUnifiedVariable('var', @file_get_contents(secretFile)) ?? time();
+    $secret = gfSuperVar('var', @file_get_contents(secretFile)) ?? time();
     $code = hash('sha256', time() . $aUsername . $aEmail . $secret);
     return $code;
   }
@@ -432,7 +432,7 @@ class classAccount {
   * Send a verification email
   ********************************************************************************************************************/
   private function sendVerificationEmail($aEmail, $aValidationCode) {
-    if (!funcUnifiedVariable('var', $aEmail)) {
+    if (!gfSuperVar('var', $aEmail)) {
       funcError('Unable to send verification email because it is null');
     }
 

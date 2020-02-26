@@ -122,7 +122,7 @@ switch ($arraySoftwareState['requestPath']) {
   case URI_EXTENSIONS:
     // Extensions Category (Top Level)
     // Find out if we should use Extension Subcategories or All Extensions
-    $arraySoftwareState['requestAllExtensions'] = funcUnifiedVariable('get', 'all');
+    $arraySoftwareState['requestAllExtensions'] = gfSuperVar('get', 'all');
     $useExtensionSubcategories = funcCheckEnabledFeature('extensions-cat', true);
 
     if ($useExtensionSubcategories && !$arraySoftwareState['requestAllExtensions']) {

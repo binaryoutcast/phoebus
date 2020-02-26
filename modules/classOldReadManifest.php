@@ -379,7 +379,7 @@ class classReadManifest {
     // If content exists, process it
     if ($processContent && array_key_exists('content', $addonManifest)) {
       // Check to ensure that there really is content
-      $addonManifest['content'] = funcUnifiedVariable('var', $addonManifest['content']);
+      $addonManifest['content'] = gfSuperVar('var', $addonManifest['content']);
 
       // Process content or assign description to it
       if ($addonManifest['content'] != null) {

@@ -14,8 +14,8 @@ $moduleDatabase        = new classDatabase();
 $moduleReadManifest    = new classReadManifest();
 
 // Request arguments
-$strRequestSlug = funcUnifiedVariable('get', 'slug');
-$strRequestProcess = funcUnifiedVariable('get', 'process');
+$strRequestSlug = gfSuperVar('get', 'slug');
+$strRequestProcess = gfSuperVar('get', 'process');
 
 // Inital vars
 $arrayRestructuredData = [];

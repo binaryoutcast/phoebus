@@ -90,7 +90,7 @@ class classDatabase {
         funcError(__CLASS__ . '::' . __FUNCTION__ . ' - Unknown query type');
     }
 
-    return funcUnifiedVariable('var', $result);
+    return gfSuperVar('var', $result);
   }
 }
 

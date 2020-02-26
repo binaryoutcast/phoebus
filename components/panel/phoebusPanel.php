@@ -29,9 +29,9 @@ $moduleWriteManifest                    = new classWriteManifest();
 $moduleGenerateContent                  = new classGenerateContent('smarty');
 
 // Request arguments
-$arraySoftwareState['requestPanelTask'] = funcUnifiedVariable('get', 'task');
-$arraySoftwareState['requestPanelWhat'] = funcUnifiedVariable('get', 'what');
-$arraySoftwareState['requestPanelSlug'] = funcUnifiedVariable('get', 'slug');
+$arraySoftwareState['requestPanelTask'] = gfSuperVar('get', 'task');
+$arraySoftwareState['requestPanelWhat'] = gfSuperVar('get', 'what');
+$arraySoftwareState['requestPanelSlug'] = gfSuperVar('get', 'slug');
 
 // ====================================================================================================================
 
