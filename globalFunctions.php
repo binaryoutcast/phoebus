@@ -240,7 +240,7 @@ function gfHeader($aHeader) {
     
     if (in_array($aHeader, [404, 501])) {
       if ($GLOBALS['gaRuntime']['debugMode']) {
-        gfError($headers[$aHeader] : 
+        gfError($headers[$aHeader]);
       }
       else {
         header($headers[$_value]);
