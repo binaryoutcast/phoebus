@@ -84,7 +84,7 @@ class classGenerateContent {
   public function addonSite($aType, $aTitle, $aData = null, $aExtraData = null) {
     // This function will only serve the SITE component
     if (!$this->libSmarty) {
-      funcError(__CLASS__ . '::' . __FUNCTION__ . ' - This method requires Smarty');
+      gfError(__CLASS__ . '::' . __FUNCTION__ . ' - This method requires Smarty');
     }
 
     // ----------------------------------------------------------------------------------------------------------------
@@ -93,14 +93,14 @@ class classGenerateContent {
     $template = $this->getContentTemplate('site-template.xhtml');
 
     if (!$template) {
-      funcError('Main template file could not be read or is missing');
+      gfError('Main template file could not be read or is missing');
     }
 
     // Read the Site Stylesheet
     $stylesheet = $this->getContentTemplate('site-stylesheet.css');
 
     if (!$stylesheet) {
-      funcError('Mail stylesheet file could not be read or is missing');
+      gfError('Mail stylesheet file could not be read or is missing');
     }
 
     // ----------------------------------------------------------------------------------------------------------------
@@ -176,12 +176,12 @@ class classGenerateContent {
       default:
         $content = $this->getContentTemplate($aType, 'content');
         if (!$content) {
-          funcError('Unkown template or content');
+          gfError('Unkown template or content');
         }
     }
 
     if (!$content) {
-      funcError('Content or template file could not be read or is missing');
+      gfError('Content or template file could not be read or is missing');
     }
 
     // ----------------------------------------------------------------------------------------------------------------
@@ -238,7 +238,7 @@ class classGenerateContent {
   ********************************************************************************************************************/
   public function addonUpdateService($aAddonManifest = null) {
     if ($GLOBALS['gaRuntime']['requestComponent'] != 'aus') {
-      funcError(
+      gfError(
         __CLASS__ . '::' . __FUNCTION__ . ' - This method is designed to work with the AUS component only'
       );
     }

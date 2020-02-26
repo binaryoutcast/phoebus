@@ -39,7 +39,7 @@ $gaRuntime['requestAPISearchGUID'] = gfSuperVar('get', 'addonguid');
 // Sanity
 if (!$gaRuntime['requestAPIScope'] ||
     !$gaRuntime['requestAPIFunction']) {
-  funcError('Missing minimum arguments (type or request)');
+  gfError('Missing minimum arguments (type or request)');
 }
 
 // --------------------------------------------------------------------------------------------------------------------
@@ -64,7 +64,7 @@ if ($gaRuntime['requestAPIScope'] == 'internal') {
       print('<?xml version="1.0" encoding="utf-8" ?>' . NEW_LINE . '<addons />');
       exit();
     default:
-      funcError('Unknown Internal Request');
+      gfError('Unknown Internal Request');
   }
 }
 elseif ($gaRuntime['requestAPIScope'] == 'external') {

@@ -60,7 +60,7 @@ function funcCheckAccessLevel($aLevel, $aReturnNull = null) {
 // == | Main | ========================================================================================================
 
 if (file_exists(ROOT_PATH . '/.disablePanel')) {
-  funcError('The Panel is currently unavailable. Please try again later.');
+  gfError('The Panel is currently unavailable. Please try again later.');
 }
 
 $strComponentPath = dirname(COMPONENTS[$gaRuntime['requestComponent']]) . '/';
@@ -89,7 +89,7 @@ switch ($gaRuntime['requestPath']) {
       $boolRegComplete = $moduleAccount->registerUser();
 
       if (!$boolRegComplete) {
-        funcError('Something has gone horribly wrong!');
+        gfError('Something has gone horribly wrong!');
       }
 
       $moduleGenerateContent->addonSite('panel-account-registration-done', 'Registration Complete', $moduleAccount->validationEmail);
@@ -102,7 +102,7 @@ switch ($gaRuntime['requestPath']) {
       $boolVerificationComplete = $moduleAccount->verifyUser();
 
       if (!$boolVerificationComplete) {
-        funcError('Something has gone horribly wrong!');
+        gfError('Something has gone horribly wrong!');
       }
 
       funcRedirect(URI_LOGIN);

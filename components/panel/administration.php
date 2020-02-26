@@ -13,13 +13,13 @@ if ($gaRuntime['requestPath'] == URI_ADMIN && !$gaRuntime['requestPanelTask']) {
 switch ($gaRuntime['requestPanelTask']) {
   case 'list':
     if (!$gaRuntime['requestPanelWhat']) {
-      funcError('You did not specify what you want to list');
+      gfError('You did not specify what you want to list');
     }
 
     switch ($gaRuntime['requestPanelWhat']) {
       case 'langpacks':
         if ($gaRuntime['authentication']['level'] < 4) {
-          funcError('You are not allowed to list language packs!');
+          gfError('You are not allowed to list language packs!');
         }
       case 'extensions':
       case 'externals':
@@ -36,14 +36,14 @@ switch ($gaRuntime['requestPanelTask']) {
         $moduleGenerateContent->addonSite('admin-list-users', 'Users - Administration', $users);
       case 'user-addons':
         if (!$gaRuntime['requestPanelSlug']) {
-          funcError('You did not specify a slug (username)');
+          gfError('You did not specify a slug (username)');
         }
 
         $userManifest = $moduleAccount->getSingleUser($gaRuntime['requestPanelSlug'], true);
 
         // Check if manifest is valid
         if (!$userManifest) {
-          funcError('User Manifest is null');
+          gfError('User Manifest is null');
         }
 
         $addons = $moduleReadManifest->getAddons('panel-user-addons', $userManifest['addons']) ?? [];
@@ -52,12 +52,12 @@ switch ($gaRuntime['requestPanelTask']) {
                                           $addons);
       break;
       default:
-        funcError('Invalid list request');
+        gfError('Invalid list request');
     }
     break;
   case 'submit':
     if (!$gaRuntime['requestPanelWhat']) {
-      funcError('You did not specify what you want to submit');
+      gfError('You did not specify what you want to submit');
     }
 
     switch ($gaRuntime['requestPanelWhat']) {
@@ -70,7 +70,7 @@ switch ($gaRuntime['requestPanelTask']) {
 
           // If an error happened stop.
           if (!$finalSlug) {
-            funcError('Something has gone horribly wrong');
+            gfError('Something has gone horribly wrong');
           }
 
           // Add-on Submitted go to edit metadata
@@ -87,7 +87,7 @@ switch ($gaRuntime['requestPanelTask']) {
 
           // If an error happened stop.
           if (!$finalSlug) {
-            funcError('Something has gone horribly wrong');
+            gfError('Something has gone horribly wrong');
           }
 
           // External Submitted go to edit metadata
@@ -98,19 +98,19 @@ switch ($gaRuntime['requestPanelTask']) {
         $moduleGenerateContent->addonSite('panel-submit-external', 'Submit new External');
         break;
       default:
-        funcError('Invalid submit request');
+        gfError('Invalid submit request');
     }
     break;
   case 'update':
     if (!$gaRuntime['requestPanelWhat'] || !$gaRuntime['requestPanelSlug']) {
-      funcError('You did not specify what you want to update');
+      gfError('You did not specify what you want to update');
     }
 
     switch ($gaRuntime['requestPanelWhat']) {
       case 'release':
         // Check for valid slug
         if (!$gaRuntime['requestPanelSlug']) {
-          funcError('You did not specify a slug');
+          gfError('You did not specify a slug');
         }
 
         // Get the manifest
@@ -118,17 +118,17 @@ switch ($gaRuntime['requestPanelTask']) {
 
         // Check if manifest is valid
         if (!$addonManifest) {
-          funcError('Add-on Manifest is null');
+          gfError('Add-on Manifest is null');
         }
 
         $isLangPack = (bool)($addonManifest['type'] == 'langpack');
 
         if ($isLangPack && $gaRuntime['authentication']['level'] < 4) {
-          funcError('You are not allowed to update language packs!');
+          gfError('You are not allowed to update language packs!');
         }
 
         if ($addonManifest['type'] == 'external') {
-          funcError('Externals do not physically exist here.. Are you a moron?');
+          gfError('Externals do not physically exist here.. Are you a moron?');
         }
 
         if ($boolHasPostData) {
@@ -136,7 +136,7 @@ switch ($gaRuntime['requestPanelTask']) {
 
           // If an error happened stop.
           if (!$finalType) {
-            funcError('Something has gone horribly wrong');
+            gfError('Something has gone horribly wrong');
           }
 
           // Add-on Submitted go to edit metadata
@@ -148,7 +148,7 @@ switch ($gaRuntime['requestPanelTask']) {
       case 'metadata':
         // Check for valid slug
         if (!$gaRuntime['requestPanelSlug']) {
-          funcError('You did not specify a slug');
+          gfError('You did not specify a slug');
         }
 
         // Get the manifest
@@ -156,11 +156,11 @@ switch ($gaRuntime['requestPanelTask']) {
 
         // Check if manifest is valid
         if (!$addonManifest) {
-          funcError('Add-on Manifest is null');
+          gfError('Add-on Manifest is null');
         }
 
         if ($addonManifest['type'] == 'langpack' && $gaRuntime['authentication']['level'] < 4) {
-          funcError('You are not allowed to edit language packs!');
+          gfError('You are not allowed to edit language packs!');
         }
 
         // We have post data so we should update the manifest data via classWriteManifest
@@ -175,7 +175,7 @@ switch ($gaRuntime['requestPanelTask']) {
 
           // If an error happened stop.
           if (!$boolUpdate) {
-            funcError('Something has gone horribly wrong');
+            gfError('Something has gone horribly wrong');
           }
 
           // Manifest updated go somewhere
@@ -207,21 +207,21 @@ switch ($gaRuntime['requestPanelTask']) {
       case 'user':
         // Check for valid slug
         if (!$gaRuntime['requestPanelSlug']) {
-          funcError('You did not specify a slug (username)');
+          gfError('You did not specify a slug (username)');
         }
 
         $userManifest = $moduleAccount->getSingleUser($gaRuntime['requestPanelSlug'], true);
 
         // Check if manifest is valid
         if (!$userManifest) {
-          funcError('User Manifest is null');
+          gfError('User Manifest is null');
         }
 
         // Do not allow editing of users at or above a user level unless they are you or you are level 5
         if ($gaRuntime['authentication']['level'] != 5 &&
             $userManifest['level'] >= $gaRuntime['authentication']['level'] &&
             $userManifest['username'] != $gaRuntime['authentication']['username']) {
-          funcError('You attempted to alter a user account that is the same or higher rank as you but not you. You\'re in trouble!');
+          gfError('You attempted to alter a user account that is the same or higher rank as you but not you. You\'re in trouble!');
         }
 
         // Deal with writing the updated user manifest
@@ -230,7 +230,7 @@ switch ($gaRuntime['requestPanelTask']) {
 
           // If an error happened stop.
           if (!$boolUpdate) {
-            funcError('Something has gone horribly wrong');
+            gfError('Something has gone horribly wrong');
           }
 
           // Manifest updated go somewhere
@@ -242,12 +242,12 @@ switch ($gaRuntime['requestPanelTask']) {
                                           $userManifest);
         break;
       default:
-        funcError('Invalid update request');
+        gfError('Invalid update request');
     }
     break;
   case 'bulk-upload':
     if (!$gaRuntime['requestPanelWhat']) {
-      funcError('You did not specify what you want to bulk upload');
+      gfError('You did not specify what you want to bulk upload');
     }
     switch ($gaRuntime['requestPanelWhat']) {
       case 'langpacks':
@@ -255,7 +255,7 @@ switch ($gaRuntime['requestPanelTask']) {
           $finalResult = $moduleWriteManifest->bulkUploader('langpack');
 
           if (!$finalResult) {
-            funcError('Something has gone horribly wrong');
+            gfError('Something has gone horribly wrong');
           }
 
           if (!empty($finalResult['errors'])) {
@@ -268,11 +268,11 @@ switch ($gaRuntime['requestPanelTask']) {
         $moduleGenerateContent->addonSite('addon-bulk-upload-langpack', 'Bulk Upload Language Packs');
         break;
       default:
-        funcError('Invalid bulk upload request');
+        gfError('Invalid bulk upload request');
     }
     break;
   default:
-    funcError('Invalid task');
+    gfError('Invalid task');
 }
 
 // ====================================================================================================================

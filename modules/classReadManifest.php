@@ -12,7 +12,7 @@ $categories = array_merge(array_keys(self::EXTENSION_CATEGORY_SLUGS),
                          ['themes', 'language-packs', 'dictionaries']);
 
 if (!in_array($aQueryData, $categories)) {
-  funcError(__CLASS__ . '::' . __FUNCTION__ . ' - by-category: Unknown category');
+  gfError(__CLASS__ . '::' . __FUNCTION__ . ' - by-category: Unknown category');
 }
 */
 
@@ -38,7 +38,7 @@ class classReadManifest {
   ********************************************************************************************************************/
   function __construct() {
     if (!funcCheckModule('database')) {
-      funcError(__CLASS__ . '::' . __FUNCTION__ . ' - database is required to be included in the global scope');
+      gfError(__CLASS__ . '::' . __FUNCTION__ . ' - database is required to be included in the global scope');
     }
     
     $this->needsReset = true;
@@ -460,7 +460,7 @@ class classReadManifest {
 
     // Why are we even here if there is no manifest?
     if (!$this->addonManifest) {
-      funcError('Unhandled null add-on manifest');
+      gfError('Unhandled null add-on manifest');
     }
 
     // ----------------------------------------------------------------------------------------------------------------

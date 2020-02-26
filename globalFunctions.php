@@ -12,12 +12,12 @@ function gfGenContent($aTitle, $aContent, $aTextBox = null, $aList = null, $aErr
 
   // Make sure the template isn't busted, if it is send a text only error as an array
   if (!$templateHead || !$templateFooter) {
-    funcError([__FUNCTION__ . ': Special Template is busted...', $aTitle, $aContent], -1);
+    gfError([__FUNCTION__ . ': Special Template is busted...', $aTitle, $aContent], -1);
   }
 
   // Can't use both the textbox and list arguments
   if ($aTextBox && $aList) {
-    funcError(__FUNCTION__ . ': You cannot use both textbox and list');
+    gfError(__FUNCTION__ . ': You cannot use both textbox and list');
   }
 
   // Anonymous function to determin if aContent is a string-ish or not
@@ -53,7 +53,7 @@ function gfGenContent($aTitle, $aContent, $aTextBox = null, $aList = null, $aErr
     $templateHead = str_replace('<!-- Special -->', '<li><a href="/special/">Special</a></li>', $templateHead);
   }
 
-  // If we are generating an error from funcError we want to clean the output buffer
+  // If we are generating an error from gfError we want to clean the output buffer
   if ($aError) {
     ob_get_clean();
   }
@@ -71,7 +71,7 @@ function gfGenContent($aTitle, $aContent, $aTextBox = null, $aList = null, $aErr
 /**********************************************************************************************************************
 * Error function that will display data (Error Message)
 **********************************************************************************************************************/
-function funcError($aValue, $aMode = 0) {
+function gfError($aValue, $aMode = 0) {
   $varExport  = var_export($aValue, true);
   $jsonEncode = json_encode($aValue, 448); // JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
   
@@ -136,7 +136,7 @@ function funcPHPErrorHandler($errno, $errstr, $errfile, $errline) {
                   str_replace(ROOT_PATH, '', $errfile) . ' on line ' . $errline;
 
   if (error_reporting() !== 0) {
-    funcError($errorMessage, 1);
+    gfError($errorMessage, 1);
   }
 }
 
@@ -172,7 +172,7 @@ function gfSuperVar($_type, $_value, $_allowFalsy = null) {
       $finalValue = $_FILES[$_value] ?? null;
       if ($finalValue) {
         if (!in_array($finalValue['error'], [UPLOAD_ERR_OK, UPLOAD_ERR_NO_FILE])) {
-          funcError('Upload of ' . $_value . ' failed with error code: ' . $finalValue['error']);
+          gfError('Upload of ' . $_value . ' failed with error code: ' . $finalValue['error']);
         }
 
         if ($finalValue['error'] == UPLOAD_ERR_NO_FILE) {
@@ -190,7 +190,7 @@ function gfSuperVar($_type, $_value, $_allowFalsy = null) {
       $finalValue = $_value ?? null;
       break;
     default:
-      funcError('Incorrect var check');
+      gfError('Incorrect var check');
   }
 
   if (!$_allowFalsy && (empty($finalValue) || $finalValue === 'none' || $finalValue === '')) {
@@ -208,7 +208,7 @@ function gfSuperVar($_type, $_value, $_allowFalsy = null) {
 **********************************************************************************************************************/
 function funcCheckModule($_value) {
   if (!array_key_exists('arrayIncludes', $GLOBALS)) {
-    funcError('$arrayIncludes is not defined');
+    gfError('$arrayIncludes is not defined');
   }
   
   if (!in_array($_value, $GLOBALS['arrayIncludes'])) {
@@ -268,7 +268,7 @@ function funcSend404() {
   if (!$GLOBALS['gaRuntime']['debugMode']) {
     funcSendHeader('404');
   }
-  funcError('404 - Not Found');
+  gfError('404 - Not Found');
 }
 
 /**********************************************************************************************************************

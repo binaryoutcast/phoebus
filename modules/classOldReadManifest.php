@@ -53,7 +53,7 @@ class classReadManifest {
   ********************************************************************************************************************/
   function __construct() {  
     if (!funcCheckModule('database')) {
-      funcError(__CLASS__ . '::' . __FUNCTION__ . ' - database is required to be included in the global scope');
+      gfError(__CLASS__ . '::' . __FUNCTION__ . ' - database is required to be included in the global scope');
     }
     
     // Assign currentApplication
@@ -132,7 +132,7 @@ class classReadManifest {
         $queryResult = $GLOBALS['moduleDatabase']->query('row', $query, $aQueryData);
       break;
       default:
-        funcError(__CLASS__ . '::' . __FUNCTION__ . ' - Unknown query type');
+        gfError(__CLASS__ . '::' . __FUNCTION__ . ' - Unknown query type');
     }
 
     if (!$queryResult) {
@@ -244,7 +244,7 @@ class classReadManifest {
         $queryResults = $GLOBALS['moduleDatabase']->query('rows', $query, $aQueryData);
         break;
       default:
-        funcError(__CLASS__ . '::' . __FUNCTION__ . ' - Unknown query type');
+        gfError(__CLASS__ . '::' . __FUNCTION__ . ' - Unknown query type');
     }
 
     if (!$queryResults) {

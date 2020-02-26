@@ -27,7 +27,7 @@ class classAccount {
   ********************************************************************************************************************/
   function __construct() {
     if (!funcCheckModule('database')) {
-      funcError(__CLASS__ . '::' . __FUNCTION__ . ' - database module is required to be included in the global scope');
+      gfError(__CLASS__ . '::' . __FUNCTION__ . ' - database module is required to be included in the global scope');
     }
 
     $this->postData = array(
@@ -60,7 +60,7 @@ class classAccount {
         strlen($this->postData['username']) < 3 ||
         strlen($this->postData['username']) > 32 ||
         $this->postData['username'] !== $username) {
-      funcError('You did not specify a valid username.</li>' .
+      gfError('You did not specify a valid username.</li>' .
                 '<li>Usernames must be 3+ chars not exceeding 32 chars.</li>' .
                 '<li>Please use only lower case letters, numbers, and/or underscore (_) or dash (-)');
     }
@@ -68,17 +68,17 @@ class classAccount {
     if (!$this->postData['password'] ||
         strlen($this->postData['password']) < 8 ||
         strlen($this->postData['password']) > 64 ) {
-      funcError('You did not specify a valid password. Passwords must be 8+ chars not exceeding 64 chars.');
+      gfError('You did not specify a valid password. Passwords must be 8+ chars not exceeding 64 chars.');
     }
 
     $this->postData['password'] = password_hash($this->postData['password'], PASSWORD_BCRYPT);
 
     if (!$this->postData['email']) {
-      funcError('You did not specify a valid email address. You will not be able to activate your account without one');
+      gfError('You did not specify a valid email address. You will not be able to activate your account without one');
     }
 
     if (!$this->postData['displayName']) {
-      funcError('You did not specify a display name.');
+      gfError('You did not specify a display name.');
     }
 
     $query = "SELECT `username`, `email` FROM `user` WHERE `username` = ?s OR `email` = ?s";
@@ -89,13 +89,13 @@ class classAccount {
 
     $isEmailBlacklisted = $this->checkEmailAgainstBlacklist($this->postData['email']);
     if ($isUsernameOrEmailExisting || $isEmailBlacklisted) {
-      funcError('Your username or e-mail address is not available. Please select another.</li>' .
+      gfError('Your username or e-mail address is not available. Please select another.</li>' .
                 '<li>You may only have one account per valid e-mail address.');
     }
 
     foreach ($this->banned as $_value) {
       if (contains($this->postData['username'], $_value) || contains($this->postData['email'], $_value)) {
-        funcError('Yourself or someone like you has been permanently banned from using this software and service.</li><li>' . 
+        gfError('Yourself or someone like you has been permanently banned from using this software and service.</li><li>' . 
                   'If this automatic determination is in error please contact the Add-ons Team or a Phoebus Administrator.</li><li>' .
                   'Have a nice day!');
       };
@@ -133,21 +133,21 @@ class classAccount {
   ********************************************************************************************************************/
   public function verifyUser() {
     if (!$this->postData['username'] || !$this->postData['verification']) {
-      funcError('You must provide a username and verification code!');
+      gfError('You must provide a username and verification code!');
     }
 
     $userManifest = $this->getSingleUser($this->postData['username'], true);
 
     if (!$userManifest) {
-      funcError('You must provide a valid registered username');
+      gfError('You must provide a valid registered username');
     }
 
     if (!$userManifest['extraData']['verification']) {
-      funcError('This account has already been verified.');
+      gfError('This account has already been verified.');
     }
 
     if ($userManifest['extraData']['verification'] != $this->postData['verification']) {
-      funcError('The verification code is incorrect. Please try again!');
+      gfError('The verification code is incorrect. Please try again!');
     }
 
     $userManifest['extraData']['verification'] = null;
@@ -176,11 +176,11 @@ class classAccount {
     unset($aUserManifest['addons']);
 
     if (!$this->postData['username']) {
-      funcError('Username was not found in POST');
+      gfError('Username was not found in POST');
     }
 
     if ($this->postData['username'] != $aUserManifest['username']) {
-      funcError('POST Slug does not match GET/Manifest Slug');
+      gfError('POST Slug does not match GET/Manifest Slug');
     }
 
     if (!in_array($this->postData['level'], [1, 2, 3, 4, 5])) {
@@ -202,7 +202,7 @@ class classAccount {
                                                                     $this->postData['email']);
         $isEmailBlacklisted = $this->checkEmailAgainstBlacklist($this->postData['email']);
         if ($isExistingEmail || $isEmailBlacklisted) {
-          funcError('Your email address is not available. Please select another.');
+          gfError('Your email address is not available. Please select another.');
         }
 
         $this->postData['extraData'] = $aUserManifest['extraData'];
@@ -224,7 +224,7 @@ class classAccount {
               break;
             }
           default:
-            funcError('Seriously, did you think manipulating user levels was going to work? I\'m disappointed!');
+            gfError('Seriously, did you think manipulating user levels was going to work? I\'m disappointed!');
         }
       }
 
@@ -239,7 +239,7 @@ class classAccount {
 
     if ($this->postData['password']) {
       if (strlen($this->postData['password']) < 8 || strlen($this->postData['password']) > 64 ) {
-        funcError('You did not specify a valid password. Passwords must be 8+ chars not exceeding 64 chars.');
+        gfError('You did not specify a valid password. Passwords must be 8+ chars not exceeding 64 chars.');
       }
       $this->postData['password'] = password_hash($this->postData['password'], PASSWORD_BCRYPT);
     }
@@ -266,7 +266,7 @@ class classAccount {
   ********************************************************************************************************************/
   public function getUsers() {
     if ($GLOBALS['gaRuntime']['authentication']['level'] < 3) {
-      funcError('I have no idea how you managed to get here but seriously you need to piss off...');
+      gfError('I have no idea how you managed to get here but seriously you need to piss off...');
     }
 
     $query = "SELECT * FROM `user` WHERE ?i = 5 OR `level` < ?i OR `username` = ?s";
@@ -414,7 +414,7 @@ class classAccount {
   private function promptCredentials() {
     header('WWW-Authenticate: Basic realm="' . SOFTWARE_NAME . '"');
     header('HTTP/1.0 401 Unauthorized');   
-    funcError('You need to enter a valid username and password.');
+    gfError('You need to enter a valid username and password.');
     exit();
   }
 
@@ -433,7 +433,7 @@ class classAccount {
   ********************************************************************************************************************/
   private function sendVerificationEmail($aEmail, $aValidationCode) {
     if (!gfSuperVar('var', $aEmail)) {
-      funcError('Unable to send verification email because it is null');
+      gfError('Unable to send verification email because it is null');
     }
 
     ini_set("sendmail_from", "phoebus@addons.palemoon.org");

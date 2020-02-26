@@ -123,7 +123,7 @@ if (!$gaRuntime['requestAddonID'] || !$gaRuntime['requestAddonVersion'] ||
     // Send blank rdf response
     $moduleGenerateContent->addonUpdateService(null);
   }
-  funcError('Missing minimum required arguments.');
+  gfError('Missing minimum required arguments.');
 }
 
 // Check for Moz-XPI-Update header
@@ -132,7 +132,7 @@ if (!$gaRuntime['requestMozXPIUpdate']) {
     // Send blank rdf response
     $moduleGenerateContent->addonUpdateService(null);
   }
-  funcError('Compatibility check failed.');
+  gfError('Compatibility check failed.');
 }
 
 // --------------------------------------------------------------------------------------------------------------------
@@ -143,7 +143,7 @@ if (in_array($gaRuntime['requestAddonID'], BAD_ADDON_IDS)) {
     // Send blank rdf response
     $moduleGenerateContent->addonUpdateService(null);
   }
-  funcError('"Bad" Add-on ID Detected');
+  gfError('"Bad" Add-on ID Detected');
 }
 
 // --------------------------------------------------------------------------------------------------------------------
@@ -166,7 +166,7 @@ else {
     // Send blank rdf response
     $moduleGenerateContent->addonUpdateService(null);
   }
-  funcError('Mismatched or Invalid Application ID');
+  gfError('Mismatched or Invalid Application ID');
 }
 
 // ====================================================================================================================

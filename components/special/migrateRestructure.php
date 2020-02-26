@@ -106,7 +106,7 @@ function funcRestructureAddons($aAddonManifest) {
 if ($strRequestSlug) {
   $addonManifest = $moduleReadManifest->getAddon('panel-by-slug', $strRequestSlug);
   if (!$addonManifest || $addonManifest['type'] == 'external') {
-    funcError('Unknown slug or is an external');
+    gfError('Unknown slug or is an external');
   }
 
   gfGenContent('Restructured Data', funcRestructureAddons($addonManifest));
@@ -169,7 +169,7 @@ if ($strRequestProcess) {
   $result = $moduleDatabase->query('multiRaw', implode('; ', $arrayQueryStatements));
 
   if (!$result) {
-    funcError('Something when very VERY wrong when executing the massive SQL operation...');
+    gfError('Something when very VERY wrong when executing the massive SQL operation...');
   }
 
   gfGenContent('Restructured Data - Query Statements', $result);

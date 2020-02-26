@@ -38,7 +38,7 @@ function funcDownloadXPI($aAddonManifest, $aAddonVersion, $aBinaryStream = null)
       $addonFile = $aAddonManifest['basePath'] . $versionXPI;
     }
     else {
-      funcError('Unknown XPI version');
+      gfError('Unknown XPI version');
     }
   }
 
@@ -58,7 +58,7 @@ function funcDownloadXPI($aAddonManifest, $aAddonVersion, $aBinaryStream = null)
     header('X-Accel-Redirect: ' . ltrim($addonFile, '.'));
   }
   else {
-    funcError('XPI file not found');
+    gfError('XPI file not found');
   }
 
   // We are done here
@@ -86,7 +86,7 @@ function funcDownloadSearchPlugin($aSearchPluginName, $aBinaryStream = null) {
     readfile($searchPluginFile);
   }
   else {
-    funcError('Search Plugin XML file not found');
+    gfError('Search Plugin XML file not found');
   }
   
   // We are done here
@@ -105,7 +105,7 @@ $boolRequestBinaryStream = in_array('disable-xpinstall', TARGET_APPLICATION[$gaR
 
 // Sanity
 if ($strRequestAddonID == null) {
-  funcError('Missing minimum required arguments.');
+  gfError('Missing minimum required arguments.');
 }
 
 // Search for add-ons in our databases
@@ -128,7 +128,7 @@ else {
     funcDownloadSearchPlugin($searchPluginsDB[$strRequestAddonID], $boolRequestBinaryStream);
   }
   else {
-    funcError('Add-on could not be found in our database');
+    gfError('Add-on could not be found in our database');
   }
 }
 

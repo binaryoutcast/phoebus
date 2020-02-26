@@ -23,7 +23,7 @@ switch ($gaRuntime['requestPath']) {
 
     // Check if manifest is valid
     if (!$userManifest) {
-      funcError('User Manifest is null');
+      gfError('User Manifest is null');
     }
 
     // Deal with writing the updated user manifest
@@ -32,7 +32,7 @@ switch ($gaRuntime['requestPath']) {
 
       // If an error happened stop.
       if (!$boolUpdate) {
-        funcError('Something has gone horribly wrong');
+        gfError('Something has gone horribly wrong');
       }
 
       // Manifest updated go somewhere
@@ -61,7 +61,7 @@ switch ($gaRuntime['requestPath']) {
     switch ($gaRuntime['requestPanelTask']) {
       case 'submit':
         if (!$gaRuntime['requestPanelWhat']) {
-          funcError('You did not specify what you want to submit');
+          gfError('You did not specify what you want to submit');
         }
 
         switch ($gaRuntime['requestPanelWhat']) {
@@ -71,7 +71,7 @@ switch ($gaRuntime['requestPath']) {
 
               // If an error happened stop.
               if (!$finalSlug) {
-                funcError('Something has gone horribly wrong');
+                gfError('Something has gone horribly wrong');
               }
 
               // Add-on Submitted go to edit metadata
@@ -82,7 +82,7 @@ switch ($gaRuntime['requestPath']) {
             $moduleGenerateContent->addonSite('panel-submit-addon', 'Submit new Add-on');
             break;
           default:
-            funcError('Invalid submit request');
+            gfError('Invalid submit request');
         }
         break;
       case 'update':
@@ -90,7 +90,7 @@ switch ($gaRuntime['requestPath']) {
           case 'release':
             // Check for valid slug
             if (!$gaRuntime['requestPanelSlug']) {
-              funcError('You did not specify a slug');
+              gfError('You did not specify a slug');
             }
 
             // Get the manifest
@@ -98,11 +98,11 @@ switch ($gaRuntime['requestPath']) {
 
             // Check if manifest is valid
             if (!$addonManifest || !in_array($addonManifest['type'], ['extension', 'theme'])) {
-              funcError('Add-on Manifest is null');
+              gfError('Add-on Manifest is null');
             }
 
             if (!in_array($gaRuntime['requestPanelSlug'], $gaRuntime['authentication']['addons'])) {
-              funcError('You do not own this add-on. Stop trying to fuck with other people\'s shit!');
+              gfError('You do not own this add-on. Stop trying to fuck with other people\'s shit!');
             }
 
             if ($boolHasPostData) {
@@ -110,7 +110,7 @@ switch ($gaRuntime['requestPath']) {
 
               // If an error happened stop.
               if (!$finalType) {
-                funcError('Something has gone horribly wrong');
+                gfError('Something has gone horribly wrong');
               }
 
               // Add-on Submitted go to edit metadata
@@ -122,7 +122,7 @@ switch ($gaRuntime['requestPath']) {
           case 'metadata':
             // Check for valid slug
             if (!$gaRuntime['requestPanelSlug']) {
-              funcError('You did not specify a slug');
+              gfError('You did not specify a slug');
             }
 
             // Get the manifest
@@ -130,11 +130,11 @@ switch ($gaRuntime['requestPath']) {
 
             // Check if manifest is valid
             if (!$addonManifest || !in_array($addonManifest['type'], ['extension', 'theme'])) {
-              funcError('Add-on Manifest is null');
+              gfError('Add-on Manifest is null');
             }
 
             if (!in_array($gaRuntime['requestPanelSlug'], $gaRuntime['authentication']['addons'])) {
-              funcError('You do not own this add-on. Stop trying to fuck with other people\'s shit!');
+              gfError('You do not own this add-on. Stop trying to fuck with other people\'s shit!');
             }
 
             // We have post data so we should update the manifest data via classWriteManifest
@@ -143,7 +143,7 @@ switch ($gaRuntime['requestPath']) {
 
               // If an error happened stop.
               if (!$boolUpdate) {
-                funcError('Something has gone horribly wrong');
+                gfError('Something has gone horribly wrong');
               }
 
               // Manifest updated go somewhere
@@ -166,7 +166,7 @@ switch ($gaRuntime['requestPath']) {
                                                $arrayExtraData);
             break;
           default:
-            funcError('Invalid update request');
+            gfError('Invalid update request');
         }
         break;
       default:

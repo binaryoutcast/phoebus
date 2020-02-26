@@ -13,9 +13,9 @@ class classWriteManifest {
   * Class constructor that sets inital state of things
   ********************************************************************************************************************/
   function __construct() {  
-    funcError(__CLASS__ . ' is currently busted.');
+    gfError(__CLASS__ . ' is currently busted.');
     if (!funcCheckModule('database')) {
-      funcError(__CLASS__ . '::' . __FUNCTION__ . ' - database is required to be included in the global scope');
+      gfError(__CLASS__ . '::' . __FUNCTION__ . ' - database is required to be included in the global scope');
     }
 
     $this->xpiUpload          = gfSuperVar('files', 'xpiUpload');
@@ -36,7 +36,7 @@ class classWriteManifest {
     if (!$aLangPack) {
       if (!$this->postData['slug'] || preg_match('/[^a-z0-9\-]|(^\-)/', $this->postData['slug']) ||
           strlen($this->postData['slug']) < 3 || strlen($this->postData['slug']) > 32) {
-        funcError('You did not specify a valid slug.
+        gfError('You did not specify a valid slug.
                    Slugs must be 3+ chars not exceeding 32 chars.
                    Please use only lower case letters, numbers, and/or dashes (-)');
       }
@@ -264,11 +264,11 @@ class classWriteManifest {
 
     // Sanity
     if (!$this->postData['slug']) {
-      funcError('Slug was not found in POST');
+      gfError('Slug was not found in POST');
     }
 
     if ($this->postData['slug'] != $aAddonManifest['slug']) {
-      funcError('POST Slug does not match GET/Manifest Slug');
+      gfError('POST Slug does not match GET/Manifest Slug');
     }
 
     if ($aAddonManifest['type'] == 'langpack') {
@@ -294,7 +294,7 @@ class classWriteManifest {
 
     if (empty($this->postData['licenseText'])) {
       if ($this->postData['license'] == 'custom') {
-        funcError('You must specify a custom license text');
+        gfError('You must specify a custom license text');
       }
 
       $this->postData['licenseText'] = null;
@@ -326,7 +326,7 @@ class classWriteManifest {
 
     if (!$this->postData['slug'] || preg_match('/[^a-z0-9\-]|(^\-)/', $this->postData['slug']) ||
         strlen($this->postData['slug']) < 3 || strlen($this->postData['slug']) > 32) {
-      funcError('You did not specify a valid slug.
+      gfError('You did not specify a valid slug.
                  Slugs must be 3+ chars not exceeding 32 chars.
                  Please use only lower case letters, numbers, and/or dashes (-)');
     }
@@ -336,7 +336,7 @@ class classWriteManifest {
     $addonExists = $this->addonExists($externalID, $this->postData['slug']);
 
     if ($addonExists) {
-      funcError('The slug you chose is not available. Please select another.');
+      gfError('The slug you chose is not available. Please select another.');
     }
 
     $this->postData['id'] = $externalID;
@@ -375,16 +375,16 @@ class classWriteManifest {
 
     // Sanity
     if (!$this->postData['slug']) {
-      funcError('Slug was not found in POST');
+      gfError('Slug was not found in POST');
     }
 
     if ($this->postData['slug'] != $aAddonManifest['slug']) {
-      funcError('POST Slug does not match GET/Manifest Slug');
+      gfError('POST Slug does not match GET/Manifest Slug');
     }
 
     foreach ($this->postData as $_key => $_value) {
       if ($_key != 'active' && $_key != 'tags' && !$_value) {
-        funcError('Please ensure that all fields are filled in');
+        gfError('Please ensure that all fields are filled in');
       }
     }
 
@@ -405,30 +405,30 @@ class classWriteManifest {
   ********************************************************************************************************************/
   public function bulkUploader($aType) {
     if ($aType != 'langpack') {
-      funcError('Unknown bulk upload type');
+      gfError('Unknown bulk upload type');
     }
 
     if (!$this->bulkUpload || $this->bulkUpload['type'] != 'application/zip') {
-      funcError('An error occured with the uploaded file. Please try again.');
+      gfError('An error occured with the uploaded file. Please try again.');
     }
     
     $obj = ROOT_PATH . OBJ_RELPATH . 'bulk-upload/' . $aType . '-' . time() . '/';
     $zip = new ZipArchive();
 
     if (!@$zip->open($this->bulkUpload['tmp_name'])) {
-      funcError('Could not read zip file');
+      gfError('Could not read zip file');
     }
 
     $result = @mkdir($obj);
 
     if (!$result) {
-      funcError('Could not create ' . $obj);
+      gfError('Could not create ' . $obj);
     }
 
     $result = @$zip->extractTo($obj);
 
     if (!$result) {
-      funcError('There was an error extracting the zip file');
+      gfError('There was an error extracting the zip file');
     }
 
     $zip->close();
@@ -436,7 +436,7 @@ class classWriteManifest {
     $glob = glob($obj . '*.xpi');
 
     if (!$glob || empty($glob)) {
-      funcError('There does not seem to be any XPI files in ' . $obj);
+      gfError('There does not seem to be any XPI files in ' . $obj);
     }
 
     $accumulatedErrors = [];
@@ -549,7 +549,7 @@ class classWriteManifest {
 
     // ----------------------------------------------------------------------------------------------------------------
 
-    //funcError([$accumulatedErrors, $accumulatedMessages, $glob, $addons], 99);
+    //gfError([$accumulatedErrors, $accumulatedMessages, $glob, $addons], 99);
     return ['errors' => $accumulatedErrors, 'messages' => $accumulatedMessages];
   }
 
@@ -558,7 +558,7 @@ class classWriteManifest {
   ********************************************************************************************************************/
   public function publicValidator() {
     if (!$this->xpiUpload) {
-      funcError('You did not upload an XPI file');
+      gfError('You did not upload an XPI file');
     }
 
     $checkID = true;
@@ -663,7 +663,7 @@ class classWriteManifest {
         $GLOBALS['moduleMozillaRDF']->parseInstallManifest($this->validatorData['installManifest']);
 
       if (is_string($this->validatorData['installManifest'])) {
-        funcError('RDF Parsing Error: ' . $this->validatorData['installManifest'], $aAccumulateErrors);
+        gfError('RDF Parsing Error: ' . $this->validatorData['installManifest'], $aAccumulateErrors);
       }
     }
 
@@ -1009,34 +1009,34 @@ class classWriteManifest {
     // Handle icon
     if ($this->iconUpload) {
       if (!in_array($this->iconUpload['type'], $arrayAllowedImageTypes)) {
-        funcError('Icon must be a png image!');
+        gfError('Icon must be a png image!');
       }
 
       if ($this->iconUpload['size'] > $intMaxImageBytes) {
-        funcError('Icon file size must not exceed ' . (string)$intMaxImageBytes . ' bytes!');
+        gfError('Icon file size must not exceed ' . (string)$intMaxImageBytes . ' bytes!');
       }
 
       $result = @move_uploaded_file($this->iconUpload['tmp_name'], $strAddonDir . $iconFile);
 
       if (!$result) {
-        funcError('Could not create ' . str_replace(ROOT_PATH, '', $strAddonDir) . $iconFile);
+        gfError('Could not create ' . str_replace(ROOT_PATH, '', $strAddonDir) . $iconFile);
       }
     }
 
     // Handle preview
     if ($this->previewUpload) {
       if (!in_array($this->previewUpload['type'], $arrayAllowedImageTypes)) {
-        funcError('Preview must be a png image!');
+        gfError('Preview must be a png image!');
       }
 
       if ($this->previewUpload['size'] > $intMaxImageBytes) {
-        funcError('Preview file size must not exceed ' . (string)$intMaxImageBytes . ' bytes!');
+        gfError('Preview file size must not exceed ' . (string)$intMaxImageBytes . ' bytes!');
       }
 
       $result = @move_uploaded_file($this->previewUpload['tmp_name'], $strAddonDir . $previewFile);
 
       if (!$result) {
-        funcError('Could not create ' . str_replace(ROOT_PATH, '', $strAddonDir) . $previewFile);
+        gfError('Could not create ' . str_replace(ROOT_PATH, '', $strAddonDir) . $previewFile);
       }
     }
 
@@ -1059,7 +1059,7 @@ class classWriteManifest {
         gfGenContent('Add-on Validator Error', '<ul>' . $validatorErrors . '</ul>');
       }
 
-      funcError($aErrorMessage);
+      gfError($aErrorMessage);
     }
 
     return $aErrorMessage;

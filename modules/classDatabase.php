@@ -18,7 +18,7 @@ class classDatabase {
     @include_once(ROOT_PATH . DATASTORE_RELPATH . '.phoebus/sql');
 
     if (!($arrayCreds ?? false)) {
-      funcError(__CLASS__ . '::' . __FUNCTION__ . ' - Could not read aql file');
+      gfError(__CLASS__ . '::' . __FUNCTION__ . ' - Could not read aql file');
     }
 
     $arrayCreds['currentDB'] = $arrayCreds['liveDB'];
@@ -30,7 +30,7 @@ class classDatabase {
     $this->connection = mysqli_connect('localhost', $arrayCreds['username'], $arrayCreds['password'], $arrayCreds['currentDB']);
     
     if (mysqli_connect_errno($this->connection)) {
-      funcError('SQL Connection Error: ' . mysqli_connect_errno($this->connection));
+      gfError('SQL Connection Error: ' . mysqli_connect_errno($this->connection));
     }
     
     mysqli_set_charset($this->connection, 'utf8');
@@ -60,7 +60,7 @@ class classDatabase {
     $result = null;
 
     if (!$this->connection) {
-      funcError(__CLASS__ . '::' . __FUNCTION__ . ' - An SQL Connection is required');
+      gfError(__CLASS__ . '::' . __FUNCTION__ . ' - An SQL Connection is required');
     }
 
     switch ($aQueryType) {
@@ -87,7 +87,7 @@ class classDatabase {
         $result = mysqli_multi_query($this->connection, $aExtraArgs[0]);
         break;
       default:
-        funcError(__CLASS__ . '::' . __FUNCTION__ . ' - Unknown query type');
+        gfError(__CLASS__ . '::' . __FUNCTION__ . ' - Unknown query type');
     }
 
     return gfSuperVar('var', $result);

@@ -78,12 +78,12 @@ if ($gaRuntime['debugMode']) {
       $gaRuntime['currentApplication'] = $gaRuntime['requestApplication'];
     }
     else {
-      funcError('Invalid application');
+      gfError('Invalid application');
     }
 
     // The same application shouldn't be appOverriden
     if ($gaRuntime['currentApplication'] == $gaRuntime['orginalApplication']) {
-      funcError('It makes no sense to appOverride the same application');
+      gfError('It makes no sense to appOverride the same application');
     }
   }
 }
@@ -99,17 +99,17 @@ if (file_exists(ROOT_PATH . '/.offline')) {
 
 // We cannot continue without a valid currentApplication
 if (!$gaRuntime['currentDomain']) {
-  funcError('Invalid domain');
+  gfError('Invalid domain');
 }
 
 // We cannot continue without a valid currentApplication
 if (!$gaRuntime['currentApplication']) {
-  funcError('Invalid application');
+  gfError('Invalid application');
 }
 
 // We cannot contine if the application is not enabled
 if (!TARGET_APPLICATION[$gaRuntime['currentApplication']]['enabled']) {
-  funcError('This ' . ucfirst($gaRuntime['currentApplication']) . ' Add-ons Site has been disabled. ' .
+  gfError('This ' . ucfirst($gaRuntime['currentApplication']) . ' Add-ons Site has been disabled. ' .
             'Please contact the Phoebus Administrator');
 }
 
@@ -139,7 +139,7 @@ else {
   if (!$gaRuntime['debugMode']) {
     funcSendHeader('404');
   }
-  funcError('Invalid component');
+  gfError('Invalid component');
 }
 
 // ====================================================================================================================

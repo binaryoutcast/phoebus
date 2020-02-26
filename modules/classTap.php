@@ -9,11 +9,11 @@ class classTap {
   ********************************************************************************************************************/
   function __construct() {  
     if (!funcCheckModule('database')) {
-      funcError(__CLASS__ . '::' . __FUNCTION__ . ' - database is required to be included in the global scope');
+      gfError(__CLASS__ . '::' . __FUNCTION__ . ' - database is required to be included in the global scope');
     }
 
     if (!$GLOBALS['gaRuntime']['remoteAddr']) {
-      funcError(__CLASS__ . '::' . __FUNCTION__ . ' - could not determin the remote addr');
+      gfError(__CLASS__ . '::' . __FUNCTION__ . ' - could not determin the remote addr');
     }
   }
 
