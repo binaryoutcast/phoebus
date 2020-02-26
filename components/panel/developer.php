@@ -5,7 +5,7 @@
 
 // == | Main | ========================================================================================================
 
-switch ($arraySoftwareState['requestPath']) {
+switch ($gaRuntime['requestPath']) {
   case URI_DEV:
     if (funcCheckAccessLevel(3, true)) {
       funcRedirect(URI_ADMIN);
@@ -16,10 +16,10 @@ switch ($arraySoftwareState['requestPath']) {
   case URI_ACCOUNT:
     // Users level 3 or above should use the administration codepath
     if (funcCheckAccessLevel(3, true)) {
-      funcRedirect(URI_ADMIN . '?task=update&what=user&slug=' . $arraySoftwareState['authentication']['username']);
+      funcRedirect(URI_ADMIN . '?task=update&what=user&slug=' . $gaRuntime['authentication']['username']);
     }
 
-    $userManifest = $moduleAccount->getSingleUser($arraySoftwareState['authentication']['username'], true);
+    $userManifest = $moduleAccount->getSingleUser($gaRuntime['authentication']['username'], true);
 
     // Check if manifest is valid
     if (!$userManifest) {
@@ -39,32 +39,32 @@ switch ($arraySoftwareState['requestPath']) {
       funcRedirect(URI_DEV);
     }
 
-    $moduleGenerateContent->addonSite('developer-account', 'Your Account', $arraySoftwareState['authentication']);
+    $moduleGenerateContent->addonSite('developer-account', 'Your Account', $gaRuntime['authentication']);
     break;
   case URI_ADDONS:
     // Serve the Developer Add-ons page
-    if ($arraySoftwareState['requestPath'] == URI_ADDONS && !$arraySoftwareState['requestPanelTask']) {
+    if ($gaRuntime['requestPath'] == URI_ADDONS && !$gaRuntime['requestPanelTask']) {
       // Users level 3 or above should use the administration codepath
       if (funcCheckAccessLevel(3, true)) {
-        funcRedirect(URI_ADMIN . '?task=list&what=user-addons&slug=' . $arraySoftwareState['authentication']['username']);
+        funcRedirect(URI_ADMIN . '?task=list&what=user-addons&slug=' . $gaRuntime['authentication']['username']);
       }
 
-      $addons = $moduleReadManifest->getAddons('panel-user-addons', $arraySoftwareState['authentication']['addons']) ?? [];
+      $addons = $moduleReadManifest->getAddons('panel-user-addons', $gaRuntime['authentication']['addons']) ?? [];
       $moduleGenerateContent->addonSite('developer-addons-list', 'Your Add-ons', $addons);
     }
 
     // Users level 3 and above should redirect to the administration codepath
     if (funcCheckAccessLevel(3, true)) {
-      funcRedirect(str_replace(URI_ADDONS, URI_ADMIN, $arraySoftwareState['phpRequestURI']));
+      funcRedirect(str_replace(URI_ADDONS, URI_ADMIN, $gaRuntime['phpRequestURI']));
     }
 
-    switch ($arraySoftwareState['requestPanelTask']) {
+    switch ($gaRuntime['requestPanelTask']) {
       case 'submit':
-        if (!$arraySoftwareState['requestPanelWhat']) {
+        if (!$gaRuntime['requestPanelWhat']) {
           funcError('You did not specify what you want to submit');
         }
 
-        switch ($arraySoftwareState['requestPanelWhat']) {
+        switch ($gaRuntime['requestPanelWhat']) {
           case 'addon':
             if ($boolHasPostData) {
               $finalSlug = $moduleWriteManifest->submitNewAddon();
@@ -86,22 +86,22 @@ switch ($arraySoftwareState['requestPath']) {
         }
         break;
       case 'update':
-        switch ($arraySoftwareState['requestPanelWhat']) {
+        switch ($gaRuntime['requestPanelWhat']) {
           case 'release':
             // Check for valid slug
-            if (!$arraySoftwareState['requestPanelSlug']) {
+            if (!$gaRuntime['requestPanelSlug']) {
               funcError('You did not specify a slug');
             }
 
             // Get the manifest
-            $addonManifest = $moduleReadManifest->getAddon('panel-by-slug', $arraySoftwareState['requestPanelSlug']);
+            $addonManifest = $moduleReadManifest->getAddon('panel-by-slug', $gaRuntime['requestPanelSlug']);
 
             // Check if manifest is valid
             if (!$addonManifest || !in_array($addonManifest['type'], ['extension', 'theme'])) {
               funcError('Add-on Manifest is null');
             }
 
-            if (!in_array($arraySoftwareState['requestPanelSlug'], $arraySoftwareState['authentication']['addons'])) {
+            if (!in_array($gaRuntime['requestPanelSlug'], $gaRuntime['authentication']['addons'])) {
               funcError('You do not own this add-on. Stop trying to fuck with other people\'s shit!');
             }
 
@@ -121,19 +121,19 @@ switch ($arraySoftwareState['requestPath']) {
             break;
           case 'metadata':
             // Check for valid slug
-            if (!$arraySoftwareState['requestPanelSlug']) {
+            if (!$gaRuntime['requestPanelSlug']) {
               funcError('You did not specify a slug');
             }
 
             // Get the manifest
-            $addonManifest = $moduleReadManifest->getAddon('panel-by-slug', $arraySoftwareState['requestPanelSlug']);
+            $addonManifest = $moduleReadManifest->getAddon('panel-by-slug', $gaRuntime['requestPanelSlug']);
 
             // Check if manifest is valid
             if (!$addonManifest || !in_array($addonManifest['type'], ['extension', 'theme'])) {
               funcError('Add-on Manifest is null');
             }
 
-            if (!in_array($arraySoftwareState['requestPanelSlug'], $arraySoftwareState['authentication']['addons'])) {
+            if (!in_array($gaRuntime['requestPanelSlug'], $gaRuntime['authentication']['addons'])) {
               funcError('You do not own this add-on. Stop trying to fuck with other people\'s shit!');
             }
 

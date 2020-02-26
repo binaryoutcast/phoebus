@@ -142,7 +142,7 @@ class classPersona {
     }
 
     // Assign Icon, Header, and Footer
-    $strPersonaDomainPrefix = 'http://' . $GLOBALS['arraySoftwareState']['currentDomain'];
+    $strPersonaDomainPrefix = 'http://' . $GLOBALS['gaRuntime']['currentDomain'];
     $strPersonaBasePath = DATASTORE_RELPATH . 'personas/' . $aPersonaManifest['id'] . '/';
 
     $aPersonaManifest['headerURL'] = $strPersonaDomainPrefix . $strPersonaBasePath . 'header.png';

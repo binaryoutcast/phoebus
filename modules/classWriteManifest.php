@@ -42,7 +42,7 @@ class classWriteManifest {
       }
     }
 
-    $this->validateAddon((bool)($GLOBALS['arraySoftwareState']['authentication']['level'] < 3), $aLangPack, $aAccumulateErrors);
+    $this->validateAddon((bool)($GLOBALS['gaRuntime']['authentication']['level'] < 3), $aLangPack, $aAccumulateErrors);
 
     // For langpacks create a slug
     if ($aLangPack) {
@@ -65,7 +65,7 @@ class classWriteManifest {
 
     $addonAMO = $this->addonAMO($this->validatorData['installManifest']['id']);
 
-    if ($addonAMO && $GLOBALS['arraySoftwareState']['authentication']['level'] < 3) {
+    if ($addonAMO && $GLOBALS['gaRuntime']['authentication']['level'] < 3) {
       return $this->error('The add-on id <strong>' . $this->validatorData['installManifest']['id'] . '</strong> is known to have existed on the Mozilla Add-ons Site.</li><li>' .
                           'If you are the original developer of this add-on, you will need to contact a member of the Add-ons Team or a Phoebus Administrator to check the validity of this submission and verify your identity.</li><li>' .
                           'If this add-on is a proper fork, you can simply change the add-on\'s id and submit again.',
@@ -93,8 +93,8 @@ class classWriteManifest {
       'id'          => $this->validatorData['installManifest']['id'],
       'slug'        => $this->postData['slug'],
       'type'        => $addonType,
-      'active'      => (bool)($GLOBALS['arraySoftwareState']['authentication']['level'] > 1),
-      'reviewed'    => (bool)($GLOBALS['arraySoftwareState']['authentication']['level'] > 2),
+      'active'      => (bool)($GLOBALS['gaRuntime']['authentication']['level'] > 1),
+      'reviewed'    => (bool)($GLOBALS['gaRuntime']['authentication']['level'] > 2),
       'releaseXPI'  => $releaseXPI,
       'category'    => 'unlisted',
       'url'         => '/addon/' . $this->postData['slug'] . '/',
@@ -113,7 +113,7 @@ class classWriteManifest {
       $addonManifest['description'] = 'Pale Moon Language Pack';
     }
     else {
-      $GLOBALS['moduleAccount']->assignAddonToUser($GLOBALS['arraySoftwareState']['authentication']['username'],
+      $GLOBALS['moduleAccount']->assignAddonToUser($GLOBALS['gaRuntime']['authentication']['username'],
                                                    $addonManifest['slug']);
     }
 
@@ -282,7 +282,7 @@ class classWriteManifest {
     }
 
     // Hackers are a superstitious cowardly lot
-    if ($GLOBALS['arraySoftwareState']['authentication']['level'] < 3) {
+    if ($GLOBALS['gaRuntime']['authentication']['level'] < 3) {
       unset($this->postData['active']);
       unset($this->postData['reviewed']);
       unset($this->postData['slug']);

@@ -35,7 +35,7 @@ $moduleGenerateContent = new classGenerateContent(true);
 /**********************************************************************************************************************
 * Strips path to obtain the slug
 *
-* @param $aPath     $arraySoftwareState['requestPath']
+* @param $aPath     $gaRuntime['requestPath']
 * @param $aPrefix   Prefix to strip 
 * @returns          slug
 ***********************************************************************************************************************/
@@ -50,7 +50,7 @@ function funcStripPath($aPath, $aPrefix) {
 * @param $aReturn     if true we will return a value else 404
 ***********************************************************************************************************************/
 function funcCheckEnabledFeature($aFeature, $aReturn = null) {
-  $currentApplication = $GLOBALS['arraySoftwareState']['currentApplication'];
+  $currentApplication = $GLOBALS['gaRuntime']['currentApplication'];
   if (!in_array($aFeature, TARGET_APPLICATION[$currentApplication]['features'])) {
     if(!$aReturn) {
       funcSend404();
@@ -67,20 +67,20 @@ function funcCheckEnabledFeature($aFeature, $aReturn = null) {
 // == | Main | ========================================================================================================
 
 // Site Name
-$arraySoftwareState['currentSiteTitle'] = TARGET_APPLICATION[$arraySoftwareState['currentApplication']]['siteTitle'];
+$gaRuntime['currentSiteTitle'] = TARGET_APPLICATION[$gaRuntime['currentApplication']]['siteTitle'];
 
 // When in debug mode it displays the software name and version and if git
 // is detected it will append the branch and short sha1 hash
 // else it will use the name defined in TARGET_APPLICATION
-if ($arraySoftwareState['debugMode']) {
-  $arraySoftwareState['currentSiteTitle'] = SOFTWARE_NAME . ' Development - Version: ' . SOFTWARE_VERSION;
+if ($gaRuntime['debugMode']) {
+  $gaRuntime['currentSiteTitle'] = SOFTWARE_NAME . ' Development - Version: ' . SOFTWARE_VERSION;
   // Git stuff
   if (file_exists('./.git/HEAD')) {
     $_strGitHead = file_get_contents('./.git/HEAD');
     $_strGitSHA1 = file_get_contents('./.git/' . substr($_strGitHead, 5, -1));
     $_strGitBranch = substr($_strGitHead, 16, -1);
-    $arraySoftwareState['currentSiteTitle'] = 
-      $arraySoftwareState['currentSiteTitle'] . ' - ' .
+    $gaRuntime['currentSiteTitle'] = 
+      $gaRuntime['currentSiteTitle'] . ' - ' .
       'Branch: ' . $_strGitBranch . ' - ' .
       'Commit: ' . substr($_strGitSHA1, 0, 7);
   }
@@ -89,24 +89,24 @@ if ($arraySoftwareState['debugMode']) {
 // --------------------------------------------------------------------------------------------------------------------
 
 // Handle URIs
-switch ($arraySoftwareState['requestPath']) {
+switch ($gaRuntime['requestPath']) {
   case URI_ROOT:
     // Special Case: Interlink should go to Extensions instead of a front page
-    if ($arraySoftwareState['currentApplication'] == 'interlink') {
+    if ($gaRuntime['currentApplication'] == 'interlink') {
       funcRedirect('/extensions/');
     }
 
     // Front Page
     // Generate the frontpage from SITE content
     $moduleGenerateContent->addonSite(
-      $arraySoftwareState['currentApplication'] . '-frontpage.xhtml', 'Explore Add-ons'
+      $gaRuntime['currentApplication'] . '-frontpage.xhtml', 'Explore Add-ons'
     );
     break;
   case URI_SEARCH:
     // Search Page
     // Send the search terms to SQL
-    $arraySoftwareState['requestSearchTerms'] = str_replace('*', '', $arraySoftwareState['requestSearchTerms']);
-    $searchManifest = $moduleReadManifest->getAddons('site-search', $arraySoftwareState['requestSearchTerms']);
+    $gaRuntime['requestSearchTerms'] = str_replace('*', '', $gaRuntime['requestSearchTerms']);
+    $searchManifest = $moduleReadManifest->getAddons('site-search', $gaRuntime['requestSearchTerms']);
 
     // If no results generate a page indicating that
     if (!$searchManifest) {
@@ -115,17 +115,17 @@ switch ($arraySoftwareState['requestPath']) {
 
     // We have results so generate the page with them
     $moduleGenerateContent->addonSite('search',
-      'Search results for "' . $arraySoftwareState['requestSearchTerms'] . '"',
+      'Search results for "' . $gaRuntime['requestSearchTerms'] . '"',
       $searchManifest
     );
     break;
   case URI_EXTENSIONS:
     // Extensions Category (Top Level)
     // Find out if we should use Extension Subcategories or All Extensions
-    $arraySoftwareState['requestAllExtensions'] = gfSuperVar('get', 'all');
+    $gaRuntime['requestAllExtensions'] = gfSuperVar('get', 'all');
     $useExtensionSubcategories = funcCheckEnabledFeature('extensions-cat', true);
 
-    if ($useExtensionSubcategories && !$arraySoftwareState['requestAllExtensions']) {
+    if ($useExtensionSubcategories && !$gaRuntime['requestAllExtensions']) {
       // We are using Extension Subcategories so generate a page that lists all the subcategories
       $moduleGenerateContent->addonSite('cat-extension-category',
                                         'Extensions',
@@ -223,12 +223,12 @@ switch ($arraySoftwareState['requestPath']) {
   default:
     // Complex URIs need more complex conditional checking
     // Extension Subcategories
-    if (startsWith($arraySoftwareState['requestPath'], URI_EXTENSIONS)) {
+    if (startsWith($gaRuntime['requestPath'], URI_EXTENSIONS)) {
       // Check if Extension Subcategories are enabled
       funcCheckEnabledFeature('extensions-cat');
 
       // Strip the path to get the slug
-      $strSlug = funcStripPath($arraySoftwareState['requestPath'], URI_EXTENSIONS);
+      $strSlug = funcStripPath($gaRuntime['requestPath'], URI_EXTENSIONS);
 
       // See if the slug exists in the category array
       if (!array_key_exists($strSlug, classReadManifest::EXTENSION_CATEGORY_SLUGS)) {
@@ -249,9 +249,9 @@ switch ($arraySoftwareState['requestPath']) {
                                         $categoryManifest, classReadManifest::EXTENSION_CATEGORY_SLUGS);
     }
     // Add-on Page
-    elseif (startsWith($arraySoftwareState['requestPath'], URI_ADDON_PAGE)) {
+    elseif (startsWith($gaRuntime['requestPath'], URI_ADDON_PAGE)) {
       // Strip the path to get the slug
-      $strSlug = funcStripPath($arraySoftwareState['requestPath'], URI_ADDON_PAGE);
+      $strSlug = funcStripPath($gaRuntime['requestPath'], URI_ADDON_PAGE);
 
       // Query SQL for the add-on
       $addonManifest = $moduleReadManifest->getAddon('by-slug', $strSlug);
@@ -265,9 +265,9 @@ switch ($arraySoftwareState['requestPath']) {
       $moduleGenerateContent->addonSite('addon-page', $addonManifest['name'], $addonManifest);
     }
     // Add-on Releases
-    elseif (startsWith($arraySoftwareState['requestPath'], URI_ADDON_RELEASES)) {
+    elseif (startsWith($gaRuntime['requestPath'], URI_ADDON_RELEASES)) {
       // Strip the path to get the slug
-      $strSlug = funcStripPath($arraySoftwareState['requestPath'], URI_ADDON_RELEASES);
+      $strSlug = funcStripPath($gaRuntime['requestPath'], URI_ADDON_RELEASES);
 
       // Query SQL for the add-on
       $addonManifest = $moduleReadManifest->getAddon('by-slug', $strSlug);
@@ -281,9 +281,9 @@ switch ($arraySoftwareState['requestPath']) {
       $moduleGenerateContent->addonSite('addon-releases', $addonManifest['name'] . ' - Releases', $addonManifest);
     }
     // Add-on License
-    elseif (startsWith($arraySoftwareState['requestPath'], URI_ADDON_LICENSE)) {
+    elseif (startsWith($gaRuntime['requestPath'], URI_ADDON_LICENSE)) {
       // Strip the path to get the slug
-      $strSlug = funcStripPath($arraySoftwareState['requestPath'], URI_ADDON_LICENSE);
+      $strSlug = funcStripPath($gaRuntime['requestPath'], URI_ADDON_LICENSE);
 
       // Query SQL for the add-on
       $addonManifest = $moduleReadManifest->getAddon('by-slug', $strSlug);

@@ -16,7 +16,7 @@ require_once('./globalFunctions.php');
 // == | Main | ========================================================================================================
 
 // Define an array that will hold the current application state
-$arraySoftwareState = array(
+$gaRuntime = array(
   'authentication'      => null,
   'currentApplication'  => null,
   'orginalApplication'  => null,
@@ -42,21 +42,21 @@ $arraySoftwareState = array(
 // Decide which application by domain that the software will be serving
 // and if debug is enabled
 foreach (TARGET_APPLICATION as $_key => $_value) {
-  switch ($arraySoftwareState['phpServerName']) {
+  switch ($gaRuntime['phpServerName']) {
     case $_value['domain']['live']:
-      $arraySoftwareState['currentApplication'] = $_key;
-      $arraySoftwareState['targetApplicationID'] = $_value['id'];
-      $arraySoftwareState['currentDomain'] = $_value['domain']['live'];
+      $gaRuntime['currentApplication'] = $_key;
+      $gaRuntime['targetApplicationID'] = $_value['id'];
+      $gaRuntime['currentDomain'] = $_value['domain']['live'];
       break;
     case $_value['domain']['dev']:
-      $arraySoftwareState['currentApplication'] = $_key;
-      $arraySoftwareState['targetApplicationID'] = $_value['id'];
-      $arraySoftwareState['currentDomain'] = $_value['domain']['dev'];
-      $arraySoftwareState['debugMode'] = true;
+      $gaRuntime['currentApplication'] = $_key;
+      $gaRuntime['targetApplicationID'] = $_value['id'];
+      $gaRuntime['currentDomain'] = $_value['domain']['dev'];
+      $gaRuntime['debugMode'] = true;
       break;
   }
 
-  if ($arraySoftwareState['currentApplication']) {
+  if ($gaRuntime['currentApplication']) {
     break;
   }
 }
@@ -64,25 +64,25 @@ foreach (TARGET_APPLICATION as $_key => $_value) {
 // --------------------------------------------------------------------------------------------------------------------
 
 // Items that get changed depending on debug mode
-if ($arraySoftwareState['debugMode']) {
+if ($gaRuntime['debugMode']) {
   // We can disable debug mode when on a dev url otherwise if debug mode we want all errors
-  if ($arraySoftwareState['requestDebugOff']) {
-    $arraySoftwareState['debugMode'] = null;
+  if ($gaRuntime['requestDebugOff']) {
+    $gaRuntime['debugMode'] = null;
   }
 
   // Override currentApplication by query
   // If requestApplication is set and it exists in the array constant set the currentApplication to that
-  if ($arraySoftwareState['requestApplication']) {
-    if (array_key_exists($arraySoftwareState['requestApplication'], TARGET_APPLICATION)) {
-      $arraySoftwareState['orginalApplication'] = $arraySoftwareState['currentApplication'];
-      $arraySoftwareState['currentApplication'] = $arraySoftwareState['requestApplication'];
+  if ($gaRuntime['requestApplication']) {
+    if (array_key_exists($gaRuntime['requestApplication'], TARGET_APPLICATION)) {
+      $gaRuntime['orginalApplication'] = $gaRuntime['currentApplication'];
+      $gaRuntime['currentApplication'] = $gaRuntime['requestApplication'];
     }
     else {
       funcError('Invalid application');
     }
 
     // The same application shouldn't be appOverriden
-    if ($arraySoftwareState['currentApplication'] == $arraySoftwareState['orginalApplication']) {
+    if ($gaRuntime['currentApplication'] == $gaRuntime['orginalApplication']) {
       funcError('It makes no sense to appOverride the same application');
     }
   }
@@ -98,45 +98,45 @@ if (file_exists(ROOT_PATH . '/.offline')) {
 // --------------------------------------------------------------------------------------------------------------------
 
 // We cannot continue without a valid currentApplication
-if (!$arraySoftwareState['currentDomain']) {
+if (!$gaRuntime['currentDomain']) {
   funcError('Invalid domain');
 }
 
 // We cannot continue without a valid currentApplication
-if (!$arraySoftwareState['currentApplication']) {
+if (!$gaRuntime['currentApplication']) {
   funcError('Invalid application');
 }
 
 // We cannot contine if the application is not enabled
-if (!TARGET_APPLICATION[$arraySoftwareState['currentApplication']]['enabled']) {
-  funcError('This ' . ucfirst($arraySoftwareState['currentApplication']) . ' Add-ons Site has been disabled. ' .
+if (!TARGET_APPLICATION[$gaRuntime['currentApplication']]['enabled']) {
+  funcError('This ' . ucfirst($gaRuntime['currentApplication']) . ' Add-ons Site has been disabled. ' .
             'Please contact the Phoebus Administrator');
 }
 
 // --------------------------------------------------------------------------------------------------------------------
 
 // Root (/) won't set a component or path
-if (!$arraySoftwareState['requestComponent'] && !$arraySoftwareState['requestPath']) {
-  $arraySoftwareState['requestComponent'] = 'site';
-  $arraySoftwareState['requestPath'] = '/';
+if (!$gaRuntime['requestComponent'] && !$gaRuntime['requestPath']) {
+  $gaRuntime['requestComponent'] = 'site';
+  $gaRuntime['requestPath'] = '/';
 }
 // The PANEL component overrides the SITE component
-elseif (startsWith($arraySoftwareState['phpRequestURI'], '/panel/')) {
-  $arraySoftwareState['requestComponent'] = 'panel';
+elseif (startsWith($gaRuntime['phpRequestURI'], '/panel/')) {
+  $gaRuntime['requestComponent'] = 'panel';
 }
 // The SPECIAL component overrides the SITE component
-elseif (startsWith($arraySoftwareState['phpRequestURI'], '/special/')) {
-  $arraySoftwareState['requestComponent'] = 'special';
+elseif (startsWith($gaRuntime['phpRequestURI'], '/special/')) {
+  $gaRuntime['requestComponent'] = 'special';
 }
 
 // --------------------------------------------------------------------------------------------------------------------
 
 // Load component based on requestComponent
-if ($arraySoftwareState['requestComponent'] && array_key_exists($arraySoftwareState['requestComponent'], COMPONENTS)) {
-  require_once(COMPONENTS[$arraySoftwareState['requestComponent']]);
+if ($gaRuntime['requestComponent'] && array_key_exists($gaRuntime['requestComponent'], COMPONENTS)) {
+  require_once(COMPONENTS[$gaRuntime['requestComponent']]);
 }
 else {
-  if (!$arraySoftwareState['debugMode']) {
+  if (!$gaRuntime['debugMode']) {
     funcSendHeader('404');
   }
   funcError('Invalid component');

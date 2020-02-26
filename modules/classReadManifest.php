@@ -553,7 +553,7 @@ class classReadManifest {
 
     // Set baseURL if applicable
     if ($this->addonManifest['type'] != 'external') {
-      $this->addonManifest['baseURL'] = 'http://' . $GLOBALS['arraySoftwareState']['currentDomain'] .
+      $this->addonManifest['baseURL'] = 'http://' . $GLOBALS['gaRuntime']['currentDomain'] .
                                         '/?component=download&id=' . $this->addonManifest['id'] .
                                         '&version=' .
                                         $this->addonManifest['thisVersion'] ?? $this->addonManifest['releaseVersion']; 
@@ -718,8 +718,8 @@ class classReadManifest {
   private function reset() {
     if ($this->needsReset) {
       $this->needsReset = false;
-      $this->currentApplication = $GLOBALS['arraySoftwareState']['currentApplication'];
-      $this->currentComponent = $GLOBALS['arraySoftwareState']['requestComponent'];
+      $this->currentApplication = $GLOBALS['gaRuntime']['currentApplication'];
+      $this->currentComponent = $GLOBALS['gaRuntime']['requestComponent'];
       $this->applicationID = TARGET_APPLICATION[$this->currentApplication]['id'];
       $this->applicationBit = TARGET_APPLICATION[$this->currentApplication]['bit'];
       $this->addonManifest = null;

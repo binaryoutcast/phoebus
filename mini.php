@@ -21,7 +21,7 @@ if (!defined('ROOT_PATH')) {
 $strOfflineMessage = 'Phoebus, and by extension this Add-ons Site, is currently unavailable. Please try again later.';
 
 if (contains(SOFTWARE_VERSION, 'a') || contains(SOFTWARE_VERSION, 'b') ||
-    contains(SOFTWARE_VERSION, 'pre') || $arraySoftwareState['debugMode']) {
+    contains(SOFTWARE_VERSION, 'pre') || $gaRuntime['debugMode']) {
   $strOfflineMessage = 'This in-development version of Phoebus is not for public consumption. Please try a live Add-ons Site!<br /><br /></li>';
 
   foreach (TARGET_APPLICATION as $_value) {
@@ -34,24 +34,24 @@ if (contains(SOFTWARE_VERSION, 'a') || contains(SOFTWARE_VERSION, 'b') ||
 }
 
 // Root (/) won't set a component or path
-if (!$arraySoftwareState['requestComponent'] && !$arraySoftwareState['requestPath']) {
-  $arraySoftwareState['requestComponent'] = 'site';
-  $arraySoftwareState['requestPath'] = '/';
+if (!$gaRuntime['requestComponent'] && !$gaRuntime['requestPath']) {
+  $gaRuntime['requestComponent'] = 'site';
+  $gaRuntime['requestPath'] = '/';
 }
 
-switch ($arraySoftwareState['requestComponent']) {
+switch ($gaRuntime['requestComponent']) {
   case 'aus':
     funcSendHeader('xml');
     print('<?xml version="1.0" encoding="UTF-8"?><RDF:RDF xmlns:RDF="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:em="http://www.mozilla.org/2004/em-rdf#" />');
     exit();
     break;
   case 'integration':
-    $arraySoftwareState['requestAPIScope'] = gfSuperVar('get', 'type');
-    $arraySoftwareState['requestAPIFunction'] = gfSuperVar('get', 'request');
-    if ($arraySoftwareState['requestAPIScope'] != 'internal') {
+    $gaRuntime['requestAPIScope'] = gfSuperVar('get', 'type');
+    $gaRuntime['requestAPIFunction'] = gfSuperVar('get', 'request');
+    if ($gaRuntime['requestAPIScope'] != 'internal') {
       funcSendHeader('404');
     }
-    switch ($arraySoftwareState['requestAPIFunction']) {
+    switch ($gaRuntime['requestAPIFunction']) {
       case 'search':
         funcSendHeader('xml');
         print('<?xml version="1.0" encoding="utf-8" ?><searchresults total_results="0" />');

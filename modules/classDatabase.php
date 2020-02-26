@@ -5,7 +5,7 @@
 
 class classDatabase {
   public $connection;
-  private $arraySoftwareState;
+  private $gaRuntime;
   private $libSafeMySQL;
   
   /********************************************************************************************************************
@@ -13,7 +13,7 @@ class classDatabase {
   ********************************************************************************************************************/
   function __construct() {
     // Assign current software state to a class property by reference
-    $this->arraySoftwareState = &$GLOBALS['arraySoftwareState'];
+    $this->gaRuntime = &$GLOBALS['gaRuntime'];
 
     @include_once(ROOT_PATH . DATASTORE_RELPATH . '.phoebus/sql');
 
@@ -23,7 +23,7 @@ class classDatabase {
 
     $arrayCreds['currentDB'] = $arrayCreds['liveDB'];
 
-    if($this->arraySoftwareState['debugMode'] || $this->arraySoftwareState['requestDebugOff']) {
+    if($this->gaRuntime['debugMode'] || $this->gaRuntime['requestDebugOff']) {
       $arrayCreds['currentDB'] = $arrayCreds['devDB'];;
     }
 

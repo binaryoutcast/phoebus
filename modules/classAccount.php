@@ -188,7 +188,7 @@ class classAccount {
     }
 
     // Hackers are a superstitious cowardly lot
-    if ($GLOBALS['arraySoftwareState']['authentication']['level'] < 3) {
+    if ($GLOBALS['gaRuntime']['authentication']['level'] < 3) {
       unset($this->postData['active']);
       unset($this->postData['level']);
       unset($this->postData['username']);
@@ -216,11 +216,11 @@ class classAccount {
       }
     }
     else {
-      if ($GLOBALS['arraySoftwareState']['authentication']['level'] != 5 &&
-          $this->postData['level'] >= $GLOBALS['arraySoftwareState']['authentication']['level']) {
-        switch ($GLOBALS['arraySoftwareState']['authentication']['username']) {
+      if ($GLOBALS['gaRuntime']['authentication']['level'] != 5 &&
+          $this->postData['level'] >= $GLOBALS['gaRuntime']['authentication']['level']) {
+        switch ($GLOBALS['gaRuntime']['authentication']['username']) {
           case $this->postData['username']:
-            if ($this->postData['level'] <= $GLOBALS['arraySoftwareState']['authentication']['level']) {
+            if ($this->postData['level'] <= $GLOBALS['gaRuntime']['authentication']['level']) {
               break;
             }
           default:
@@ -265,16 +265,16 @@ class classAccount {
   * Gets all users at or below the requesting user level
   ********************************************************************************************************************/
   public function getUsers() {
-    if ($GLOBALS['arraySoftwareState']['authentication']['level'] < 3) {
+    if ($GLOBALS['gaRuntime']['authentication']['level'] < 3) {
       funcError('I have no idea how you managed to get here but seriously you need to piss off...');
     }
 
     $query = "SELECT * FROM `user` WHERE ?i = 5 OR `level` < ?i OR `username` = ?s";
     $allUsers = $GLOBALS['moduleDatabase']->query('rows',
                                                   $query,
-                                                  $GLOBALS['arraySoftwareState']['authentication']['level'],
-                                                  $GLOBALS['arraySoftwareState']['authentication']['level'],
-                                                  $GLOBALS['arraySoftwareState']['authentication']['username']);
+                                                  $GLOBALS['gaRuntime']['authentication']['level'],
+                                                  $GLOBALS['gaRuntime']['authentication']['level'],
+                                                  $GLOBALS['gaRuntime']['authentication']['username']);
 
     foreach ($allUsers as $_key => $_value) {
       unset($allUsers[$_key]['password']);
@@ -351,7 +351,7 @@ class classAccount {
     // This will handle a logout situation using a dirty javascript trick
     // It will not work without javascript or on IE but then again neither will the PANEL
     if ($aLogout) {
-      $url = 'https://logout:logout@' . $GLOBALS['arraySoftwareState']['currentDomain'] . '/panel/logout/';
+      $url = 'https://logout:logout@' . $GLOBALS['gaRuntime']['currentDomain'] . '/panel/logout/';
       funcSendHeader('html');
       die(
         '<html><head><script>' .
@@ -391,7 +391,7 @@ class classAccount {
     }
 
     // Levels 1 and 2 need to add their email and displayName so force them
-    if ($userManifest['level'] < 3 && $GLOBALS['arraySoftwareState']['requestPath'] != '/panel/account/') {
+    if ($userManifest['level'] < 3 && $GLOBALS['gaRuntime']['requestPath'] != '/panel/account/') {
       if (!$userManifest['email'] || !$userManifest['displayName']) {
         funcRedirect('/panel/account/');
       }
@@ -403,7 +403,7 @@ class classAccount {
     // ----------------------------------------------------------------------------------------------------------------
 
     // Assign the userManifest to the softwareState
-    $GLOBALS['arraySoftwareState']['authentication'] = $userManifest;
+    $GLOBALS['gaRuntime']['authentication'] = $userManifest;
 
     return true;
   }
@@ -444,7 +444,7 @@ class classAccount {
       'X-Mailer' => SOFTWARE_NAME . '/' . SOFTWARE_VERSION,
     );
 
-    $strSubDomain = $GLOBALS['arraySoftwareState']['debugMode'] ? 'addons-dev.' : 'addons.';
+    $strSubDomain = $GLOBALS['gaRuntime']['debugMode'] ? 'addons-dev.' : 'addons.';
 
     $strSendMailBody = 'Your verification code is: ' . $aValidationCode . NEW_LINE . NEW_LINE .
                        'You can verify and/or activate your account by navigating to https://' .

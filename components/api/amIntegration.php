@@ -8,7 +8,7 @@
 // Include modules
 $arrayIncludes = ['database', 'oldReadManifest', 'generateContent'];
 
-if ($arraySoftwareState['tap']) {
+if ($gaRuntime['tap']) {
   $arrayIncludes[] = 'tap';
 }
 
@@ -19,7 +19,7 @@ $moduleDatabase = new classDatabase();
 $moduleReadManifest = new classReadManifest();
 $moduleGenerateContent = new classGenerateContent();
 
-if ($arraySoftwareState['tap']) {
+if ($gaRuntime['tap']) {
   $moduleTap = new classTap();
   $moduleTap->execute();
 }
@@ -29,34 +29,34 @@ if ($arraySoftwareState['tap']) {
 // == | Main | ========================================================================================================
 
 // Assign HTTP GET arguments to the software state
-$arraySoftwareState['requestAPIScope'] = gfSuperVar('get', 'type');
-$arraySoftwareState['requestAPIFunction'] = gfSuperVar('get', 'request');
-$arraySoftwareState['requestAPISearchQuery'] = gfSuperVar('get', 'q');
-$arraySoftwareState['requestAPISearchGUID'] = gfSuperVar('get', 'addonguid');
+$gaRuntime['requestAPIScope'] = gfSuperVar('get', 'type');
+$gaRuntime['requestAPIFunction'] = gfSuperVar('get', 'request');
+$gaRuntime['requestAPISearchQuery'] = gfSuperVar('get', 'q');
+$gaRuntime['requestAPISearchGUID'] = gfSuperVar('get', 'addonguid');
 
 // --------------------------------------------------------------------------------------------------------------------
 
 // Sanity
-if (!$arraySoftwareState['requestAPIScope'] ||
-    !$arraySoftwareState['requestAPIFunction']) {
+if (!$gaRuntime['requestAPIScope'] ||
+    !$gaRuntime['requestAPIFunction']) {
   funcError('Missing minimum arguments (type or request)');
 }
 
 // --------------------------------------------------------------------------------------------------------------------
 
-if ($arraySoftwareState['requestAPIScope'] == 'internal') {
-  switch ($arraySoftwareState['requestAPIFunction']) {
+if ($gaRuntime['requestAPIScope'] == 'internal') {
+  switch ($gaRuntime['requestAPIFunction']) {
     case 'search':
-      $searchManifest = $moduleReadManifest->getAddons('api-search', $arraySoftwareState['requestAPISearchQuery'], 1);
+      $searchManifest = $moduleReadManifest->getAddons('api-search', $gaRuntime['requestAPISearchQuery'], 1);
       $moduleGenerateContent->amSearch($searchManifest);
     case 'get':
-      if (!$arraySoftwareState['requestAPISearchGUID']) {
+      if (!$gaRuntime['requestAPISearchGUID']) {
         $moduleGenerateContent->amSearch(null);
       }
 
-      $arraySoftwareState['requestAPISearchGUID'] = explode(',', $arraySoftwareState['requestAPISearchGUID']);
+      $gaRuntime['requestAPISearchGUID'] = explode(',', $gaRuntime['requestAPISearchGUID']);
 
-      $searchManifest = $moduleReadManifest->getAddons('api-get', $arraySoftwareState['requestAPISearchGUID'], 2);
+      $searchManifest = $moduleReadManifest->getAddons('api-get', $gaRuntime['requestAPISearchGUID'], 2);
       $moduleGenerateContent->amSearch($searchManifest);
     case 'recommended':
       // This is apperently not used anymore but provide an empty response
@@ -67,11 +67,11 @@ if ($arraySoftwareState['requestAPIScope'] == 'internal') {
       funcError('Unknown Internal Request');
   }
 }
-elseif ($arraySoftwareState['requestAPIScope'] == 'external') {
-  switch ($arraySoftwareState['requestAPIFunction']) {
+elseif ($gaRuntime['requestAPIScope'] == 'external') {
+  switch ($gaRuntime['requestAPIFunction']) {
     case 'search':
       funcRedirect(
-        '/search/?terms=' . $arraySoftwareState['requestAPISearchQuery']
+        '/search/?terms=' . $gaRuntime['requestAPISearchQuery']
       );
     case 'themes':
       funcRedirect('/themes/');

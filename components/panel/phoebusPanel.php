@@ -29,9 +29,9 @@ $moduleWriteManifest                    = new classWriteManifest();
 $moduleGenerateContent                  = new classGenerateContent('smarty');
 
 // Request arguments
-$arraySoftwareState['requestPanelTask'] = gfSuperVar('get', 'task');
-$arraySoftwareState['requestPanelWhat'] = gfSuperVar('get', 'what');
-$arraySoftwareState['requestPanelSlug'] = gfSuperVar('get', 'slug');
+$gaRuntime['requestPanelTask'] = gfSuperVar('get', 'task');
+$gaRuntime['requestPanelWhat'] = gfSuperVar('get', 'what');
+$gaRuntime['requestPanelSlug'] = gfSuperVar('get', 'slug');
 
 // ====================================================================================================================
 
@@ -44,7 +44,7 @@ $arraySoftwareState['requestPanelSlug'] = gfSuperVar('get', 'slug');
 * @returns          true 404
 ***********************************************************************************************************************/
 function funcCheckAccessLevel($aLevel, $aReturnNull = null) {
-  if ($GLOBALS['arraySoftwareState']['authentication']['level'] >= $aLevel) {
+  if ($GLOBALS['gaRuntime']['authentication']['level'] >= $aLevel) {
     return true;
   }
 
@@ -63,24 +63,24 @@ if (file_exists(ROOT_PATH . '/.disablePanel')) {
   funcError('The Panel is currently unavailable. Please try again later.');
 }
 
-$strComponentPath = dirname(COMPONENTS[$arraySoftwareState['requestComponent']]) . '/';
+$strComponentPath = dirname(COMPONENTS[$gaRuntime['requestComponent']]) . '/';
 $boolHasPostData = !empty($_POST);
 
 // --------------------------------------------------------------------------------------------------------------------
 
 // The Panel can ONLY be used on HTTPS so redirect those sites without https to Pale Moon
-if (!in_array('https', TARGET_APPLICATION[$arraySoftwareState['currentApplication']]['features'])) {
+if (!in_array('https', TARGET_APPLICATION[$gaRuntime['currentApplication']]['features'])) {
   funcRedirect('https://' . TARGET_APPLICATION['palemoon']['domain']['live'] . '/panel/');
 }
 
-if ($arraySoftwareState['currentScheme'] != 'https') {
-  funcRedirect('https://' . $arraySoftwareState['currentDomain'] . '/panel/');
+if ($gaRuntime['currentScheme'] != 'https') {
+  funcRedirect('https://' . $gaRuntime['currentDomain'] . '/panel/');
 }
 
 // --------------------------------------------------------------------------------------------------------------------
 
 // Handle URIs
-switch ($arraySoftwareState['requestPath']) {
+switch ($gaRuntime['requestPath']) {
   case URI_PANEL:
     $moduleGenerateContent->addonSite('panel-frontpage.xhtml', 'Landing Page');
     break;
@@ -127,7 +127,7 @@ switch ($arraySoftwareState['requestPath']) {
     require_once($strComponentPath . 'developer.php');
     break;
   default:
-    if (startsWith($arraySoftwareState['requestPath'], URI_ADMIN)){
+    if (startsWith($gaRuntime['requestPath'], URI_ADMIN)){
       $moduleAccount->authenticate();
       funcCheckAccessLevel(3);
       require_once($strComponentPath . 'administration.php');

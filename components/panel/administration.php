@@ -6,40 +6,40 @@
 // == | Main | ========================================================================================================
 
 // Serve the Adminsitration landing page
-if ($arraySoftwareState['requestPath'] == URI_ADMIN && !$arraySoftwareState['requestPanelTask']) {
+if ($gaRuntime['requestPath'] == URI_ADMIN && !$gaRuntime['requestPanelTask']) {
   $moduleGenerateContent->addonSite('admin-frontpage.xhtml', 'Administration');
 }
 
-switch ($arraySoftwareState['requestPanelTask']) {
+switch ($gaRuntime['requestPanelTask']) {
   case 'list':
-    if (!$arraySoftwareState['requestPanelWhat']) {
+    if (!$gaRuntime['requestPanelWhat']) {
       funcError('You did not specify what you want to list');
     }
 
-    switch ($arraySoftwareState['requestPanelWhat']) {
+    switch ($gaRuntime['requestPanelWhat']) {
       case 'langpacks':
-        if ($arraySoftwareState['authentication']['level'] < 4) {
+        if ($gaRuntime['authentication']['level'] < 4) {
           funcError('You are not allowed to list language packs!');
         }
       case 'extensions':
       case 'externals':
       case 'themes':
         $addons = $moduleReadManifest->getAddons('panel-addons-by-type',
-                                                 substr($arraySoftwareState['requestPanelWhat'], 0, -1));
+                                                 substr($gaRuntime['requestPanelWhat'], 0, -1));
 
-        $moduleGenerateContent->addonSite('admin-list-' . $arraySoftwareState['requestPanelWhat'],
-                                          ucfirst($arraySoftwareState['requestPanelWhat']) . ' - Administration',
+        $moduleGenerateContent->addonSite('admin-list-' . $gaRuntime['requestPanelWhat'],
+                                          ucfirst($gaRuntime['requestPanelWhat']) . ' - Administration',
                                           $addons);
         break;
       case 'users':
         $users = $moduleAccount->getUsers();
         $moduleGenerateContent->addonSite('admin-list-users', 'Users - Administration', $users);
       case 'user-addons':
-        if (!$arraySoftwareState['requestPanelSlug']) {
+        if (!$gaRuntime['requestPanelSlug']) {
           funcError('You did not specify a slug (username)');
         }
 
-        $userManifest = $moduleAccount->getSingleUser($arraySoftwareState['requestPanelSlug'], true);
+        $userManifest = $moduleAccount->getSingleUser($gaRuntime['requestPanelSlug'], true);
 
         // Check if manifest is valid
         if (!$userManifest) {
@@ -56,14 +56,14 @@ switch ($arraySoftwareState['requestPanelTask']) {
     }
     break;
   case 'submit':
-    if (!$arraySoftwareState['requestPanelWhat']) {
+    if (!$gaRuntime['requestPanelWhat']) {
       funcError('You did not specify what you want to submit');
     }
 
-    switch ($arraySoftwareState['requestPanelWhat']) {
+    switch ($gaRuntime['requestPanelWhat']) {
       case 'addon':
       case 'langpack':
-        $isLangPack = (bool)($arraySoftwareState['requestPanelWhat'] == 'langpack');
+        $isLangPack = (bool)($gaRuntime['requestPanelWhat'] == 'langpack');
         $strTitle = $isLangPack ? 'Pale Moon Language Pack' : 'Add-on';
         if ($boolHasPostData) {
           $finalSlug = $moduleWriteManifest->submitNewAddon($isLangPack);
@@ -78,7 +78,7 @@ switch ($arraySoftwareState['requestPanelTask']) {
         }
 
         // Generate the submit page
-        $moduleGenerateContent->addonSite('panel-submit-' . $arraySoftwareState['requestPanelWhat'],
+        $moduleGenerateContent->addonSite('panel-submit-' . $gaRuntime['requestPanelWhat'],
                                           'Submit new ' . $strTitle);
         break;
       case 'external':
@@ -102,19 +102,19 @@ switch ($arraySoftwareState['requestPanelTask']) {
     }
     break;
   case 'update':
-    if (!$arraySoftwareState['requestPanelWhat'] || !$arraySoftwareState['requestPanelSlug']) {
+    if (!$gaRuntime['requestPanelWhat'] || !$gaRuntime['requestPanelSlug']) {
       funcError('You did not specify what you want to update');
     }
 
-    switch ($arraySoftwareState['requestPanelWhat']) {
+    switch ($gaRuntime['requestPanelWhat']) {
       case 'release':
         // Check for valid slug
-        if (!$arraySoftwareState['requestPanelSlug']) {
+        if (!$gaRuntime['requestPanelSlug']) {
           funcError('You did not specify a slug');
         }
 
         // Get the manifest
-        $addonManifest = $moduleReadManifest->getAddon('panel-by-slug', $arraySoftwareState['requestPanelSlug']);
+        $addonManifest = $moduleReadManifest->getAddon('panel-by-slug', $gaRuntime['requestPanelSlug']);
 
         // Check if manifest is valid
         if (!$addonManifest) {
@@ -123,7 +123,7 @@ switch ($arraySoftwareState['requestPanelTask']) {
 
         $isLangPack = (bool)($addonManifest['type'] == 'langpack');
 
-        if ($isLangPack && $arraySoftwareState['authentication']['level'] < 4) {
+        if ($isLangPack && $gaRuntime['authentication']['level'] < 4) {
           funcError('You are not allowed to update language packs!');
         }
 
@@ -147,19 +147,19 @@ switch ($arraySoftwareState['requestPanelTask']) {
         break;
       case 'metadata':
         // Check for valid slug
-        if (!$arraySoftwareState['requestPanelSlug']) {
+        if (!$gaRuntime['requestPanelSlug']) {
           funcError('You did not specify a slug');
         }
 
         // Get the manifest
-        $addonManifest = $moduleReadManifest->getAddon('panel-by-slug', $arraySoftwareState['requestPanelSlug']);
+        $addonManifest = $moduleReadManifest->getAddon('panel-by-slug', $gaRuntime['requestPanelSlug']);
 
         // Check if manifest is valid
         if (!$addonManifest) {
           funcError('Add-on Manifest is null');
         }
 
-        if ($addonManifest['type'] == 'langpack' && $arraySoftwareState['authentication']['level'] < 4) {
+        if ($addonManifest['type'] == 'langpack' && $gaRuntime['authentication']['level'] < 4) {
           funcError('You are not allowed to edit language packs!');
         }
 
@@ -206,11 +206,11 @@ switch ($arraySoftwareState['requestPanelTask']) {
         break;
       case 'user':
         // Check for valid slug
-        if (!$arraySoftwareState['requestPanelSlug']) {
+        if (!$gaRuntime['requestPanelSlug']) {
           funcError('You did not specify a slug (username)');
         }
 
-        $userManifest = $moduleAccount->getSingleUser($arraySoftwareState['requestPanelSlug'], true);
+        $userManifest = $moduleAccount->getSingleUser($gaRuntime['requestPanelSlug'], true);
 
         // Check if manifest is valid
         if (!$userManifest) {
@@ -218,9 +218,9 @@ switch ($arraySoftwareState['requestPanelTask']) {
         }
 
         // Do not allow editing of users at or above a user level unless they are you or you are level 5
-        if ($arraySoftwareState['authentication']['level'] != 5 &&
-            $userManifest['level'] >= $arraySoftwareState['authentication']['level'] &&
-            $userManifest['username'] != $arraySoftwareState['authentication']['username']) {
+        if ($gaRuntime['authentication']['level'] != 5 &&
+            $userManifest['level'] >= $gaRuntime['authentication']['level'] &&
+            $userManifest['username'] != $gaRuntime['authentication']['username']) {
           funcError('You attempted to alter a user account that is the same or higher rank as you but not you. You\'re in trouble!');
         }
 
@@ -246,10 +246,10 @@ switch ($arraySoftwareState['requestPanelTask']) {
     }
     break;
   case 'bulk-upload':
-    if (!$arraySoftwareState['requestPanelWhat']) {
+    if (!$gaRuntime['requestPanelWhat']) {
       funcError('You did not specify what you want to bulk upload');
     }
-    switch ($arraySoftwareState['requestPanelWhat']) {
+    switch ($gaRuntime['requestPanelWhat']) {
       case 'langpacks':
         if ($boolHasPostData) {
           $finalResult = $moduleWriteManifest->bulkUploader('langpack');

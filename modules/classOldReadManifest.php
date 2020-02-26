@@ -57,7 +57,7 @@ class classReadManifest {
     }
     
     // Assign currentApplication
-    $this->currentApplication = $GLOBALS['arraySoftwareState']['currentApplication'];
+    $this->currentApplication = $GLOBALS['gaRuntime']['currentApplication'];
     $this->currentAppID = TARGET_APPLICATION[$this->currentApplication]['id'];
     $this->currentAppBit = TARGET_APPLICATION[$this->currentApplication]['bit'];
   }
@@ -337,7 +337,7 @@ class classReadManifest {
     }
 
     // In the PANEL we join the client table but we only need it for externals
-    if ($GLOBALS['arraySoftwareState']['requestComponent'] == 'panel' && $addonManifest['type'] != 'external') {
+    if ($GLOBALS['gaRuntime']['requestComponent'] == 'panel' && $addonManifest['type'] != 'external') {
       foreach (TARGET_APPLICATION as $_key => $_value) {
         unset($addonManifest[$_key]);
       }
@@ -405,7 +405,7 @@ class classReadManifest {
     // Set baseURL if applicable
     if ($addonManifest['type'] != 'external') {
       $addonManifest['baseURL'] = 'http://' .
-                                  $GLOBALS['arraySoftwareState']['currentDomain'] .
+                                  $GLOBALS['gaRuntime']['currentDomain'] .
                                   '/?component=download&version=latest&id=';
     }
 

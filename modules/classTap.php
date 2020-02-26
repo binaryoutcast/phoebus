@@ -12,7 +12,7 @@ class classTap {
       funcError(__CLASS__ . '::' . __FUNCTION__ . ' - database is required to be included in the global scope');
     }
 
-    if (!$GLOBALS['arraySoftwareState']['remoteAddr']) {
+    if (!$GLOBALS['gaRuntime']['remoteAddr']) {
       funcError(__CLASS__ . '::' . __FUNCTION__ . ' - could not determin the remote addr');
     }
   }
@@ -21,7 +21,7 @@ class classTap {
   * Tap
   ********************************************************************************************************************/
   public function execute() {
-    $strHashIP = hash('sha256', $GLOBALS['arraySoftwareState']['remoteAddr']);
+    $strHashIP = hash('sha256', $GLOBALS['gaRuntime']['remoteAddr']);
     $query = "INSERT IGNORE `tap` SET haship=?s";
     $GLOBALS['moduleDatabase']->query('normal', $query, $strHashIP);
   }

@@ -8,7 +8,7 @@
 /**********************************************************************************************************************
 * Strips path to obtain the slug
 *
-* @param $aPath     $arraySoftwareState['requestPath']
+* @param $aPath     $gaRuntime['requestPath']
 * @param $aPrefix   Prefix to strip 
 * @returns          slug
 ***********************************************************************************************************************/
@@ -18,10 +18,10 @@ function funcStripPath($aPath, $aPrefix) {
 
 // == | Main | ========================================================================================================
 
-$strComponentPath = dirname(COMPONENTS[$arraySoftwareState['requestComponent']]) . '/';
-$strStripPath = funcStripPath($arraySoftwareState['requestPath'], '/special/');
+$strComponentPath = dirname(COMPONENTS[$gaRuntime['requestComponent']]) . '/';
+$strStripPath = funcStripPath($gaRuntime['requestPath'], '/special/');
 
-if (!$arraySoftwareState['debugMode']) {
+if (!$gaRuntime['debugMode']) {
   if ($strStripPath != 'phpinfo') {
     funcRedirect('/');
   }
@@ -39,13 +39,13 @@ switch ($strStripPath) {
     $moduleDatabase = new classDatabase();
     $moduleAccount = new classAccount();
     $moduleAccount->authenticate();
-    funcGenerateContent('Authenticated Software State', $arraySoftwareState);
+    funcGenerateContent('Authenticated Software State', $gaRuntime);
     break;
   case 'restructure':
     require_once($strComponentPath . 'migrateRestructure.php');
     break;
   case 'test':
-    $arraySoftwareState['requestTestCase'] = gfSuperVar('get', 'case');
+    $gaRuntime['requestTestCase'] = gfSuperVar('get', 'case');
     $arrayTestsGlob = glob($strComponentPath . 'tests/*.php');
     $arrayFinalTests = [];
 
@@ -57,9 +57,9 @@ switch ($strStripPath) {
 
     unset($arrayTestsGlob);
 
-    if ($arraySoftwareState['requestTestCase'] &&
-        in_array($arraySoftwareState['requestTestCase'], $arrayFinalTests)) {
-      require_once($strComponentPath . 'tests/' . $arraySoftwareState['requestTestCase'] . '.php');
+    if ($gaRuntime['requestTestCase'] &&
+        in_array($gaRuntime['requestTestCase'], $arrayFinalTests)) {
+      require_once($strComponentPath . 'tests/' . $gaRuntime['requestTestCase'] . '.php');
     }
 
     $testsHTML = '';

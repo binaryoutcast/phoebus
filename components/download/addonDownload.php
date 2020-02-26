@@ -100,7 +100,7 @@ function funcDownloadSearchPlugin($aSearchPluginName, $aBinaryStream = null) {
 $strRequestAddonID = gfSuperVar('get', 'id');
 $strRequestAddonVersion = gfSuperVar('get', 'version') ?? 'latest';
 $boolRequestPanel = gfSuperVar('get', 'panel');
-$boolRequestBinaryStream = in_array('disable-xpinstall', TARGET_APPLICATION[$arraySoftwareState['currentApplication']]['features']);
+$boolRequestBinaryStream = in_array('disable-xpinstall', TARGET_APPLICATION[$gaRuntime['currentApplication']]['features']);
                     
 
 // Sanity

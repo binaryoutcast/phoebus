@@ -265,7 +265,7 @@ function funcRedirect($_strURL) {
 * Sends a 404 error but does it depending on debug mode
 ***********************************************************************************************************************/
 function funcSend404() {
-  if (!$GLOBALS['arraySoftwareState']['debugMode']) {
+  if (!$GLOBALS['gaRuntime']['debugMode']) {
     funcSendHeader('404');
   }
   funcError('404 - Not Found');
