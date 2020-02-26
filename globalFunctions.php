@@ -163,13 +163,13 @@ function gfSuperVar($_type, $_value, $_allowFalsy = null) {
 
       break;
     case 'post':
-      $finalValue = $_POST[$_value] ?? null;
+      $finalValue ??= $_POST[$_value];
       break;
     case 'server':
-      $finalValue = $_SERVER[$_value] ?? null;
+      $finalValue ??= $_SERVER[$_value];
       break;
     case 'files':
-      $finalValue = $_FILES[$_value] ?? null;
+      $finalValue ??= $_FILES[$_value];
       if ($finalValue) {
         if (!in_array($finalValue['error'], [UPLOAD_ERR_OK, UPLOAD_ERR_NO_FILE])) {
           gfError('Upload of ' . $_value . ' failed with error code: ' . $finalValue['error']);
@@ -184,10 +184,10 @@ function gfSuperVar($_type, $_value, $_allowFalsy = null) {
       }
       break;
     case 'cookie':
-      $finalValue = $_COOKIE[$_value] ?? null;
+      $finalValue ??= $_COOKIE[$_value];
       break;
     case 'var':
-      $finalValue = $_value ?? null;
+      $finalValue ??= $_value;
       break;
     default:
       gfError('Incorrect var check');
