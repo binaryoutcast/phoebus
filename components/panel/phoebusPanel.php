@@ -127,7 +127,7 @@ switch ($gaRuntime['requestPath']) {
     require_once($strComponentPath . 'developer.php');
     break;
   default:
-    if (startsWith($gaRuntime['requestPath'], URI_ADMIN)){
+    if (str_starts_with($gaRuntime['requestPath'], URI_ADMIN)){
       $moduleAccount->authenticate();
       funcCheckAccessLevel(3);
       require_once($strComponentPath . 'administration.php');

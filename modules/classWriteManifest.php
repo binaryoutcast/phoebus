@@ -457,8 +457,8 @@ class classWriteManifest {
         $_result = $this->validateAddon(false, true, true, true);
         
         if (is_string($_result)) {
-          if (contains($_result, 'uploaded') || contains($_result, 'Jetpack') ||
-              contains($_result, 'Jetpack') || contains($_result, 'WebExtensions')) {
+          if (str_contains($_result, 'uploaded') || str_contains($_result, 'Jetpack') ||
+              str_contains($_result, 'Jetpack') || str_contains($_result, 'WebExtensions')) {
             $accumulatedErrors[] = $basename . $_result;
             continue; 
           }
@@ -832,14 +832,14 @@ class classWriteManifest {
       }
 
       foreach ($arrayRestrictedIDs as $_value) {
-        if (contains($this->validatorData['installManifest']['id'], $_value)) {
+        if (str_contains($this->validatorData['installManifest']['id'], $_value)) {
           $this->validatorData['status']['isRestrictedID'] = true;
         }
       }
 
       if ($this->validatorData['status']['isRestrictedID']) {
         $this->validatorData['errors'][] =
-          'em:id contains restricted elements. Please change it.';
+          'em:id str_contains restricted elements. Please change it.';
       }
       else {
         $this->validatorData['status']['isRestrictedID'] = false;
@@ -955,7 +955,7 @@ class classWriteManifest {
         return $this->error('I have no idea how you managed to upload an XPI file for an external but.. NOPE!', $aAccumulateErrors);
       }
 
-      if (contains($aID, '@ex-')) {
+      if (str_contains($aID, '@ex-')) {
         $strAddonDir = ROOT_PATH . DATASTORE_RELPATH . 'addons/' . preg_replace('/(.*)\@(.*)/iU', '$2', $aID);
       }
     }

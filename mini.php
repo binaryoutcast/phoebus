@@ -20,8 +20,8 @@ if (!defined('ROOT_PATH')) {
 
 $strOfflineMessage = 'Phoebus, and by extension this Add-ons Site, is currently unavailable. Please try again later.';
 
-if (contains(SOFTWARE_VERSION, 'a') || contains(SOFTWARE_VERSION, 'b') ||
-    contains(SOFTWARE_VERSION, 'pre') || $gaRuntime['debugMode']) {
+if (str_contains(SOFTWARE_VERSION, 'a') || str_contains(SOFTWARE_VERSION, 'b') ||
+    str_contains(SOFTWARE_VERSION, 'pre') || $gaRuntime['debugMode']) {
   $strOfflineMessage = 'This in-development version of Phoebus is not for public consumption. Please try a live Add-ons Site!<br /><br /></li>';
 
   foreach (TARGET_APPLICATION as $_value) {

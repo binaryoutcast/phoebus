@@ -49,7 +49,7 @@ function gfGenContent($aTitle, $aContent, $aTextBox = null, $aList = null, $aErr
                   '<title>' . $aTitle . ' - ' . SOFTWARE_NAME . ' ' . SOFTWARE_VERSION . '</title>',
                   $templateHead);
 
-  if (contains(SOFTWARE_VERSION, 'a') || contains(SOFTWARE_VERSION, 'b') || contains(SOFTWARE_VERSION, 'pre')) {
+  if (str_contains(SOFTWARE_VERSION, 'a') || str_contains(SOFTWARE_VERSION, 'b') || str_contains(SOFTWARE_VERSION, 'pre')) {
     $templateHead = str_replace('<!-- Special -->', '<li><a href="/special/">Special</a></li>', $templateHead);
   }
 
@@ -265,38 +265,44 @@ function gfRedirect($aURL) {
 }
 
 /**********************************************************************************************************************
-* Polyfills for missing functions
-* startsWith, endsWith, contains
+* Polyfills for missing/proposed functions
+* str_starts_with, str_ends_with, str_contains
 *
 * @param $haystack  string
 * @param $needle    substring
 * @returns          true if substring exists in string else false
 **********************************************************************************************************************/
 
-function startsWith($haystack, $needle) {
-   $length = strlen($needle);
-   return (substr($haystack, 0, $length) === $needle);
+if (!function_exists('str_starts_with')) {
+  function str_starts_with($haystack, $needle) {
+     $length = strlen($needle);
+     return (substr($haystack, 0, $length) === $needle);
+  }
 }
 
 // --------------------------------------------------------------------------------------------------------------------
 
-function endsWith($haystack, $needle) {
-  $length = strlen($needle);
-  if ($length == 0) {
-    return true;
-  }
+if (!function_exists('str_ends_with')) {
+  function str_ends_with($haystack, $needle) {
+    $length = strlen($needle);
+    if ($length == 0) {
+      return true;
+    }
 
-  return (substr($haystack, -$length) === $needle);
+    return (substr($haystack, -$length) === $needle);
+  }
 }
 
 // --------------------------------------------------------------------------------------------------------------------
 
-function contains($haystack, $needle) {
-  if (strpos($haystack, $needle) > -1) {
-    return true;
-  }
-  else {
-    return false;
+if (!function_exists('str_contains')) {
+  function str_contains($haystack, $needle) {
+    if (strpos($haystack, $needle) > -1) {
+      return true;
+    }
+    else {
+      return false;
+    }
   }
 }
 

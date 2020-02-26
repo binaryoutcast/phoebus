@@ -121,11 +121,11 @@ if (!$gaRuntime['requestComponent'] && !$gaRuntime['requestPath']) {
   $gaRuntime['requestPath'] = '/';
 }
 // The PANEL component overrides the SITE component
-elseif (startsWith($gaRuntime['phpRequestURI'], '/panel/')) {
+elseif (str_starts_with($gaRuntime['phpRequestURI'], '/panel/')) {
   $gaRuntime['requestComponent'] = 'panel';
 }
 // The SPECIAL component overrides the SITE component
-elseif (startsWith($gaRuntime['phpRequestURI'], '/special/')) {
+elseif (str_starts_with($gaRuntime['phpRequestURI'], '/special/')) {
   $gaRuntime['requestComponent'] = 'special';
 }
 

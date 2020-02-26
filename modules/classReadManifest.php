@@ -567,7 +567,7 @@ class classReadManifest {
     $defaultPath = str_replace($this->addonManifest['slug'], 'default', $addonPath);
 
     // Legacy Externals have their icons in an ex-### directory
-    if ($this->addonManifest['type'] == 'external' && contains($this->addonManifest['id'], '@ex-')) {
+    if ($this->addonManifest['type'] == 'external' && str_contains($this->addonManifest['id'], '@ex-')) {
       // Extract the legacy external id
       $oldID = preg_replace('/(.*)\@(.*)/iU', '$2', $this->addonManifest['id']);
 
@@ -611,7 +611,7 @@ class classReadManifest {
     // Replace new lines with <br />
     $this->addonManifest['content'] = nl2br($this->addonManifest['content'], true);
 
-    // create an array that contains the strs to pseudo-bbcode to real html
+    // create an array that str_contains the strs to pseudo-bbcode to real html
     $arrayPhoebusCode = array(
       'simple' => array(
         '[b]' => '<strong>',

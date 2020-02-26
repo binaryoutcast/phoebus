@@ -94,7 +94,7 @@ class classAccount {
     }
 
     foreach ($this->banned as $_value) {
-      if (contains($this->postData['username'], $_value) || contains($this->postData['email'], $_value)) {
+      if (str_contains($this->postData['username'], $_value) || str_contains($this->postData['email'], $_value)) {
         gfError('Yourself or someone like you has been permanently banned from using this software and service.</li><li>' . 
                   'If this automatic determination is in error please contact the Add-ons Team or a Phoebus Administrator.</li><li>' .
                   'Have a nice day!');

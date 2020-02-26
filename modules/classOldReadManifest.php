@@ -420,7 +420,7 @@ class classReadManifest {
     $_defaultPath = str_replace($addonManifest['slug'], 'default', $_addonPath);
 
     // Legacy Externals have their icons in an ex-### directory
-    if ($addonManifest['type'] == 'external' && contains($addonManifest['id'], '@ex-')) {
+    if ($addonManifest['type'] == 'external' && str_contains($addonManifest['id'], '@ex-')) {
       // Extract the legacy external id
       $_oldID = preg_replace('/(.*)\@(.*)/iU', '$2', $addonManifest['id']);
 
@@ -473,7 +473,7 @@ class classReadManifest {
     // Replace new lines with <br />
     $aAddonContent = nl2br($aAddonContent, true);
 
-    // create an array that contains the strs to pseudo-bbcode to real html
+    // create an array that str_contains the strs to pseudo-bbcode to real html
     $arrayPhoebusCode = array(
       'simple' => array(
         '[b]' => '<strong>',
@@ -553,7 +553,7 @@ class classReadManifest {
     }
 
     if ($aAddonManifest['license'] != null) {
-      if ($aAddonManifest['license'] == 'custom' && startsWith($aAddonManifest['licenseURL'], 'http')) {
+      if ($aAddonManifest['license'] == 'custom' && str_starts_with($aAddonManifest['licenseURL'], 'http')) {
         $aAddonManifest['license'] = 'custom';
         $aAddonManifest['licenseName'] = $arrayLicenses[$aAddonManifest['license']];
 

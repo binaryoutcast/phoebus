@@ -223,7 +223,7 @@ switch ($gaRuntime['requestPath']) {
   default:
     // Complex URIs need more complex conditional checking
     // Extension Subcategories
-    if (startsWith($gaRuntime['requestPath'], URI_EXTENSIONS)) {
+    if (str_starts_with($gaRuntime['requestPath'], URI_EXTENSIONS)) {
       // Check if Extension Subcategories are enabled
       funcCheckEnabledFeature('extensions-cat');
 
@@ -249,7 +249,7 @@ switch ($gaRuntime['requestPath']) {
                                         $categoryManifest, classReadManifest::EXTENSION_CATEGORY_SLUGS);
     }
     // Add-on Page
-    elseif (startsWith($gaRuntime['requestPath'], URI_ADDON_PAGE)) {
+    elseif (str_starts_with($gaRuntime['requestPath'], URI_ADDON_PAGE)) {
       // Strip the path to get the slug
       $strSlug = funcStripPath($gaRuntime['requestPath'], URI_ADDON_PAGE);
 
@@ -265,7 +265,7 @@ switch ($gaRuntime['requestPath']) {
       $moduleGenerateContent->addonSite('addon-page', $addonManifest['name'], $addonManifest);
     }
     // Add-on Releases
-    elseif (startsWith($gaRuntime['requestPath'], URI_ADDON_RELEASES)) {
+    elseif (str_starts_with($gaRuntime['requestPath'], URI_ADDON_RELEASES)) {
       // Strip the path to get the slug
       $strSlug = funcStripPath($gaRuntime['requestPath'], URI_ADDON_RELEASES);
 
@@ -281,7 +281,7 @@ switch ($gaRuntime['requestPath']) {
       $moduleGenerateContent->addonSite('addon-releases', $addonManifest['name'] . ' - Releases', $addonManifest);
     }
     // Add-on License
-    elseif (startsWith($gaRuntime['requestPath'], URI_ADDON_LICENSE)) {
+    elseif (str_starts_with($gaRuntime['requestPath'], URI_ADDON_LICENSE)) {
       // Strip the path to get the slug
       $strSlug = funcStripPath($gaRuntime['requestPath'], URI_ADDON_LICENSE);
 
