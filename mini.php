@@ -49,7 +49,7 @@ switch ($gaRuntime['requestComponent']) {
     $gaRuntime['requestAPIScope'] = gfSuperVar('get', 'type');
     $gaRuntime['requestAPIFunction'] = gfSuperVar('get', 'request');
     if ($gaRuntime['requestAPIScope'] != 'internal') {
-      gfHeader('404');
+      gfHeader(404);
     }
     switch ($gaRuntime['requestAPIFunction']) {
       case 'search':
@@ -64,7 +64,7 @@ switch ($gaRuntime['requestComponent']) {
         exit();
         break;
       default:
-        gfHeader('404');
+        gfHeader(404);
     }
     break;
   case 'discover': gfHeader(404);

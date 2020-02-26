@@ -137,7 +137,7 @@ if ($gaRuntime['requestComponent'] && array_key_exists($gaRuntime['requestCompon
 }
 else {
   if (!$gaRuntime['debugMode']) {
-    gfHeader('404');
+    gfHeader(404);
   }
   gfError('Invalid component');
 }

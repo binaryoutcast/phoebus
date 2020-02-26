@@ -234,17 +234,18 @@ function gfHeader($aHeader) {
     'css'           => 'Content-Type: text/css',
     'phoebus'       => 'X-Phoebus: https://github.com/Pale-Moon-Addons-Team/phoebus/',
   );
-
-  // Remove this shit
-  $headers['404'] = $headers[404];
-  $headers['501'] = $headers[501];
   
   if (!headers_sent() && array_key_exists($aHeader, $headers)) {
     header($headers['phoebus']);
     
-    if ($aHeader == '404' || $aHeader == '501') {
-      $GLOBALS['gaRuntime']['debugMode'] ? gfError($headers[$aHeader] : header($headers[$_value]);
-      exit();
+    if (in_array($aHeader, [404, 501])) {
+      if ($GLOBALS['gaRuntime']['debugMode']) {
+        gfError($headers[$aHeader] : 
+      }
+      else {
+        header($headers[$_value]);
+        exit();
+      }
     }
 
     header($headers[$_value]);
