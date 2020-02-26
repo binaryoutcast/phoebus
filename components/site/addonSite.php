@@ -53,7 +53,7 @@ function funcCheckEnabledFeature($aFeature, $aReturn = null) {
   $currentApplication = $GLOBALS['gaRuntime']['currentApplication'];
   if (!in_array($aFeature, TARGET_APPLICATION[$currentApplication]['features'])) {
     if(!$aReturn) {
-      funcSend404();
+      gfHeader(404);
     }
 
     return null;
@@ -240,7 +240,7 @@ switch ($gaRuntime['requestPath']) {
       
       // If there are no extensions then 404
       if (!$categoryManifest) {
-        funcSend404();
+        gfHeader(404);
       }
 
       // We have extensions so generate the subcategory page
@@ -258,7 +258,7 @@ switch ($gaRuntime['requestPath']) {
 
       // If there is no add-on, 404
       if (!$addonManifest) {
-        funcSend404();
+        gfHeader(404);
       }
 
       // Generate the Add-on Releases Page
@@ -274,7 +274,7 @@ switch ($gaRuntime['requestPath']) {
 
       // If there is no add-on, 404
       if (!$addonManifest) {
-        funcSend404();
+        gfHeader(404);
       }
 
       // Generate the Add-on Releases Page
@@ -290,7 +290,7 @@ switch ($gaRuntime['requestPath']) {
 
       // If there is no add-on, 404
       if (!$addonManifest) {
-        funcSend404();
+        gfHeader(404);
       }
 
       // If there is a licenseURL then redirect to it
@@ -315,7 +315,7 @@ switch ($gaRuntime['requestPath']) {
     }
 
     // There are no matches so 404
-    funcSend404(); 
+    gfHeader(404); 
 }
 
 // ====================================================================================================================

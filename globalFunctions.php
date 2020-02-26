@@ -223,10 +223,10 @@ function gfEnsureModule($_value) {
 *
 * @param $_value    Short name of header
 **********************************************************************************************************************/
-function gfHeader($_value) {
-  $_arrayHeaders = array(
-    '404'           => 'HTTP/1.0 404 Not Found',
-    '501'           => 'HTTP/1.0 501 Not Implemented',
+function gfHeader($aHeader) {
+  $headers = array(
+    404             => 'HTTP/1.1 404 Not Found',
+    501             => 'HTTP/1.1 501 Not Implemented',
     'html'          => 'Content-Type: text/html',
     'text'          => 'Content-Type: text/plain',
     'xml'           => 'Content-Type: text/xml',
@@ -234,15 +234,20 @@ function gfHeader($_value) {
     'css'           => 'Content-Type: text/css',
     'phoebus'       => 'X-Phoebus: https://github.com/Pale-Moon-Addons-Team/phoebus/',
   );
+
+  // Remove this shit
+  $headers['404'] = $headers[404];
+  $headers['501'] = $headers[501];
   
-  if (!headers_sent() && array_key_exists($_value, $_arrayHeaders)) {
-    header($_arrayHeaders['phoebus']);
-    header($_arrayHeaders[$_value]);
+  if (!headers_sent() && array_key_exists($aHeader, $headers)) {
+    header($headers['phoebus']);
     
-    if ($_value == '404' || $_value == '501') {
-      // We are done here
+    if ($aHeader == '404' || $aHeader == '501') {
+      $GLOBALS['gaRuntime']['debugMode'] ? gfError($headers[$aHeader] : header($headers[$_value]);
       exit();
     }
+
+    header($headers[$_value]);
   }
 }
 
@@ -257,18 +262,6 @@ function funcRedirect($_strURL) {
   
   // We are done here
   exit();
-}
-
-// --------------------------------------------------------------------------------------------------------------------
-
-/**********************************************************************************************************************
-* Sends a 404 error but does it depending on debug mode
-***********************************************************************************************************************/
-function funcSend404() {
-  if (!$GLOBALS['gaRuntime']['debugMode']) {
-    gfHeader('404');
-  }
-  gfError('404 - Not Found');
 }
 
 /**********************************************************************************************************************

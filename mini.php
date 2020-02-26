@@ -67,7 +67,7 @@ switch ($gaRuntime['requestComponent']) {
         gfHeader('404');
     }
     break;
-  case 'discover': funcSend404();
+  case 'discover': gfHeader(404);
   default: gfError($strOfflineMessage);
 }
 
