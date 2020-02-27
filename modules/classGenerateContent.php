@@ -225,7 +225,7 @@ class classGenerateContent {
     gfHeader('html');
     
     // Send the final template to smarty and output
-    $this->libSmarty->display('string:' . $finalTemplate);
+    $this->libSmarty->display('string:' . $finalTemplate, null, str_replace('/', '_', $GLOBALS['gaRuntime']['requestPath']));
     
     // We're done here
     exit();
