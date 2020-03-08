@@ -13,9 +13,9 @@ foreach ($arrayIncludes as $_value) { require_once(MODULES[$_value]); }
 $moduleDatabase        = new classDatabase();
 $moduleReadManifest    = new classReadManifest();
 
-$addonManifest = $moduleReadManifest->getAddon('panel-by-slug', 'abprime');
+$addonManifest = $moduleReadManifest->getAddon('by-slug', 'aeromoon');
 
-gfGenContent('Resturctured Manifest', $addonManifest);
+gfGenContent('Manifest', $addonManifest);
 
 // ====================================================================================================================
 

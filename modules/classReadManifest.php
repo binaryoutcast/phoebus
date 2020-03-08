@@ -533,7 +533,7 @@ class classReadManifest {
                                               $this->addonManifest['creator'] ?? 'This Add-on\'s Developer';
       }
       else {
-        foreach (self::LICENSES as $_key => $_value) {
+        foreach (LICENSES as $_key => $_value) {
           if ($this->addonManifest['licenseCode'] == strtolower($_key)) {
             $this->addonManifest['licenseName'] = $_value;
             break;
