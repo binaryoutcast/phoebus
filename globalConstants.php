@@ -11,7 +11,7 @@ define('ROOT_PATH', $_SERVER['DOCUMENT_ROOT']);
 
 // Define basic constants for the software
 const SOFTWARE_NAME       = 'Phoebus';
-const SOFTWARE_VERSION    = '2.1.0a1';
+const SOFTWARE_VERSION    = '3.0.0a1';
 const DATASTORE_RELPATH   = '/datastore/';
 const OBJ_RELPATH         = '/.obj/';
 const COMPONENTS_RELPATH  = '/components/';
