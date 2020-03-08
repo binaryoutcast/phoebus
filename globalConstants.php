@@ -69,8 +69,9 @@ const LIBRARIES = array(
  * Sunbird:          {718e30fb-e89b-41dd-9da7-e25a45638b28}
  * Instantbird:      {33cb9019-c295-46dd-be21-8c4936574bee}
  * Adblock Browser:  {55aba3ac-94d3-41a8-9e25-5c21fe874539} */
-const TOOLKIT_ID          = 'toolkit@mozilla.org';
-const TOOLKIT_BIT         = 1;
+const TOOLKIT_ID    = 'toolkit@mozilla.org';
+const TOOLKIT_ALTID = 'toolkit@palemoon.org';
+const TOOLKIT_BIT   = 1;
 
 // Define application metadata
 const TARGET_APPLICATION = array(
@@ -81,8 +82,8 @@ const TARGET_APPLICATION = array(
     'name'          => 'Pale Moon',
     'siteTitle'     => 'Pale Moon - Add-ons',
     'domain'        => array('live' => 'addons.palemoon.org', 'dev' => 'addons-dev.palemoon.org'),
-    'features'      => array('https', 'extensions', 'extensions-cat', 'themes',
-                             'personas', 'language-packs', 'search-plugins')
+    'features'      => ['https', 'extensions', 'extensions-cat', 'themes',
+                        'personas', 'language-packs', 'search-plugins']
   ),
   'basilisk' => array(
     'enabled'       => true,
@@ -91,7 +92,7 @@ const TARGET_APPLICATION = array(
     'name'          => 'Basilisk',
     'siteTitle'     => 'Basilisk: add-ons',
     'domain'        => array('live' => 'addons.basilisk-browser.org', 'dev' => null),
-    'features'      => array('https', 'extensions', 'themes', 'personas', 'search-plugins')
+    'features'      => ['https', 'extensions', 'themes', 'personas', 'search-plugins']
   ),
   'ambassador' => array(
     'enabled'       => false,
@@ -100,7 +101,7 @@ const TARGET_APPLICATION = array(
     'name'          => 'Ambassador',
     'siteTitle'     => 'Add-ons - Ambassador',
     'domain'        => array('live' => 'ab-addons.thereisonlyxul.org', 'dev' => null),
-    'features'      => array('extensions', 'themes', 'disable-xpinstall')
+    'features'      => ['extensions', 'themes', 'disable-xpinstall']
   ),
   'borealis' => array(
     'enabled'       => false,
@@ -109,7 +110,7 @@ const TARGET_APPLICATION = array(
     'name'          => 'Borealis',
     'siteTitle'     => 'Borealis Add-ons - Binary Outcast',
     'domain'        => array('live' => 'borealis-addons.binaryoutcast.com', 'dev' => null),
-    'features'      => array('extensions', 'search-plugins')
+    'features'      => ['extensions', 'search-plugins']
   ),
   'interlink' => array(
     'enabled'       => true,
@@ -118,7 +119,7 @@ const TARGET_APPLICATION = array(
     'name'          => 'Interlink',
     'siteTitle'     => 'Interlink Add-ons - Binary Outcast',
     'domain'        => array('live' => 'interlink-addons.binaryoutcast.com', 'dev' => null),
-    'features'      => array('extensions', 'themes', 'search-plugins', 'disable-xpinstall')
+    'features'      => ['extensions', 'themes', 'search-plugins', 'disable-xpinstall']
   ),
 );
 
