@@ -7,7 +7,7 @@ body {
 	margin-bottom: 0px;
 	/* background-color: #51667b; Mattcast Blue*/
   background-color: #020814;
-  background-image: url('/components/site/skin/background.webp');
+  background-image: url('/components/site/skin/interlink/background.webp');
   background-repeat: no-repeat;
   background-attachment: fixed;
   background-position-x: center;
@@ -109,7 +109,7 @@ hr {
 
 #BinOC-Header {
   background-color: #020814;
-  background-image: url('/components/site/skin/background-blur.webp');
+  background-image: url('/components/site/skin/interlink/background-blur.webp');
   background-repeat: no-repeat;
   background-attachment: fixed;
   background-position-x: center;
