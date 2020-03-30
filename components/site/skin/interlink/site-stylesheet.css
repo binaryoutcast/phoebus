@@ -6,8 +6,8 @@ body {
 	margin-right: 0px;
 	margin-bottom: 0px;
 	/* background-color: #51667b; Mattcast Blue*/
-  background-color: #000144;
-  background-image: url('/components/site/skin/interlink/background.jpg');
+  background-color: #020814;
+  background-image: url('/components/site/skin/background.webp');
   background-repeat: no-repeat;
   background-attachment: fixed;
   background-position-x: center;
@@ -108,8 +108,8 @@ hr {
 }
 
 #BinOC-Header {
-  background-color: #000144;
-  background-image: url('/components/site/skin/interlink/background-blur.png');
+  background-color: #020814;
+  background-image: url('/components/site/skin/background-blur.webp');
   background-repeat: no-repeat;
   background-attachment: fixed;
   background-position-x: center;
@@ -157,7 +157,7 @@ text-shadow: 0px 2px 2px black, 0px 1px 1px #000;
 	max-width: 1200px;
   margin: 0 auto;
   margin-top: 32px;
-  background-color: #FFFFFF;
+  background-color: #f9f9f9;
 	border-radius: 5px;
 	box-shadow: 0px 2px 10px #000000;
 }
@@ -252,7 +252,7 @@ text-shadow: 0px 2px 2px black, 0px 1px 1px #000;
 }
 
 #BinOC-Content-Sidebar-Block-Body {
-	background-color: #FFF;
+	background-color: #f9f9f9;
 	font-weight: normal;
 	padding-left: 10px;
 	padding-right: 10px;
