@@ -7,7 +7,7 @@
     <learnmore>{%ADDON_URL}</learnmore>
     <authors>
       <author>
-        <name>{%ADDON_CREATOR}</name>
+        <name><![CDATA[{%ADDON_CREATOR}]]></name>
         <link>{%ADDON_CREATORURL}</link> <!-- We do not have specific developer pages yet -->
       </author>
     </authors>
