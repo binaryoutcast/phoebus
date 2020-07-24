@@ -6,8 +6,9 @@
 class classMozillaRDF {
   const EM_NS = 'http://www.mozilla.org/2004/em-rdf#';
   const INSTALL_MANIFEST_RESOURCE = 'urn:mozilla:install-manifest';
+  const ANON_PREFIX = '#genid';
 
-  private $libRdfParser;
+  private $rdfParser;
 
   /********************************************************************************************************************
   * Class constructor that sets inital state of things
@@ -15,7 +16,7 @@ class classMozillaRDF {
   function __construct() {
     // Include the Rdf_parser
     require_once(LIBRARIES['rdfParser']);
-    $this->libRdfParser = new Rdf_parser();
+    $this->rdfParser = new Rdf_parser();
   }
 
   /********************************************************************************************************************
@@ -27,19 +28,25 @@ class classMozillaRDF {
   public function parseInstallManifest($manifestData) {
     $data = array();
 
-    $this->libRdfParser->rdf_parser_create(null);
-    $this->libRdfParser->rdf_set_user_data($data);
-    $this->libRdfParser->rdf_set_statement_handler(array('classMozillaRDF', 'installManifestStatementHandler'));
-    $this->libRdfParser->rdf_set_base('');
+    $this->rdfParser->rdf_parser_create(null);
+    $this->rdfParser->rdf_set_user_data($data);
+    $this->rdfParser->rdf_set_statement_handler(array('classMozillaRDF', 'installManifestStatementHandler'));
+    $this->rdfParser->rdf_set_base('');
 
-    if (!$this->libRdfParser->rdf_parse($manifestData, strlen($manifestData), true)) {
-      return xml_error_string(xml_get_error_code($this->libRdfParser->rdf_parser['xml_parser']));
+    if (!$this->rdfParser->rdf_parse($manifestData, strlen($manifestData), true)) {
+      return xml_error_string(xml_get_error_code($this->rdfParser->rdf_parser['xml_parser']));
     }
 
     // Set the targetApplication data
     $targetArray = array();
     if (!empty($data['manifest']['targetApplication']) && is_array($data['manifest']['targetApplication'])) {
       foreach ($data['manifest']['targetApplication'] as $targetApp) {
+        if (startsWith($data[$targetApp][self::EM_NS."id"], self::ANON_PREFIX) ||
+            startsWith($data[$targetApp][self::EM_NS.'minVersion'], self::ANON_PREFIX) ||
+            startsWith($data[$targetApp][self::EM_NS.'maxVersion'], self::ANON_PREFIX)) {
+          funcError('em:targetApplication description tags/attributes em:id, em:minVersion, and em:maxVersion MUST have a value');
+        }
+
         $id = $data[$targetApp][self::EM_NS."id"];
         $targetArray[$id]['minVersion'] = $data[$targetApp][self::EM_NS.'minVersion'];
         $targetArray[$id]['maxVersion'] = $data[$targetApp][self::EM_NS.'maxVersion'];
@@ -48,7 +55,7 @@ class classMozillaRDF {
 
     $data['manifest']['targetApplication'] = $targetArray;
 
-    $this->libRdfParser->rdf_parser_free();
+    $this->rdfParser->rdf_parser_free();
 
     return $data['manifest'];
   }
@@ -58,14 +65,14 @@ class classMozillaRDF {
   * Parses install.rdf for our desired properties
   *
   * @param string     $manifestData
-  * @param array &$data
-  * @param string $subjectType
-  * @param string $subject
-  * @param string $predicate
-  * @param int $ordinal
-  * @param string $objectType
-  * @param string $object
-  * @param string $xmlLang
+  * @param array      &$data
+  * @param string     $subjectType
+  * @param string     $subject
+  * @param string     $predicate
+  * @param int        $ordinal
+  * @param string     $objectType
+  * @param string     $object
+  * @param string     $xmlLang
   ********************************************************************************************************************/
   static function installManifestStatementHandler(&$data,
                                                   $subjectType,
@@ -74,39 +81,17 @@ class classMozillaRDF {
                                                   $ordinal,
                                                   $objectType,
                                                   $object,
-                                                  $xmlLang) {   
+                                                  $xmlLang) {
     //single properties - ignoring: optionsURL, aboutURL, and anything not listed
-    $singleProps = array(
-      'id' => 1,
-      'type' => 1,
-      'version' => 1,
-      'creator' => 1,
-      'homepageURL' => 1,
-      'updateURL' => 1,
-      'updateKey' => 1,
-      'bootstrap' => 1,
-      'hasEmbeddedWebExtension' => 1,
-      'multiprocessCompatible' => 1,
-      'skinnable' => 1,
-      'strictCompatibility' => 1,
-      'license' => 1,
-      'iconURL' => 1,
-      'icon64URL' => 1
-    );
-    
+    $singleProps = ['id', 'type', 'version', 'creator', 'homepageURL', 'updateURL', 'updateKey', 'bootstrap',
+                    'hasEmbeddedWebExtension', 'multiprocessCompatible', 'skinnable', 'strictCompatibility',
+                    'license', 'iconURL', 'icon64URL'];
+
     //multiple properties - ignoring: File
-    $multiProps = array(
-      'contributor' => 1,
-      'developer' => 1,
-      'translator' => 1,
-      'targetApplication' => 1
-    );
+    $multiProps = ['contributor', 'developer', 'translator', 'targetApplication'];
     
-    //localizable properties
-    $l10nProps = array(
-      'name' => 1,
-      'description' => 1
-    );
+    //localizable properties   
+    $localeProps = ['name', 'description'];
 
     //Look for properties on the install manifest itself
     if ($subject == self::INSTALL_MANIFEST_RESOURCE) {
@@ -115,13 +100,15 @@ class classMozillaRDF {
       if (strncmp($predicate, self::EM_NS, $length) == 0) {
         $prop = substr($predicate, $length, strlen($predicate)-$length);
 
-        if (array_key_exists($prop, $singleProps) ) {
+        if (in_array($prop, $singleProps) &&
+            !startsWith($object, self::ANON_PREFIX) &&
+            $object != 'false') {
           $data['manifest'][$prop] = $object;
         }
-        elseif (array_key_exists($prop, $multiProps)) {
+        elseif (in_array($prop, $multiProps)) {
           $data['manifest'][$prop][] = $object;
         }
-        elseif (array_key_exists($prop, $l10nProps)) {
+        elseif (in_array($prop, $localeProps)) {
           $lang = ($xmlLang) ? $xmlLang : 'en-US';
           $data['manifest'][$prop][$lang] = $object;
         }
