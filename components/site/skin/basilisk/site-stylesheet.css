@@ -10,7 +10,7 @@
   border: 0;
 }
 /* BASIC */
-body {
+#main-body {
   /* font: normal 18px/22px "Varela Round", sans-serif; */
   font: normal 18px/22px "Arial", sans-serif;
   background-color: #D9F9F0;
