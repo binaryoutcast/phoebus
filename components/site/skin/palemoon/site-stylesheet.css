@@ -20,7 +20,7 @@ html {
   min-height: 100%;
 }
 
-body {
+#main-body {
 	margin-left: 0px;
 	margin-top: 8px;
 	margin-right: 0px;
@@ -35,7 +35,7 @@ body {
   background-attachment: fixed;
 }
 
-body,td,th {
+#main-body,td,th {
   font-family: "Museo500Regular","Times New Roman",Times,serif;
   font-style: normal;
   font-size: 12pt;
