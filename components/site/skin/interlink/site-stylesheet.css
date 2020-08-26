@@ -1,6 +1,6 @@
 @charset "utf-8";
 
-#main-body {
+body {
 	margin-left: 0px;
 	margin-top: 0px;
 	margin-right: 0px;
@@ -13,7 +13,7 @@
   background-position-x: center;
 }
 
-#main-body,td,th {
+body,td,th {
 	font-family: 'DejaVu Sans Web';
 	font-size: 12px;
 	color: #000000;
