@@ -67,8 +67,7 @@
   <div class="alignright" style="margin-top: 0px;">
     <a class="button"
        style="margin-top: 8px; margin-right: 0px;"
-       href="javascript:void(0)"
-       onclick="InstallTrigger.startSoftwareUpdate('/?component=download&id={$PAGE_DATA.id}&version={$PAGE_DATA['xpinstall'][$PAGE_DATA['releaseXPI']]['version']}');"
+       href="/?component=download&id={$PAGE_DATA.id}&version={$PAGE_DATA['xpinstall'][$PAGE_DATA['releaseXPI']]['version']}"
        title="Basilisk Add-on Compatiblity Version {$PAGE_DATA['xpinstall'][$PAGE_DATA['releaseXPI']]['targetApplication'][$APPLICATION_ID]['minVersion']} to {$PAGE_DATA['xpinstall'][$PAGE_DATA['releaseXPI']]['targetApplication'][$APPLICATION_ID]['maxVersion']}">
     <span>Install Now</span>
   </a>
@@ -86,8 +85,7 @@
       <div class="alignright" style="margin-top: 0px;">
         <a class="button"
            style="margin-top: 8px; margin-right: 0px;"
-           href="javascript:void(0)"
-            onclick="InstallTrigger.startSoftwareUpdate('/?component=download&id={$PAGE_DATA.id}&version={$key.version}');"
+           href="/?component=download&id={$PAGE_DATA.id}&version={$key.version}"
            title="Basilisk Add-on Compatiblity Version {$key['targetApplication'][$APPLICATION_ID]['minVersion']} to {$key['targetApplication'][$APPLICATION_ID]['maxVersion']}">
         <span>Install Now</span>
       </a>
