@@ -49,7 +49,7 @@
         <small>[External]</small>
   {/if}
         <br />
-        <small>{$key.description}</small>
+        <small>{$key.description|truncate:190:"&hellip;":true}</small>
       </div>
     </a>
   {foreachelse}
