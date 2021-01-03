@@ -49,7 +49,7 @@
         <small>[External]</small>
   {/if}
         <br />
-        <small>{if $PAGE_TYPE == 'cat-themes'}{$key.description|truncate:190:"&hellip;"}{else}{$key.description}{/if}</small>
+        <small>{if $PAGE_TYPE == 'cat-themes'}{$key.description|truncate:190:"&hellip;":true}{else}{$key.description}{/if}</small>
       </div>
     </a>
   {foreachelse}

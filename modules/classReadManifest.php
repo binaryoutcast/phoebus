@@ -368,12 +368,6 @@ class classReadManifest {
       $addonManifest = $this->processLicense($addonManifest);
     }
     
-    // XXX: Smarty/CSS can do this so why are we doing it here instead?
-    // Truncate description if it is too long..
-    if (array_key_exists('description', $addonManifest) && strlen($addonManifest['description']) >= 235) {
-      $addonManifest['description'] = substr($addonManifest['description'], 0, 230) . '&hellip;';
-    }
-
     // XXX: Why the fuck do we need this?
     // Set baseURL if applicable
     if ($addonManifest['type'] != 'external') {
