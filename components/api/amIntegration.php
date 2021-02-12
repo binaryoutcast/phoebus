@@ -8,21 +8,12 @@
 // Include modules
 $arrayIncludes = ['database', 'readManifest', 'generateContent'];
 
-if ($arraySoftwareState['tap']) {
-  $arrayIncludes[] = 'tap';
-}
-
 foreach ($arrayIncludes as $_value) { require_once(MODULES[$_value]); }
 
 // Instantiate modules
 $moduleDatabase = new classDatabase();
 $moduleReadManifest = new classReadManifest();
 $moduleGenerateContent = new classGenerateContent();
-
-if ($arraySoftwareState['tap']) {
-  $moduleTap = new classTap();
-  $moduleTap->execute();
-}
 
 // ====================================================================================================================
 
