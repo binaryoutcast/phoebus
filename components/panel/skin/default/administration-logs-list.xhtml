@@ -1,0 +1,29 @@
+<h2>{$PAGE_TITLE|replace:' - Administration':''}</h2>
+{assign "SUBMENU_STYLE" "vertical-align: middle; margin-left: 2px; margin-right: 2px"}
+<p>
+  <a href="/panel/administration/?task=list&what=extensions"><img src="{$BASE_PATH}../shared/plugin.png" style="{$SUBMENU_STYLE}"/>Extensions</a> 
+  <a href="/panel/administration/?task=list&what=externals"><img src="{$BASE_PATH}../shared/plugin_link.png" style="{$SUBMENU_STYLE}" />Externals</a> 
+  <a href="/panel/administration/?task=list&what=themes"><img src="{$BASE_PATH}../shared/palette.png" style="{$SUBMENU_STYLE}" />Themes</a> 
+  {if $USER_LEVEL >= 4}
+  <a href="/panel/administration/?task=list&what=langpacks"><img src="{$BASE_PATH}../shared/world.png" style="{$SUBMENU_STYLE}" />Language Packs</a>
+  {/if}
+  <a href="/panel/administration/?task=list&what=users"><img src="{$BASE_PATH}../shared/user.png" style="{$SUBMENU_STYLE}" />Users</a>
+  <a href="/panel/administration/?task=list&what=logs"><img src="{$BASE_PATH}../shared/application_view_list.png" style="{$SUBMENU_STYLE}" />Logs</a>
+</p>
+<table class="addonTable single-row">
+  <tr>
+    <th style="width: 140px;">Date</th>
+    <th style="width: 140px;">Username</th>
+    <th>IP Address</th>
+    <th>Action</th>
+  </tr>
+  {foreach $PAGE_DATA as $key}
+    <tr>
+      <td>{$key.date}</td>
+      <td>{$key.username}</td>
+      <td>{$key.ip}</td>
+      <td>{$key.action}</td>
+    </tr>
+  {/foreach}
+</table>
+{$key = null}
