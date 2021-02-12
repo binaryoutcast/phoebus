@@ -17,12 +17,13 @@ const URI_ADDONS                        = URI_PANEL . 'addons/';
 const URI_ADMIN                         = URI_PANEL . 'administration/';
 
 // Include modules
-$arrayIncludes = ['database', 'account', 'mozillaRDF', 'vc', 'readManifest', 'writeManifest', 'generateContent'];
+$arrayIncludes = ['database', 'account', 'log', 'mozillaRDF', 'vc', 'readManifest', 'writeManifest', 'generateContent'];
 foreach ($arrayIncludes as $_value) { require_once(MODULES[$_value]); }
 
 // Instantiate modules
 $moduleDatabase                         = new classDatabase();
 $moduleAccount                          = new classAccount();
+$moduleLog                              = new classLog();
 $moduleMozillaRDF                       = new classMozillaRDF();
 $moduleReadManifest                     = new classReadManifest();
 $moduleWriteManifest                    = new classWriteManifest();

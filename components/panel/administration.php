@@ -51,6 +51,10 @@ switch ($arraySoftwareState['requestPanelTask']) {
                                           ($userManifest['displayName'] ?? $userManifest['username']) . '\'s Add-ons',
                                           $addons);
       break;
+      case 'logs':
+        $logs = $moduleLog->fetch();
+        $moduleGenerateContent->addonSite('admin-list-logs', 'Last 100 Logged Events', $logs);
+        break;
       default:
         funcError('Invalid list request');
     }
@@ -74,6 +78,7 @@ switch ($arraySoftwareState['requestPanelTask']) {
           }
 
           // Add-on Submitted go to edit metadata
+          $moduleLog->record('[ADMIN] SUCCESS - Submitted Add-on: ' . $finalSlug);
           funcRedirect(URI_ADMIN . '?task=update&what=metadata' . '&slug=' . $finalSlug);
         }
 
@@ -91,6 +96,7 @@ switch ($arraySoftwareState['requestPanelTask']) {
           }
 
           // External Submitted go to edit metadata
+          $moduleLog->record('[ADMIN] SUCCESS - Submitted External: ' . $finalSlug);
           funcRedirect(URI_ADMIN . '?task=update&what=metadata' . '&slug=' . $finalSlug);
         }
 
@@ -124,10 +130,12 @@ switch ($arraySoftwareState['requestPanelTask']) {
         $isLangPack = (bool)($addonManifest['type'] == 'langpack');
 
         if ($isLangPack && $arraySoftwareState['authentication']['level'] < 4) {
+          $moduleLog->record('[ADMIN] FAIL - Tried to update a language pack release ' . $addonManifest['slug']);
           funcError('You are not allowed to update language packs!');
         }
 
         if ($addonManifest['type'] == 'external') {
+          $moduleLog->record('[ADMIN] FAIL - Tried to update external release' . $addonManifest['slug']);
           funcError('Externals do not physically exist here.. Are you a moron?');
         }
 
@@ -140,6 +148,7 @@ switch ($arraySoftwareState['requestPanelTask']) {
           }
 
           // Add-on Submitted go to edit metadata
+          $moduleLog->record('[ADMIN] SUCCESS - Updated Add-on Release: ' . $addonManifest['slug']);
           funcRedirect(URI_ADMIN . '?task=list&what=' . $finalType);
         }
 
@@ -160,6 +169,7 @@ switch ($arraySoftwareState['requestPanelTask']) {
         }
 
         if ($addonManifest['type'] == 'langpack' && $arraySoftwareState['authentication']['level'] < 4) {
+          $moduleLog->record('[ADMIN] FAIL - Tried to update language pack metadata' . $addonManifest['slug']);
           funcError('You are not allowed to edit language packs!');
         }
 
@@ -179,6 +189,7 @@ switch ($arraySoftwareState['requestPanelTask']) {
           }
 
           // Manifest updated go somewhere
+          $moduleLog->record('[ADMIN] SUCCESS - Updated Add-on/External Metadata: ' . $addonManifest['slug']);
           funcRedirect(URI_ADMIN . '?task=list&what=' . $addonManifest['type'] . 's');
         }
 
@@ -221,6 +232,7 @@ switch ($arraySoftwareState['requestPanelTask']) {
         if ($arraySoftwareState['authentication']['level'] != 5 &&
             $userManifest['level'] >= $arraySoftwareState['authentication']['level'] &&
             $userManifest['username'] != $arraySoftwareState['authentication']['username']) {
+          $moduleLog->record('[ADMIN] FAIL - Tried to update User Metadata: ' . $arraySoftwareState['requestPanelSlug']);
           funcError('You attempted to alter a user account that is the same or higher rank as you but not you. You\'re in trouble!');
         }
 
@@ -234,6 +246,7 @@ switch ($arraySoftwareState['requestPanelTask']) {
           }
 
           // Manifest updated go somewhere
+          $moduleLog->record('[ADMIN] SUCCESS - Updated User Metadata: ' . $arraySoftwareState['requestPanelSlug']);
           funcRedirect(URI_ADMIN . '?task=list&what=users');
         }
 
@@ -262,6 +275,7 @@ switch ($arraySoftwareState['requestPanelTask']) {
             $moduleGenerateContent->addonSite('addon-bulk-upload-result', 'Bulk Upload Report', $finalResult);
           }
 
+          $moduleLog->record('[ADMIN] SUCCESS - Bulk Uploaded Language Packs');
           funcRedirect(URI_ADMIN . '?task=list&what=langpacks');
         }
 

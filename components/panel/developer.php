@@ -74,6 +74,8 @@ switch ($arraySoftwareState['requestPath']) {
                 funcError('Something has gone horribly wrong');
               }
 
+              $moduleLog->record('SUCCESS - Submitted Add-on: ' . $finalSlug);
+
               // Add-on Submitted go to edit metadata
               funcRedirect(URI_ADDONS . '?task=update&what=metadata' . '&slug=' . $finalSlug);
             }
@@ -102,6 +104,7 @@ switch ($arraySoftwareState['requestPath']) {
             }
 
             if (!in_array($arraySoftwareState['requestPanelSlug'], $arraySoftwareState['authentication']['addons'])) {
+              $moduleLog->record('FAIL - Tried to update an add-on that was not assigned: ' . $addonManifest['slug']);
               funcError('You do not own this add-on. Stop trying to fuck with other people\'s shit!');
             }
 
@@ -114,6 +117,7 @@ switch ($arraySoftwareState['requestPath']) {
               }
 
               // Add-on Submitted go to edit metadata
+              $moduleLog->record('SUCCESS - Updated Add-on Release: ' . $addonManifest['slug']);
               funcRedirect(URI_ADDONS);
             }
 
@@ -145,6 +149,8 @@ switch ($arraySoftwareState['requestPath']) {
               if (!$boolUpdate) {
                 funcError('Something has gone horribly wrong');
               }
+
+              $moduleLog->record('SUCCESS - Updated Add-on Metadata: ' . $addonManifest['slug']);
 
               // Manifest updated go somewhere
               funcRedirect(URI_ADDONS);

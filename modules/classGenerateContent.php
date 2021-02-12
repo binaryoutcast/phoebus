@@ -165,6 +165,9 @@ class classGenerateContent {
       case 'admin-list-users':
         $content = $this->getContentTemplate('administration-users-list.xhtml');
         break;
+      case 'admin-list-logs':
+        $content = $this->getContentTemplate('administration-logs-list.xhtml');
+        break;
       case 'developer-edit-addon-metadata':
       case 'admin-edit-addon-metadata':
         $content = $this->getContentTemplate('addon-metadata.xhtml');
