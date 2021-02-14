@@ -160,6 +160,7 @@ class classGenerateContent {
       case 'admin-list-externals':
       case 'admin-list-themes':
       case 'admin-list-langpacks':
+      case 'admin-list-unreviewed':
         $content = $this->getContentTemplate('administration-addon-list.xhtml');
         break;
       case 'admin-list-users':

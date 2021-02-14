@@ -205,6 +205,34 @@ class classReadManifest {
                   ORDER BY `name`";
         $queryResults = $GLOBALS['moduleDatabase']->query('rows', $query, $aQueryData);
         break;
+      case 'panel-unreviewed-addons':
+        $returnInactive = true;
+        $returnUnreviewed = true;
+        $processContent = null;
+        $xpInstallFixup = null;
+        $query = "SELECT `id`, `slug`, `type`, `name`, `category`, `url`, `reviewed`, `active`
+                  FROM `addon`
+                  WHERE `type` IN ('extension', 'theme')
+                  AND `reviewed` = 0
+                  ORDER BY `name`";
+        $queryResults = $GLOBALS['moduleDatabase']->query('rows', $query);
+
+        // Exclude JustOff from this list due to being a traitor
+        $addonsJustOff = $GLOBALS['moduleDatabase']->query('row', "SELECT `addons` FROM `user` WHERE `username` = 'justoff'");
+        $addonsJustOff = json_decode($addonsJustOff['addons']);
+
+        if ($queryResults && $addonsJustOff) {
+          $filteredQueryResults = $queryResults;
+
+          foreach ($queryResults as $_key => $_value) {
+            if (in_array($_value['slug'], $addonsJustOff)) {
+              unset($filteredQueryResults[$_key]);
+            }
+          }
+
+          $queryResults = $filteredQueryResults;
+        }
+        break;
       case 'panel-addons-by-type':
         $returnInactive = true;
         $returnUnreviewed = true;
@@ -225,7 +253,7 @@ class classReadManifest {
     }
 
     $manifestData = array();
-    
+
     foreach($queryResults as $_value) {
       $addonManifest = $this->processManifest($_value,
                                               $returnInactive,

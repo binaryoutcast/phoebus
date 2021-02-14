@@ -31,6 +31,12 @@ switch ($arraySoftwareState['requestPanelTask']) {
                                           ucfirst($arraySoftwareState['requestPanelWhat']) . ' - Administration',
                                           $addons);
         break;
+      case 'unreviewed':
+        $addons = $moduleReadManifest->getAddons('panel-unreviewed-addons');
+        $moduleGenerateContent->addonSite('admin-list-unreviewed',
+                                          'Unreviewed Add-ons - Administration',
+                                          $addons);
+        break;
       case 'users':
         $users = $moduleAccount->getUsers();
         $moduleGenerateContent->addonSite('admin-list-users', 'Users - Administration', $users);
