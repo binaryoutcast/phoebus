@@ -1,6 +1,7 @@
 <h2>{if $PAGE_TYPE == 'admin-list-langpacks'}Pale Moon Language Packs{else}{$PAGE_TITLE|replace:' - Administration':''}{/if}</h2>
 {assign "SUBMENU_STYLE" "vertical-align: middle; margin-left: 2px; margin-right: 2px;"}
 <p>
+  <a href="/panel/administration/?task=list&what=unreviewed"><img src="{$BASE_PATH}../shared/shield.png" style="{$SUBMENU_STYLE}"/>Unreviewed</a> 
   <a href="/panel/administration/?task=list&what=extensions"><img src="{$BASE_PATH}../shared/plugin.png" style="{$SUBMENU_STYLE}"/>Extensions</a> 
   <a href="/panel/administration/?task=list&what=externals"><img src="{$BASE_PATH}../shared/plugin_link.png" style="{$SUBMENU_STYLE}" />Externals</a> 
   <a href="/panel/administration/?task=list&what=themes"><img src="{$BASE_PATH}../shared/palette.png" style="{$SUBMENU_STYLE}" />Themes</a> 
