@@ -84,6 +84,17 @@ class classReadManifest {
                   AND `slug` = ?s
                   AND `type` IN ('extension', 'theme', 'langpack')";
         $queryResult = $GLOBALS['moduleDatabase']->query('row', $query, $this->currentApplication, $aQueryData);
+
+        if ($queryResult) {
+        // Exclude JustOff from this list due to being a traitor
+          $addonsJustOff = $GLOBALS['moduleDatabase']->query('row', "SELECT `addons` FROM `user` WHERE `username` = 'justoff'");
+          $addonsJustOff = json_decode($addonsJustOff['addons']);
+          if ($addonsJustOff) {
+            if (in_array($queryResult['slug'], $addonsJustOff)) {
+              $queryResult = null;
+            }
+          }
+        }
         break;
       case 'panel-by-id':
         $returnInactive = true;
@@ -217,20 +228,22 @@ class classReadManifest {
                   ORDER BY `name`";
         $queryResults = $GLOBALS['moduleDatabase']->query('rows', $query);
 
-        // Exclude JustOff from this list due to being a traitor
-        $addonsJustOff = $GLOBALS['moduleDatabase']->query('row', "SELECT `addons` FROM `user` WHERE `username` = 'justoff'");
-        $addonsJustOff = json_decode($addonsJustOff['addons']);
+        if ($queryResults) {
+          // Exclude JustOff from this list due to being a traitor
+          $addonsJustOff = $GLOBALS['moduleDatabase']->query('row', "SELECT `addons` FROM `user` WHERE `username` = 'justoff'");
+          $addonsJustOff = json_decode($addonsJustOff['addons']);
 
-        if ($queryResults && $addonsJustOff) {
-          $filteredQueryResults = $queryResults;
+          if ($addonsJustOff) {
+            $filteredQueryResults = $queryResults;
 
-          foreach ($queryResults as $_key => $_value) {
-            if (in_array($_value['slug'], $addonsJustOff)) {
-              unset($filteredQueryResults[$_key]);
+            foreach ($queryResults as $_key => $_value) {
+              if (in_array($_value['slug'], $addonsJustOff)) {
+                unset($filteredQueryResults[$_key]);
+              }
             }
-          }
 
-          $queryResults = $filteredQueryResults;
+            $queryResults = $filteredQueryResults;
+          }
         }
         break;
       case 'panel-addons-by-type':
