@@ -453,18 +453,15 @@ class classWriteManifest {
 
     // Extensions and Themes are assigned to users
     if (in_array($aAddonManifest['type'], ['extension', 'theme'])) {
-      // Attempt to search the database for the user the add-on is assigned to
-      $username = $GLOBALS['moduleAccount']->findUserAddon($aAddonManifest['slug']);
-
-      if (!$username) {
+      if (!$aAddonManifest['owner']) {
         funcError('No one seems to own ' . $aAddonManifest['slug']);
       }
 
       // Remove the add-on from the list of add-ons assigned to that user
-      $removeFromUser = $GLOBALS['moduleAccount']->removeAddonFromUser($username, $aAddonManifest['slug']);
+      $removeFromUser = $GLOBALS['moduleAccount']->removeAddonFromUser($aAddonManifest['owner'], $aAddonManifest['slug']);
 
       if (!$removeFromUser) {
-        funcError('This ' . $aAddonManifest['type'] . ' could not be removed from assigned user: ' . $username);
+        funcError('This ' . $aAddonManifest['type'] . ' could not be removed from assigned user: ' . $aAddonManifest['owner']);
       }
     }
 
