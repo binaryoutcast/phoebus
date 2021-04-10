@@ -582,7 +582,7 @@ class classWriteManifest {
       'status' => array(
         'installManifestExists'       => null,
         'webExManifestExists'         => null,
-        'oldJetpackManifestExists'    => null,
+        'jetpackManifestExists'       => null,
         'hasID'                       => null,
         'hasType'                     => null,
         'hasVersion'                  => null,
@@ -673,19 +673,21 @@ class classWriteManifest {
     // ----------------------------------------------------------------------------------------------------------------
 
     // Look for other types of manifest files
-    $this->validatorData['status']['oldJetpackManifestExists'] = (bool)$this->readFileFromArchive($this->xpiUpload['tmp_name'],
-                                                                                      $strOldJetpackManifest,
-                                                                                      true);
-    if ($this->validatorData['status']['oldJetpackManifestExists']) {
-      return $this->error('Old style Jetpack based extensions are almost certainly not going to work properly, thus they are unsupported',
-             $aAccumulateErrors);
+    $isJetpack = (bool)$this->readFileFromArchive($this->xpiUpload['tmp_name'], $strOldJetpackManifest, true) ??
+                 (bool)$this->readFileFromArchive($this->xpiUpload['tmp_name'], $strJetpackManifest, true);
+    $this->validatorData['status']['jetpackManifestExists'] = $isJetpack;
+
+    if ($aCheckID) {                                                                                       
+      if ($this->validatorData['status']['jetpackManifestExists']) {
+        return $this->error('Jetpack (Add-on SDK) style extensions are not supported', $aAccumulateErrors);
+      }
     }
 
     $this->validatorData['status']['webExManifestExists'] = (bool)$this->readFileFromArchive($this->xpiUpload['tmp_name'],
-                                                                                        $strWebExManifest,
-                                                                                        true);
+                                                                                             $strWebExManifest,
+                                                                                             true);
     if ($this->validatorData['status']['webExManifestExists']) {
-      return $this->error('WebExtensions are not supported', $aAccumulateErrors);
+      return $this->error('WebExtensions (Chrome) style extensions are not supported', $aAccumulateErrors);
     }
 
     // ----------------------------------------------------------------------------------------------------------------
