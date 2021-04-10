@@ -400,6 +400,89 @@ class classWriteManifest {
   }
 
   /********************************************************************************************************************
+  * Remove an Add-on
+  ********************************************************************************************************************/
+  public function deleteAddon($aAddonManifest) {
+    // Populate Post Data with data from $_POST
+    $this->postData = array(
+      'confirm'       => (bool)funcUnifiedVariable('post', 'confirm'),
+      'slug'          => funcUnifiedVariable('post', 'slug'),
+    );
+
+    // Make sure that this is confirmed and someone didn't just use DOMi and enable the button
+    if (!$this->postData['confirm']) {
+      funcError('The deletion operation cannot be confirmed');
+    }
+
+    // Make sure the form posted slug is the same as the manifest slug
+    if ($this->postData['slug'] != $aAddonManifest['slug']) {
+      funcError('Add-on Slug mismatch');
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------
+
+    // Use the basePath to determine the true absolute path on the filesystem.
+    // This is important because removing files through symlinks can be problematic.
+    // NOTE: This does NOT have a trailing slash
+    $realAddonPath = realpath($aAddonManifest['basePath']);
+
+    if ($realAddonPath) {
+      // Glob for all files in the real add-on path because we will need to remove each one before the directory
+      // can be removed.
+      $glob = glob($realAddonPath . '/*');
+
+      // Test to see if the directory is writable
+      if (!is_writable($realAddonPath)) {
+        funcError('Datastore directory for ' . $aAddonManifest['slug'] . ' is not writable');
+      }
+
+      // Test to see if each file in the directory is writable
+      foreach ($glob as $_value) {
+        if (!is_writable($_value)) {
+          funcError('Datastore file ' . basename($_value) . ' for ' . $aAddonManifest['slug'] . ' is not writable');
+        }
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------
+
+    // Remove the data from the database
+    $query = "DELETE FROM ?n WHERE ?n = ?s";
+    $resultATable = $GLOBALS['moduleDatabase']->query('normal', $query, 'addon', 'id', $aAddonManifest['id']);
+    $resultCTable = $GLOBALS['moduleDatabase']->query('normal', $query, 'client', 'addonID', $aAddonManifest['id']);
+
+    // Extensions and Themes are assigned to users
+    if (in_array($aAddonManifest['type'], ['extension', 'theme'])) {
+      if (!$aAddonManifest['owner']) {
+        funcError('No one seems to own ' . $aAddonManifest['slug']);
+      }
+
+      // Remove the add-on from the list of add-ons assigned to that user
+      $removeFromUser = $GLOBALS['moduleAccount']->removeAddonFromUser($aAddonManifest['owner'], $aAddonManifest['slug']);
+
+      if (!$removeFromUser) {
+        funcError('This ' . $aAddonManifest['type'] . ' could not be removed from assigned user: ' . $aAddonManifest['owner']);
+      }
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------
+
+    if ($realAddonPath) {
+      // Delete each file on faith
+      foreach ($glob as $_value) {
+        unlink($_value);
+      }
+
+      // Delete the directory on faith
+      rmdir($realAddonPath);
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------
+
+    return true;
+  }
+
+  /********************************************************************************************************************
   * Bulk Add-on Uploader
   ********************************************************************************************************************/
   public function bulkUploader($aType) {
@@ -408,7 +491,7 @@ class classWriteManifest {
     }
 
     if (!$this->bulkUpload || $this->bulkUpload['type'] != 'application/zip') {
-      funcError('An error occured with the uploaded file. Please try again.');
+      funcError('An error occurred with the uploaded file. Please try again.');
     }
     
     $obj = ROOT_PATH . OBJ_RELPATH . 'bulk-upload/' . $aType . '-' . time() . '/';
@@ -582,7 +665,7 @@ class classWriteManifest {
       'status' => array(
         'installManifestExists'       => null,
         'webExManifestExists'         => null,
-        'oldJetpackManifestExists'    => null,
+        'jetpackManifestExists'       => null,
         'hasID'                       => null,
         'hasType'                     => null,
         'hasVersion'                  => null,
@@ -673,19 +756,20 @@ class classWriteManifest {
     // ----------------------------------------------------------------------------------------------------------------
 
     // Look for other types of manifest files
-    $this->validatorData['status']['oldJetpackManifestExists'] = (bool)$this->readFileFromArchive($this->xpiUpload['tmp_name'],
-                                                                                      $strOldJetpackManifest,
-                                                                                      true);
-    if ($this->validatorData['status']['oldJetpackManifestExists']) {
-      return $this->error('Old style Jetpack based extensions are almost certainly not going to work properly, thus they are unsupported',
-             $aAccumulateErrors);
+    $isJetpack = $this->readFileFromArchive($this->xpiUpload['tmp_name'], $strOldJetpackManifest, true) ??
+                 $this->readFileFromArchive($this->xpiUpload['tmp_name'], $strJetpackManifest, true);
+    
+    $this->validatorData['status']['jetpackManifestExists'] = $isJetpack;
+
+    if ($aCheckID && $this->validatorData['status']['jetpackManifestExists']) {                                                                                       
+      return $this->error('Jetpack (Add-on SDK) style extensions are not supported', $aAccumulateErrors);
     }
 
     $this->validatorData['status']['webExManifestExists'] = (bool)$this->readFileFromArchive($this->xpiUpload['tmp_name'],
-                                                                                        $strWebExManifest,
-                                                                                        true);
+                                                                                             $strWebExManifest,
+                                                                                             true);
     if ($this->validatorData['status']['webExManifestExists']) {
-      return $this->error('WebExtensions are not supported', $aAccumulateErrors);
+      return $this->error('WebExtensions (Chrome) style extensions are not supported', $aAccumulateErrors);
     }
 
     // ----------------------------------------------------------------------------------------------------------------

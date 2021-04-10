@@ -264,6 +264,49 @@ switch ($arraySoftwareState['requestPanelTask']) {
         funcError('Invalid update request');
     }
     break;
+  case 'delete':
+    switch ($arraySoftwareState['requestPanelWhat']) {
+      case 'addon':
+        // Check for valid slug
+        if (!$arraySoftwareState['requestPanelSlug']) {
+          funcError('You did not specify a slug');
+        }
+
+        // Get the manifest
+        $addonManifest = $moduleReadManifest->getAddon('panel-by-slug', $arraySoftwareState['requestPanelSlug']);
+
+        if ($arraySoftwareState['authentication']['level'] < 4) {
+          $moduleLog->record('[ADMIN] FAIL - Tried to delete add-on ' . $addonManifest['slug']);
+          funcError('You are not allowed to delete add-ons!');
+        }
+
+        // Check if manifest is valid
+        if (!$addonManifest) {
+          funcError('Add-on Manifest is null');
+        }
+
+        if ($boolHasPostData) {
+          $boolDelete = $moduleWriteManifest->deleteAddon($addonManifest);
+
+          // If an error happened stop.
+          if (!$boolDelete) {
+            funcError('Something has gone horribly wrong');
+          }
+
+          // Add-on deleted go somewhere
+          $moduleLog->record('[ADMIN] SUCCESS - Deleted Add-on: ' . $arraySoftwareState['requestPanelSlug']);
+          funcRedirect(URI_ADMIN . '?task=list&what=' . $addonManifest['type'] . 's');
+        }
+
+        // Generate the delete confirmation page
+        $moduleGenerateContent->addonSite('admin-delete-addon',
+                                           'Remove ' . ($addonManifest['name'] ?? $addonManifest['slug']),
+                                           $addonManifest);
+        break;
+      default:
+      funcError('Invalid delete request');
+    }
+    break;
   case 'bulk-upload':
     if (!$arraySoftwareState['requestPanelWhat']) {
       funcError('You did not specify what you want to bulk upload');

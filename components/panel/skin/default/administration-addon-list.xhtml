@@ -24,11 +24,15 @@
 
 <table class="addonTable single-row">
   <tr>
-    <th colspan="2" style="width: 36px;"></th>
+    {if $USER_LEVEL >= 4}
+    <th colspan="4" style="width: 36px;"></th>
+    {else}
+    <th colspan="3" style="width: 36px;"></th>
+    {/if}
     <th>Name</th>
     <th>Slug</th>
-    <th>ID</th>
-    <th>{if $PAGE_TYPE != 'admin-list-langpacks'}Category{/if}</th>
+    <th>ID</th> 
+    <th>Category</th>
     <th style="text-align: center;">Active</th>
     <th style="text-align: center;">Reviewed</th>
   </tr>
@@ -39,7 +43,7 @@
           <img src="{$BASE_PATH}../shared/pencil.png" alt="Edit Add-on" />
         </a>
       </td>
-      <td style="width: 20px;">
+      <td style="width: 16px;">
         {if $key.type != 'external'}
         <a href="{$PAGE_PATH}?task=update&what=release&slug={$key.slug}" title="Release a new version of this Add-on">
           <img src="{$BASE_PATH}../shared/plugin_add.png" alt="New Version" />
@@ -51,10 +55,26 @@
         </a>
         {/if}
       </td>
+      {if $USER_LEVEL >= 4}
+      <td style="width: 16px;">       
+        <a href="{$PAGE_PATH}?task=delete&what=addon&slug={$key.slug}" title="Remove Add-on">
+          <img src="{$BASE_PATH}../shared/plugin_delete.png" alt="Remove Add-on" />
+        </a>
+      </td>
+      {/if}
+      <td style="width: 20px;">       
+        {if $key.owner}
+        <a href="{$PAGE_PATH}?task=update&what=user&slug={$key.owner}" title="Owned by: {$key.owner}">
+          <img src="{$BASE_PATH}../shared/user_go.png" alt="Owned by {$key.owner}" />
+        </a>
+        {else}
+          <img src="{$BASE_PATH}../shared/user_red.png" alt="No assigned owner!" title="No assigned owner!" />
+        {/if}
+      </td>
       <td class="cell-ellipsis">{$key.name}</td>
-      <td class="cell-ellipsis">{$key.slug}</td>
+      <td>{$key.slug}</td>
       <td>{$key.id}</td>
-      <td style="width: 150px; min-width: 150px; max-width: 150px">{if $PAGE_TYPE != 'admin-list-langpacks'}{$key.category}{/if}</td>
+      <td style="width: 150px; min-width: 125px; max-width: 150px">{$key.category}</td>
       <td style="text-align: center; width: 64px;">
         {if $key.active}
           <img src="{$BASE_PATH}../shared/accept.png" />
@@ -70,6 +90,8 @@
         {/if}
       </td>
     </tr>
+  {foreachelse}
+  <tr><td colspan="10" style="text-align: center;"><strong>There are no add-ons to list!</strong></td></tr>
   {/foreach}
 </table>
 {$key = null}

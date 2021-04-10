@@ -42,6 +42,12 @@ class classReadManifest {
     if (!funcCheckModule('database')) {
       funcError(__CLASS__ . '::' . __FUNCTION__ . ' - database is required to be included in the global scope');
     }
+
+    if ($GLOBALS['arraySoftwareState']['requestComponent'] == 'panel') {
+      if (!funcCheckModule('account')) {
+        funcError(__CLASS__ . '::' . __FUNCTION__ . ' - account is required to be included in the global scope when using the panel component');
+      }
+    }
     
     // Assign currentApplication
     $this->currentApplication = $GLOBALS['arraySoftwareState']['currentApplication'];
@@ -357,6 +363,14 @@ class classReadManifest {
       }
 
       unset($addonManifest['addonID']);
+    }
+
+    // It would be nice if we could have the owner of an add-on in the panel
+    if ($GLOBALS['arraySoftwareState']['requestComponent'] == 'panel') {
+      $level = $GLOBALS['arraySoftwareState']['authentication']['level'] ?? 0;
+      if ($level >= 3) {
+        $addonManifest['owner'] = $GLOBALS['moduleAccount']->findUserAddon($addonManifest['slug']) ?? null;
+      }
     }
 
     // Actions on xpinstall key

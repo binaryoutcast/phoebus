@@ -82,6 +82,17 @@ class classDatabase {
 
     return funcUnifiedVariable('var', $result);
   }
-}
+
+  /********************************************************************************************************************
+  * Parses query using SafeMySQL
+  *
+  * @param    ...$aArgs     Expanded list of arguments
+  * @return   parsed query string or null
+  ********************************************************************************************************************/
+  public function parse(...$aArgs) {
+    return funcUnifiedVariable('var', $this->libSafeMySQL->parse(...$aArgs));
+  }
+
+} // End of Class
 
 ?>
