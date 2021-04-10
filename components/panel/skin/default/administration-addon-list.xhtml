@@ -43,7 +43,11 @@
           <img src="{$BASE_PATH}../shared/pencil.png" alt="Edit Add-on" />
         </a>
       </td>
+      {if $USER_LEVEL >= 4}
+      <td style="width: 16px;">
+      {else}
       <td style="width: 20px;">
+      {/if}
         {if $key.type != 'external'}
         <a href="{$PAGE_PATH}?task=update&what=release&slug={$key.slug}" title="Release a new version of this Add-on">
           <img src="{$BASE_PATH}../shared/plugin_add.png" alt="New Version" />
@@ -56,9 +60,9 @@
         {/if}
       </td>
       {if $USER_LEVEL >= 4}
-      <td style="width: 16px;">       
-        <a href="{$PAGE_PATH}?task=delete&what=addon&slug={$key.slug}" title="Edit Add-on Metadata">
-          <img src="{$BASE_PATH}../shared/cross.png" alt="Remove Add-on" />
+      <td style="width: 20px;">       
+        <a href="{$PAGE_PATH}?task=delete&what=addon&slug={$key.slug}" title="Remove Add-on">
+          <img src="{$BASE_PATH}../shared/plugin_delete.png" alt="Remove Add-on" />
         </a>
       </td>
       {/if}

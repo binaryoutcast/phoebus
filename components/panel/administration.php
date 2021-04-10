@@ -295,7 +295,7 @@ switch ($arraySoftwareState['requestPanelTask']) {
 
           // Add-on deleted go somewhere
           $moduleLog->record('[ADMIN] SUCCESS - Deleted Add-on: ' . $arraySoftwareState['requestPanelSlug']);
-          funcRedirect(URI_ADMIN . '?task=list&what=' . $addonManifest['type']);
+          funcRedirect(URI_ADMIN . '?task=list&what=' . $addonManifest['type'] . 's');
         }
 
         // Generate the delete confirmation page
