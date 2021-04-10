@@ -25,6 +25,8 @@
       <td>{$key.ip}</td>
       <td>{$key.action}</td>
     </tr>
+  {foreachelse}
+  <tr><td colspan="4" style="text-align: center;"><strong>There are no logs to list!</strong></td></tr>
   {/foreach}
 </table>
 {$key = null}
