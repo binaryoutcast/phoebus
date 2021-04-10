@@ -1,0 +1,10 @@
+<h2>{$PAGE_TITLE}</h2>
+
+<div style="width: 100%; text-align: center;">
+  <form id="delete-addon" accept-charset="UTF-8" method="POST" style="display: inline-block; text-align: left;">
+    <input type="checkbox" id="confirmCheckbox" name="confirm" value="1">
+    <label for="confirmCheckbox">Are you sure you want to permanently remove add-on {$PAGE_DATA.name}?</label><br />
+    <input type="hidden" name="slug" value="{$PAGE_DATA.slug}" />
+    <button type="submit" value="Submit" style="float: right;">Delete</button><br />
+  </form>
+</div>

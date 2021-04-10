@@ -176,6 +176,9 @@ class classGenerateContent {
       case 'admin-edit-external-metadata':
         $content = $this->getContentTemplate('external-metadata.xhtml');
         break;
+      case 'admin-delete-addon':
+        $content = $this->getContentTemplate('delete-addon.xhtml');
+        break;
       case 'panel-submit-addon':
       case 'panel-submit-langpack':
       case 'panel-submit-external':

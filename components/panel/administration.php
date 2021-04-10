@@ -221,6 +221,34 @@ switch ($arraySoftwareState['requestPanelTask']) {
                                            $addonManifest,
                                            $arrayExtraData);
         break;
+      case 'delete':
+        // Check for valid slug
+        if (!$arraySoftwareState['requestPanelSlug']) {
+          funcError('You did not specify a slug');
+        }
+
+        if ($arraySoftwareState['authentication']['level'] < 4) {
+          $moduleLog->record('[ADMIN] FAIL - Tried to delete add-on ' . $addonManifest['slug']);
+          funcError('You are not allowed to delete add-ons!');
+        }
+
+        // Get the manifest
+        $addonManifest = $moduleReadManifest->getAddon('panel-by-slug', $arraySoftwareState['requestPanelSlug']);
+
+        // Check if manifest is valid
+        if (!$addonManifest) {
+          funcError('Add-on Manifest is null');
+        }
+
+        if ($boolHasPostData) {
+          funcSendHeader('501');
+        }
+
+        // Generate the delete confirmation page page
+        $moduleGenerateContent->addonSite('admin-delete-addon',
+                                           'Remove ' . ($addonManifest['name'] ?? $addonManifest['slug']),
+                                           $addonManifest);
+        break;
       case 'user':
         // Check for valid slug
         if (!$arraySoftwareState['requestPanelSlug']) {
