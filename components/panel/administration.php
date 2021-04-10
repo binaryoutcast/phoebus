@@ -286,7 +286,7 @@ switch ($arraySoftwareState['requestPanelTask']) {
       }
 
       if ($boolHasPostData) {
-        funcSendHeader('501');
+        funcError($_POST);
       }
 
       // Generate the delete confirmation page page
