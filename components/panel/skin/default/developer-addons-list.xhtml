@@ -20,7 +20,11 @@
 
 <table class="addonTable single-row">
   <tr>
-    <th colspan="2" style="text-align: center;"></th>
+    {if $USER_LEVEL >= 4}
+    <th colspan="3" style="width: 36px;"></th>
+    {else}
+    <th colspan="2" style="width: 36px;"></th>
+    {/if}
     <th>Name</th>
     <th>Slug</th>
     <th>ID</th>
@@ -35,13 +39,24 @@
           <img src="{$BASE_PATH}../shared/pencil.png" alt="Edit Add-on" />
         </a>
       </td>
+      {if $USER_LEVEL >= 4}
+      <td style="width: 16px;">
+      {else}
       <td style="width: 20px;">
+      {/if}
         {if $key.type != 'external'}
         <a href="{$PAGE_PATH}?task=update&what=release&slug={$key.slug}" title="Release a new version of this Add-on">
           <img src="{$BASE_PATH}../shared/plugin_add.png" alt="New Version" />
         </a>
         {/if}
       </td>
+      {if $USER_LEVEL >= 4}
+      <td style="width: 20px;">       
+        <a href="{$PAGE_PATH}?task=delete&what=addon&slug={$key.slug}" title="Remove Add-on">
+          <img src="{$BASE_PATH}../shared/plugin_delete.png" alt="Remove Add-on" />
+        </a>
+      </td>
+      {/if}
       <td class="cell-ellipsis">{$key.name}</td>
       <td class="cell-ellipsis">{$key.slug}</td>
       <td>{$key.id}</td>
