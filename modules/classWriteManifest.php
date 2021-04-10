@@ -673,14 +673,13 @@ class classWriteManifest {
     // ----------------------------------------------------------------------------------------------------------------
 
     // Look for other types of manifest files
-    $isJetpack = (bool)$this->readFileFromArchive($this->xpiUpload['tmp_name'], $strOldJetpackManifest, true) ??
-                 (bool)$this->readFileFromArchive($this->xpiUpload['tmp_name'], $strJetpackManifest, true);
+    $isJetpack = $this->readFileFromArchive($this->xpiUpload['tmp_name'], $strOldJetpackManifest, true) ??
+                 $this->readFileFromArchive($this->xpiUpload['tmp_name'], $strJetpackManifest, true);
+    
     $this->validatorData['status']['jetpackManifestExists'] = $isJetpack;
 
-    if ($aCheckID) {                                                                                       
-      if ($this->validatorData['status']['jetpackManifestExists']) {
-        return $this->error('Jetpack (Add-on SDK) style extensions are not supported', $aAccumulateErrors);
-      }
+    if ($aCheckID && $this->validatorData['status']['jetpackManifestExists']) {                                                                                       
+      return $this->error('Jetpack (Add-on SDK) style extensions are not supported', $aAccumulateErrors);
     }
 
     $this->validatorData['status']['webExManifestExists'] = (bool)$this->readFileFromArchive($this->xpiUpload['tmp_name'],
