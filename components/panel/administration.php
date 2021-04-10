@@ -267,33 +267,42 @@ switch ($arraySoftwareState['requestPanelTask']) {
   case 'delete':
     switch ($arraySoftwareState['requestPanelWhat']) {
       case 'addon':
-      // Check for valid slug
-      if (!$arraySoftwareState['requestPanelSlug']) {
-        funcError('You did not specify a slug');
-      }
+        // Check for valid slug
+        if (!$arraySoftwareState['requestPanelSlug']) {
+          funcError('You did not specify a slug');
+        }
 
-      if ($arraySoftwareState['authentication']['level'] < 4) {
-        $moduleLog->record('[ADMIN] FAIL - Tried to delete add-on ' . $addonManifest['slug']);
-        funcError('You are not allowed to delete add-ons!');
-      }
+        if ($arraySoftwareState['authentication']['level'] < 4) {
+          $moduleLog->record('[ADMIN] FAIL - Tried to delete add-on ' . $addonManifest['slug']);
+          funcError('You are not allowed to delete add-ons!');
+        }
 
-      // Get the manifest
-      $addonManifest = $moduleReadManifest->getAddon('panel-by-slug', $arraySoftwareState['requestPanelSlug']);
+        // Get the manifest
+        $addonManifest = $moduleReadManifest->getAddon('panel-by-slug', $arraySoftwareState['requestPanelSlug']);
 
-      // Check if manifest is valid
-      if (!$addonManifest) {
-        funcError('Add-on Manifest is null');
-      }
+        // Check if manifest is valid
+        if (!$addonManifest) {
+          funcError('Add-on Manifest is null');
+        }
 
-      if ($boolHasPostData) {
-        funcError($_POST);
-      }
+        if ($boolHasPostData) {
+          $boolDelete = $moduleWriteManifest->deleteAddon($addonManifest);
 
-      // Generate the delete confirmation page page
-      $moduleGenerateContent->addonSite('admin-delete-addon',
-                                         'Remove ' . ($addonManifest['name'] ?? $addonManifest['slug']),
-                                         $addonManifest);
-      break;
+          // If an error happened stop.
+          if (!$boolDelete) {
+            funcError('Something has gone horribly wrong');
+          }
+
+          // Add-on deleted go somewhere
+          $moduleLog->record('[ADMIN] SUCCESS - Deleted Add-on: ' . $arraySoftwareState['requestPanelSlug']);
+          funcRedirect(URI_ADMIN . '?task=list&what=' . $addonManifest['type']);
+        }
+
+        // Generate the delete confirmation page
+        $moduleGenerateContent->addonSite('admin-delete-addon',
+                                           'Remove ' . ($addonManifest['name'] ?? $addonManifest['slug']),
+                                           $addonManifest);
+        break;
       default:
       funcError('Invalid delete request');
     }

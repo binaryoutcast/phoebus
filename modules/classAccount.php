@@ -312,7 +312,7 @@ class classAccount {
   }
 
   /********************************************************************************************************************
-  * Gets all users at or below the requesting user level
+  * Assigns an Add-on slug to a user
   ********************************************************************************************************************/
   public function assignAddonToUser($aUsername, $aSlug) {
     $query = "SELECT `username`, `addons` FROM `user` WHERE `username` = ?s";
@@ -334,6 +334,52 @@ class classAccount {
     }
 
     return true;
+  }
+
+  /********************************************************************************************************************
+  * Removes an Add-on slug from a user
+  ********************************************************************************************************************/
+  public function removeAddonFromUser($aUsername, $aSlug) {
+    $query = "SELECT `username`, `addons` FROM `user` WHERE `username` = ?s";
+    $userManifest = $GLOBALS['moduleDatabase']->query('row', $query, $aUsername);
+
+    if (!$userManifest) {
+      return null;
+    }
+
+    $userAddons = json_decode($userManifest['addons']);
+
+    if (!in_array($aSlug, $userAddons)) {
+      return null;
+    }
+
+    unset($userAddons[array_search($aSlug, $userAddons)]);
+
+    $userAddons = json_encode(array_values($userAddons), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+
+    // Insert the updated manifest data into the database
+    $query = "UPDATE `user` SET ?u WHERE `username` = ?s";
+    $rv = $GLOBALS['moduleDatabase']->query('normal', $query, array('addons' => $userAddons), $userManifest['username']);
+
+    return true;
+  }
+
+  /********************************************************************************************************************
+  * Find a user by Add-on Slug
+  ********************************************************************************************************************/
+  public function findUserAddon($aSlug) {
+    $query = "SELECT `username` FROM `user` WHERE `addons` LIKE '%\"{$aSlug}\"%'";
+    $usernames = $GLOBALS['moduleDatabase']->query('col', $query);
+
+    if (!$usernames) {
+      return null;
+    }
+
+    if (count($usernames) > 1) {
+      funcError('Unable to determine a single user for slug ' . $aSlug);
+    }
+
+    return $usernames[0];
   }
 
   /********************************************************************************************************************
