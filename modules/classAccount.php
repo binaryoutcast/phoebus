@@ -436,11 +436,11 @@ class classAccount {
       funcError('Unable to send verification email because it is null');
     }
 
-    ini_set("sendmail_from", "phoebus@addons.palemoon.org");
+    ini_set("sendmail_from", "addons@palemoon.org");
 
     $arraySendMailHeaders = array(
-      'From' => 'Phoebus Account Registration <phoebus@addons.palemoon.org>',
-      'Reply-To' => 'phoebus@addons.palemoon.org',
+      'From' => 'Phoebus Account Registration <addons@palemoon.org>',
+      'Reply-To' => 'addons@palemoon.org',
       'X-Mailer' => SOFTWARE_NAME . '/' . SOFTWARE_VERSION,
     );
 
