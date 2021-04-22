@@ -102,7 +102,12 @@ else {
   $strPageButtons = $strAMOButton;
 }
 
-$strHTMLTemplate = file_get_contents(ROOT_PATH . $strComponentPath . '/content/template.xhtml');   
+if ($arraySoftwareState['currentApplication'] == 'palemoon') {
+  $strHTMLTemplate = file_get_contents(ROOT_PATH . $strComponentPath . '/content/template-announcement.xhtml');
+}
+else {
+  $strHTMLTemplate = file_get_contents(ROOT_PATH . $strComponentPath . '/content/template.xhtml');
+}
 
 $arrayFilterSubstitute = array(
   '{%BASE_PATH}'              => $strComponentPath,
