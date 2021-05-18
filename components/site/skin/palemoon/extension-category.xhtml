@@ -10,15 +10,15 @@
         <strong>{$value}</strong>
       </div>
     </a>
+  {foreachelse}
+    <p><em>There are no available add-ons in this category.</em></p>
+  {/foreach}
     <a href="/extensions/?all=1" class="fake-table-row-search-plugin" style="height: 36px; margin-bottom: 24px;">
       <img src="{$BASE_PATH}../shared/other.png" class="alignleft" width="32px" height="32px">
       <div style="margin-top: 7px;">
         <strong>List All Extensions</strong>
       </div>
     </a>
-  {foreachelse}
-    <p><em>There are no available add-ons in this category.</em></p>
-  {/foreach}
 </div>
 
 {$key = null}
