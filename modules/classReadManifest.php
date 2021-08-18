@@ -44,7 +44,7 @@ class classReadManifest {
     gfEnsureModules(__CLASS__, 'database');
 
     if ($gaRuntime['qComponent'] == 'panel') {
-      gfEnsureModules(__CLASS__, 'database');
+      gfEnsureModules(__CLASS__, 'account');
     }
     
     // Assign currentApplication
