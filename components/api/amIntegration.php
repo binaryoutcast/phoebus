@@ -6,73 +6,64 @@
 // == | Setup | =======================================================================================================
 
 // Include modules
-$arrayIncludes = ['database', 'readManifest', 'generateContent'];
+gfImportModules('database', 'readManifest', 'generateContent']);
 
-foreach ($arrayIncludes as $_value) { require_once(MODULES[$_value]); }
-
-// Instantiate modules
-$moduleDatabase = new classDatabase();
-$moduleReadManifest = new classReadManifest();
-$moduleGenerateContent = new classGenerateContent();
+// Assign HTTP GET arguments to the software state
+$gaRuntime['qAPIScope'] = gfSuperVar('get', 'type');
+$gaRuntime['qAPIFunction'] = gfSuperVar('get', 'request');
+$gaRuntime['qAPISearchQuery'] = gfSuperVar('get', 'q');
+$gaRuntime['qAPISearchGUID'] = gfSuperVar('get', 'addonguid');
 
 // ====================================================================================================================
 
 // == | Main | ========================================================================================================
 
-// Assign HTTP GET arguments to the software state
-$arraySoftwareState['requestAPIScope'] = funcUnifiedVariable('get', 'type');
-$arraySoftwareState['requestAPIFunction'] = funcUnifiedVariable('get', 'request');
-$arraySoftwareState['requestAPISearchQuery'] = funcUnifiedVariable('get', 'q');
-$arraySoftwareState['requestAPISearchGUID'] = funcUnifiedVariable('get', 'addonguid');
-
-// --------------------------------------------------------------------------------------------------------------------
-
 // Sanity
-if (!$arraySoftwareState['requestAPIScope'] ||
-    !$arraySoftwareState['requestAPIFunction']) {
-  funcError('Missing minimum arguments (type or request)');
+if (!$gaRuntime['qAPIScope'] ||
+    !$gaRuntime['qAPIFunction']) {
+  gfError('Missing minimum arguments (type or request)');
 }
 
 // --------------------------------------------------------------------------------------------------------------------
 
-if ($arraySoftwareState['requestAPIScope'] == 'internal') {
-  switch ($arraySoftwareState['requestAPIFunction']) {
+if ($gaRuntime['qAPIScope'] == 'internal') {
+  switch ($gaRuntime['qAPIFunction']) {
     case 'search':
-      $searchManifest = $moduleReadManifest->getAddons('api-search', $arraySoftwareState['requestAPISearchQuery'], 1);
-      $moduleGenerateContent->amSearch($searchManifest);
+      $searchManifest = $gmReadManifest->getAddons('api-search', $gaRuntime['qAPISearchQuery'], 1);
+      $gmGenerateContent->amSearch($searchManifest);
     case 'get':
-      if (!$arraySoftwareState['requestAPISearchGUID']) {
-        $moduleGenerateContent->amSearch(null);
+      if (!$gaRuntime['qAPISearchGUID']) {
+        $gmGenerateContent->amSearch(null);
       }
 
-      $arraySoftwareState['requestAPISearchGUID'] = explode(',', $arraySoftwareState['requestAPISearchGUID']);
+      $gaRuntime['qAPISearchGUID'] = explode(',', $gaRuntime['qAPISearchGUID']);
 
-      $searchManifest = $moduleReadManifest->getAddons('api-get', $arraySoftwareState['requestAPISearchGUID'], 2);
-      $moduleGenerateContent->amSearch($searchManifest);
+      $searchManifest = $gmReadManifest->getAddons('api-get', $gaRuntime['qAPISearchGUID'], 2);
+      $gmGenerateContent->amSearch($searchManifest);
     case 'recommended':
       // This is apperently not used anymore but provide an empty response
-      funcSendHeader('xml');
+      gfHeader('xml');
       print('<?xml version="1.0" encoding="utf-8" ?>' . NEW_LINE . '<addons />');
       exit();
     default:
-      funcError('Unknown Internal Request');
+      gfError('Unknown Internal Request');
   }
 }
-elseif ($arraySoftwareState['requestAPIScope'] == 'external') {
-  switch ($arraySoftwareState['requestAPIFunction']) {
+elseif ($gaRuntime['qAPIScope'] == 'external') {
+  switch ($gaRuntime['qAPIFunction']) {
     case 'search':
-      funcRedirect(
-        '/search/?terms=' . $arraySoftwareState['requestAPISearchQuery']
+      gfRedirect(
+        '/search/?terms=' . $gaRuntime['qAPISearchQuery']
       );
     case 'themes':
-      funcRedirect('/themes/');
+      gfRedirect('/themes/');
     case 'searchplugins':
-      funcRedirect('/search-plugins/');
+      gfRedirect('/search-plugins/');
     case 'devtools':
-      funcRedirect('/extensions/web-development/');
+      gfRedirect('/extensions/web-development/');
     case 'recommended':
     default:
-      funcRedirect('/');
+      gfRedirect('/');
   }
 }
 

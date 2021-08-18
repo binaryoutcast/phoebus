@@ -5,8 +5,10 @@
 
 // == | Setup | =======================================================================================================
 
+// Enable Error Reporting
 error_reporting(E_ALL);
 ini_set("display_errors", "on");
+ini_set('html_errors', false);
 
 // This has to be defined using the function at runtime because it is based
 // on a variable. However, constants defined with the language construct
@@ -14,16 +16,19 @@ ini_set("display_errors", "on");
 // NOTE: DOCUMENT_ROOT does NOT have a trailing slash.
 define('ROOT_PATH', $_SERVER['DOCUMENT_ROOT']);
 
+// Debug flag
+define('DEBUG_MODE', $_GET['debug'] ?? null);
+
 // Define basic constants for the software
 const SOFTWARE_NAME       = 'Phoebus';
-const SOFTWARE_VERSION    = '2.1.0';
+const SOFTWARE_VERSION    = '2.2.0a1';
 const DATASTORE_RELPATH   = '/datastore/';
 const OBJ_RELPATH         = '/.obj/';
 const COMPONENTS_RELPATH  = '/components/';
 const DATABASES_RELPATH   = '/databases/';
 const MODULES_RELPATH     = '/modules/';
 const LIB_RELPATH         = '/libraries/';
-const NEW_LINE            = "\n";
+const SPECIAL_SKIN_PATH   = ROOT_PATH . '/components/special/skin/default/';
 
 // Define components
 const COMPONENTS = array(
@@ -119,17 +124,17 @@ const TARGET_APPLICATION_ID = array(
 );
 
 const EXTENSION_CATEGORY_SLUGS = array(
-  'alerts-and-updates' => 'Alerts &amp; Updates',
-  'appearance' => 'Appearance',
-  'bookmarks-and-tabs' => 'Bookmarks &amp; Tabs',
-  'download-management' => 'Download Management',
-  'feeds-news-and-blogging' => 'Feeds, News, &amp; Blogging',
-  'privacy-and-security' => 'Privacy &amp; Security',
-  'search-tools' => 'Search Tools',
-  'social-and-communication' => 'Social &amp; Communication',
-  'tools-and-utilities' => 'Tools &amp; Utilities',
-  'web-development' => 'Web Development',
-  'other' => 'Other'
+  'alerts-and-updates'        => 'Alerts &amp; Updates',
+  'appearance'                => 'Appearance',
+  'bookmarks-and-tabs'        => 'Bookmarks &amp; Tabs',
+  'download-management'       => 'Download Management',
+  'feeds-news-and-blogging'   => 'Feeds, News, &amp; Blogging',
+  'privacy-and-security'      => 'Privacy &amp; Security',
+  'search-tools'              => 'Search Tools',
+  'social-and-communication'  => 'Social &amp; Communication',
+  'tools-and-utilities'       => 'Tools &amp; Utilities',
+  'web-development'           => 'Web Development',
+  'other'                     => 'Other'
 );
 
 const OTHER_CATEGORY_SLUGS = array(
@@ -139,6 +144,9 @@ const OTHER_CATEGORY_SLUGS = array(
   'language-packs'            => 'Language Packs',
 );
 
+// Load fundamental constants and global functions
+require_once('./fundamentals.php');
+
 // ====================================================================================================================
 
 // == | Functions | ===================================================================================================
@@ -146,18 +154,18 @@ const OTHER_CATEGORY_SLUGS = array(
 /**********************************************************************************************************************
 * Basic Content Generation using the Special Component's Template
 ***********************************************************************************************************************/
-function funcGenerateContent($aTitle, $aContent, $aTextBox = null, $aList = null, $aError = null) {
-  $templateHead = @file_get_contents('./components/special/skin/default/template-header.xhtml');
-  $templateFooter = @file_get_contents('./components/special/skin/default/template-footer.xhtml');
+function gfGenContent($aTitle, $aContent, $aTextBox = null, $aList = null, $aError = null) {
+  $templateHead = @file_get_contents(SPECIAL_SKIN_PATH . 'template-header.xhtml');
+  $templateFooter = @file_get_contents(SPECIAL_SKIN_PATH . 'template-footer.xhtml');
 
   // Make sure the template isn't busted, if it is send a text only error as an array
   if (!$templateHead || !$templateFooter) {
-    funcError([__FUNCTION__ . ': Special Template is busted...', $aTitle, $aContent], -1);
+    gfError([__FUNCTION__ . ': Special Template is busted...', $aTitle, $aContent], -1);
   }
 
   // Can't use both the textbox and list arguments
   if ($aTextBox && $aList) {
-    funcError(__FUNCTION__ . ': You cannot use both textbox and list');
+    gfError(__FUNCTION__ . ': You cannot use both textbox and list');
   }
 
   // Anonymous function to determin if aContent is a string-ish or not
@@ -189,7 +197,7 @@ function funcGenerateContent($aTitle, $aContent, $aTextBox = null, $aList = null
                   '<title>' . $aTitle . ' - ' . SOFTWARE_NAME . ' ' . SOFTWARE_VERSION . '</title>',
                   $templateHead);
 
-  // If we are generating an error from funcError we want to clean the output buffer
+  // If we are generating an error from gfError we want to clean the output buffer
   if ($aError) {
     ob_get_clean();
   }
@@ -205,142 +213,6 @@ function funcGenerateContent($aTitle, $aContent, $aTextBox = null, $aList = null
 }
 
 /**********************************************************************************************************************
-* Error function that will display data (Error Message)
-**********************************************************************************************************************/
-function funcError($aValue, $aMode = 0) {
-  $varExport  = var_export($aValue, true);
-  $jsonEncode = json_encode($aValue, 448); // JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
-  
-  $pageHeader = array(
-    'default' => 'Unable to Comply',
-    'fatal'   => 'Fatal Error',
-    'php'     => 'PHP Error',
-    'output'  => 'Output'
-  );
-
-  switch($aMode) {
-    case -1:
-      // Text only
-      header('Content-Type: text/plain', false);
-      if (is_string($aValue) || is_int($aValue)) {
-        print($aValue);
-      }
-      else {
-        print($varExport);
-      }
-      break;
-    case 1:
-      funcGenerateContent($pageHeader['php'], $aValue, null, true, true);
-      break;
-    case 98:
-      // Depercated, use funcGenerateContent
-      funcGenerateContent($pageHeader['output'], $jsonEncode, true);
-      break;
-    case 99:
-      // Depercated, use funcGenerateContent
-      funcGenerateContent($pageHeader['output'], $varExport, true);
-      break;
-    default:
-      funcGenerateContent($pageHeader['default'], $aValue, null, true, true);
-  }
-
-  exit();
-}
-
-/**********************************************************************************************************************
-* PHP Error Handler
-**********************************************************************************************************************/
-
-function funcPHPErrorHandler($errno, $errstr, $errfile, $errline) {
-  $errorCodes = array(
-    E_ERROR => 'Fatal Error',
-    E_WARNING => 'Warning',
-    E_PARSE => 'Parse',
-    E_NOTICE => 'Notice',
-    E_CORE_ERROR => 'Fatal Error (Core)',
-    E_CORE_WARNING => 'Warning (Core)',
-    E_COMPILE_ERROR => 'Fatal Error (Compile)',
-    E_COMPILE_WARNING => 'Warning (Compile)',
-    E_USER_ERROR => 'Fatal Error (User Generated)',
-    E_USER_WARNING => 'Warning (User Generated)',
-    E_USER_NOTICE => 'Notice (User Generated)',
-    E_STRICT => 'Strict',
-    E_RECOVERABLE_ERROR => 'Fatal Error (Recoverable)',
-    E_DEPRECATED => 'Depercated',
-    E_USER_DEPRECATED => 'Depercated (User Generated)',
-    E_ALL => 'All',
-  );
-
-  $errorType = $errorCodes[$errno] ?? $errno;
-  $errorMessage = $errorType . ': ' . $errstr . ' in ' .
-                  str_replace(ROOT_PATH, '', $errfile) . ' on line ' . $errline;
-
-  if (error_reporting() !== 0) {
-    funcError($errorMessage, 1);
-  }
-}
-
-set_error_handler("funcPHPErrorHandler");
-
-/**********************************************************************************************************************
-* Unified Var Checking
-*
-* @param $_type           Type of var to check
-* @param $_value          GET/PUT/SERVER/FILES/EXISTING Normal Var
-* @param $_allowFalsy     Optional - Allow falsey returns (really only works with case var)
-* @returns                Value or null
-**********************************************************************************************************************/
-function funcUnifiedVariable($_type, $_value, $_allowFalsy = null) {
-  $finalValue = null;
-
-  switch ($_type) {
-    case 'get':
-      $finalValue = $_GET[$_value] ?? null;
-
-      if ($finalValue) {
-        $finalValue = preg_replace('/[^-a-zA-Z0-9_\-\/\{\}\@\.\%\s\,]/', '', $_GET[$_value]);
-      }
-
-      break;
-    case 'post':
-      $finalValue = $_POST[$_value] ?? null;
-      break;
-    case 'server':
-      $finalValue = $_SERVER[$_value] ?? null;
-      break;
-    case 'files':
-      $finalValue = $_FILES[$_value] ?? null;
-      if ($finalValue) {
-        if (!in_array($finalValue['error'], [UPLOAD_ERR_OK, UPLOAD_ERR_NO_FILE])) {
-          funcError('Upload of ' . $_value . ' failed with error code: ' . $finalValue['error']);
-        }
-
-        if ($finalValue['error'] == UPLOAD_ERR_NO_FILE) {
-          $finalValue = null;
-        }
-        else {
-          $finalValue['type'] = mime_content_type($finalValue['tmp_name']);
-        }
-      }
-      break;
-    case 'cookie':
-      $finalValue = $_COOKIE[$_value] ?? null;
-      break;
-    case 'var':
-      $finalValue = $_value ?? null;
-      break;
-    default:
-      funcError('Incorrect var check');
-  }
-
-  if (!$_allowFalsy && (empty($finalValue) || $finalValue === 'none' || $finalValue === '')) {
-    return null;
-  }
-
-  return $finalValue;
-}
-
-/**********************************************************************************************************************
 * Check if a module is in $arrayIncludes
 *
 * @param $_value    A module
@@ -348,7 +220,7 @@ function funcUnifiedVariable($_type, $_value, $_allowFalsy = null) {
 **********************************************************************************************************************/
 function funcCheckModule($_value) {
   if (!array_key_exists('arrayIncludes', $GLOBALS)) {
-    funcError('$arrayIncludes is not defined');
+    gfError('$arrayIncludes is not defined');
   }
   
   if (!in_array($_value, $GLOBALS['arrayIncludes'])) {
@@ -359,69 +231,16 @@ function funcCheckModule($_value) {
 }
 
 /**********************************************************************************************************************
-* Sends HTTP Headers to client using a short name
-*
-* @param $_value    Short name of header
-**********************************************************************************************************************/
-function funcSendHeader($_value) {
-  $_arrayHeaders = array(
-    '404'           => 'HTTP/1.0 404 Not Found',
-    '501'           => 'HTTP/1.0 501 Not Implemented',
-    'html'          => 'Content-Type: text/html',
-    'text'          => 'Content-Type: text/plain',
-    'xml'           => 'Content-Type: text/xml',
-    'json'          => 'Content-Type: application/json',
-    'css'           => 'Content-Type: text/css',
-    'phoebus'       => 'X-Phoebus: https://github.com/Pale-Moon-Addons-Team/phoebus/',
-  );
-  
-  if (!headers_sent() && array_key_exists($_value, $_arrayHeaders)) {
-    header($_arrayHeaders['phoebus']);
-    header($_arrayHeaders[$_value]);
-    
-    if ($_value == '404' || $_value == '501') {
-      // We are done here
-      exit();
-    }
-  }
-}
-
-/**********************************************************************************************************************
-* Sends HTTP Header to redirect the client to another URL
-*
-* @param $_strURL   URL to redirect to
-**********************************************************************************************************************/
-// This function sends a redirect header
-function funcRedirect($_strURL) {
-	header('Location: ' . $_strURL , true, 302);
-  
-  // We are done here
-  exit();
-}
-
-// --------------------------------------------------------------------------------------------------------------------
-
-/**********************************************************************************************************************
-* Sends a 404 error but does it depending on debug mode
-***********************************************************************************************************************/
-function funcSend404() {
-  if (!$GLOBALS['arraySoftwareState']['debugMode']) {
-    funcSendHeader('404');
-  }
-  funcError('404 - Not Found');
-}
-
-/**********************************************************************************************************************
 * Checks for enabled features
 *
 * @param $aFeature    feature
 * @param $aReturn     if true we will return a value else 404
 ***********************************************************************************************************************/
-function funcCheckEnabledFeature($aFeature, $aReturn = null) {
-  $currentApplication = $GLOBALS['arraySoftwareState']['currentApplication'];
+function gfEnabledFeature($aFeature, $aReturn = null) {
+  $currentApplication = $GLOBALS['gaRuntime']['currentApplication'];
   if (!in_array($aFeature, TARGET_APPLICATION_SITE[$currentApplication]['features'])) {
     if(!$aReturn) {
-      funcSend404();
+      gfHeader(404);
     }
 
     return null;
@@ -430,109 +249,73 @@ function funcCheckEnabledFeature($aFeature, $aReturn = null) {
   return true;
 }
 
-/**********************************************************************************************************************
-* Polyfills for missing functions
-* startsWith, endsWith, contains
-*
-* @param $haystack  string
-* @param $needle    substring
-* @returns          true if substring exists in string else false
-**********************************************************************************************************************/
-
-function startsWith($haystack, $needle) {
-   $length = strlen($needle);
-   return (substr($haystack, 0, $length) === $needle);
-}
-
-// --------------------------------------------------------------------------------------------------------------------
-
-function endsWith($haystack, $needle) {
-  $length = strlen($needle);
-  if ($length == 0) {
-    return true;
-  }
-
-  return (substr($haystack, -$length) === $needle);
-}
-
-// --------------------------------------------------------------------------------------------------------------------
-
-function contains($haystack, $needle) {
-  if (strpos($haystack, $needle) > -1) {
-    return true;
-  }
-  else {
-    return false;
-  }
-}
-
 // ====================================================================================================================
 
 // == | Main | ========================================================================================================
 
 // Define an array that will hold the current application state
-$arraySoftwareState = array(
+$gaRuntime = array(
   'authentication'      => null,
   'currentApplication'  => null,
   'orginalApplication'  => null,
   'currentName'         => null,
-  'currentScheme'       => funcUnifiedVariable('server', 'SCHEME'),
+  'currentScheme'       => gfSuperVar('server', 'SCHEME') ?? (gfSuperVar('server', 'HTTPS') ? 'https' : 'http'),
   'currentDomain'       => null,
   'debugMode'           => null,
-  'phpServerName'       => funcUnifiedVariable('server', 'SERVER_NAME'),
-  'phpRequestURI'       => funcUnifiedVariable('server', 'REQUEST_URI'),
-  'remoteAddr'          => funcUnifiedVariable('server', 'HTTP_X_FORWARDED_FOR') ??
-                           funcUnifiedVariable('server', 'REMOTE_ADDR'),
-  'requestComponent'    => funcUnifiedVariable('get', 'component'),
-  'requestPath'         => funcUnifiedVariable('get', 'path'),
-  'requestApplication'  => funcUnifiedVariable('get', 'appOverride') ??
-                           funcUnifiedVariable('cookie', 'appOverride'),
-  'requestDebugOff'     => funcUnifiedVariable('get', 'debugOff'),
-  'requestSearchTerms'  => funcUnifiedVariable('get', 'terms')
+  'useSmarty'           => null,
+  'phpServerName'       => gfSuperVar('server', 'SERVER_NAME'),
+  'phpRequestURI'       => gfSuperVar('server', 'REQUEST_URI'),
+  'remoteAddr'          => gfSuperVar('server', 'HTTP_X_FORWARDED_FOR') ??
+                           gfSuperVar('server', 'REMOTE_ADDR'),
+  'qComponent'          => gfSuperVar('get', 'component'),
+  'qPath'               => gfSuperVar('get', 'path'),
+  'qApplication'        => gfSuperVar('get', 'appOverride'),
+  'qDebugOff'           => gfSuperVar('get', 'debugOff'),
+  'qSearchTerms'        => gfSuperVar('get', 'terms'),
 );
 
 // --------------------------------------------------------------------------------------------------------------------
 // If the entire site is offline but nothing above is busted.. We want to serve proper but empty responses
-if (file_exists(ROOT_PATH . '/.offline') && !funcUnifiedVariable('cookie', 'overrideOffline')) {
+if (file_exists(ROOT_PATH . '/.offline') && !gfSuperVar('cookie', 'overrideOffline')) {
   $strOfflineMessage = 'Phoebus, and by extension this Add-ons Site, is currently unavailable. Please try again later.';
   // Root (/) won't set a component or path
-  if (!$arraySoftwareState['requestComponent'] && !$arraySoftwareState['requestPath']) {
-    $arraySoftwareState['requestComponent'] = 'site';
-    $arraySoftwareState['requestPath'] = '/';
+  if (!$gaRuntime['qComponent'] && !$gaRuntime['qPath']) {
+    $gaRuntime['qComponent'] = 'site';
+    $gaRuntime['qPath'] = '/';
   }
 
-  switch ($arraySoftwareState['requestComponent']) {
+  switch ($gaRuntime['qComponent']) {
     case 'aus':
-      funcSendHeader('xml');
+      gfHeader('xml');
       print('<?xml version="1.0" encoding="UTF-8"?><RDF:RDF xmlns:RDF="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:em="http://www.mozilla.org/2004/em-rdf#" />');
       exit();
       break;
     case 'integration':
-      $arraySoftwareState['requestAPIScope'] = funcUnifiedVariable('get', 'type');
-      $arraySoftwareState['requestAPIFunction'] = funcUnifiedVariable('get', 'request');
-      if ($arraySoftwareState['requestAPIScope'] != 'internal') {
-        funcSendHeader('404');
+      $gaRuntime['requestAPIScope'] = gfSuperVar('get', 'type');
+      $gaRuntime['requestAPIFunction'] = gfSuperVar('get', 'request');
+      if ($gaRuntime['requestAPIScope'] != 'internal') {
+        gfHeader(404);
       }
-      switch ($arraySoftwareState['requestAPIFunction']) {
+      switch ($gaRuntime['requestAPIFunction']) {
         case 'search':
-          funcSendHeader('xml');
+          gfHeader('xml');
           print('<?xml version="1.0" encoding="utf-8" ?><searchresults total_results="0" />');
           exit();
           break;      
         case 'get':
         case 'recommended':
-          funcSendHeader('xml');
+          gfHeader('xml');
           print('<?xml version="1.0" encoding="utf-8" ?><addons />');
           exit();
           break;
         default:
-          funcSendHeader('404');
+          gfHeader(404);
       }
       break;
     case 'discover':
-      funcSend404();
+      gfHeader(404);
     default:
-      funcError($strOfflineMessage);
+      gfError($strOfflineMessage);
   }
 }
 
@@ -541,19 +324,19 @@ if (file_exists(ROOT_PATH . '/.offline') && !funcUnifiedVariable('cookie', 'over
 // Decide which application by domain that the software will be serving
 // and if debug is enabled
 foreach (TARGET_APPLICATION_SITE as $_key => $_value) {
-  switch ($arraySoftwareState['phpServerName']) {
+  switch ($gaRuntime['phpServerName']) {
     case $_value['domain']['live']:
-      $arraySoftwareState['currentApplication'] = $_key;
-      $arraySoftwareState['currentDomain'] = $_value['domain']['live'];
+      $gaRuntime['currentApplication'] = $_key;
+      $gaRuntime['currentDomain'] = $_value['domain']['live'];
       break;
     case $_value['domain']['dev']:
-      $arraySoftwareState['currentApplication'] = $_key;
-      $arraySoftwareState['currentDomain'] = $_value['domain']['dev'];
-      $arraySoftwareState['debugMode'] = true;
+      $gaRuntime['currentApplication'] = $_key;
+      $gaRuntime['currentDomain'] = $_value['domain']['dev'];
+      $gaRuntime['debugMode'] = true;
       break;
   }
 
-  if ($arraySoftwareState['currentApplication']) {
+  if ($gaRuntime['currentApplication']) {
     break;
   }
 }
@@ -561,26 +344,26 @@ foreach (TARGET_APPLICATION_SITE as $_key => $_value) {
 // --------------------------------------------------------------------------------------------------------------------
 
 // Items that get changed depending on debug mode
-if ($arraySoftwareState['debugMode']) {
+if ($gaRuntime['debugMode']) {
   // We can disable debug mode when on a dev url otherwise if debug mode we want all errors
-  if ($arraySoftwareState['requestDebugOff']) {
-    $arraySoftwareState['debugMode'] = null;
+  if ($gaRuntime['qDebugOff']) {
+    $gaRuntime['debugMode'] = null;
   }
 
   // Override currentApplication by query
-  // If requestApplication is set and it exists in the array constant set the currentApplication to that
-  if ($arraySoftwareState['requestApplication']) {
-    if (array_key_exists($arraySoftwareState['requestApplication'], TARGET_APPLICATION_SITE)) {
-      $arraySoftwareState['orginalApplication'] = $arraySoftwareState['currentApplication'];
-      $arraySoftwareState['currentApplication'] = $arraySoftwareState['requestApplication'];
+  // If qApplication is set and it exists in the array constant set the currentApplication to that
+  if ($gaRuntime['qApplication']) {
+    if (array_key_exists($gaRuntime['qApplication'], TARGET_APPLICATION_SITE)) {
+      $gaRuntime['orginalApplication'] = $gaRuntime['currentApplication'];
+      $gaRuntime['currentApplication'] = $gaRuntime['qApplication'];
     }
     else {
-      funcError('Invalid application');
+      gfError('Invalid application');
     }
 
     // The same application shouldn't be appOverriden
-    if ($arraySoftwareState['currentApplication'] == $arraySoftwareState['orginalApplication']) {
-      funcError('It makes no sense to appOverride the same application');
+    if ($gaRuntime['currentApplication'] == $gaRuntime['orginalApplication']) {
+      gfError('It makes no sense to appOverride the same application');
     }
   }
 }
@@ -588,48 +371,48 @@ if ($arraySoftwareState['debugMode']) {
 // --------------------------------------------------------------------------------------------------------------------
 
 // We cannot continue without a valid currentApplication
-if (!$arraySoftwareState['currentDomain']) {
-  funcError('Invalid domain');
+if (!$gaRuntime['currentDomain']) {
+  gfError('Invalid domain');
 }
 
 // We cannot continue without a valid currentApplication
-if (!$arraySoftwareState['currentApplication']) {
-  funcError('Invalid application');
+if (!$gaRuntime['currentApplication']) {
+  gfError('Invalid application');
 }
 
 // We cannot contine if the application is not enabled
-if (!TARGET_APPLICATION_SITE[$arraySoftwareState['currentApplication']]['enabled']) {
-  funcError('This ' . ucfirst($arraySoftwareState['currentApplication']) . ' Add-ons Site has been disabled. ' .
+if (!TARGET_APPLICATION_SITE[$gaRuntime['currentApplication']]['enabled']) {
+  gfError('This ' . ucfirst($gaRuntime['currentApplication']) . ' Add-ons Site has been disabled. ' .
             'Please contact the Phoebus Administrator');
 }
 
 // --------------------------------------------------------------------------------------------------------------------
 
 // Root (/) won't set a component or path
-if (!$arraySoftwareState['requestComponent'] && !$arraySoftwareState['requestPath']) {
-  $arraySoftwareState['requestComponent'] = 'site';
-  $arraySoftwareState['requestPath'] = '/';
+if (!$gaRuntime['qComponent'] && !$gaRuntime['qPath']) {
+  $gaRuntime['qComponent'] = 'site';
+  $gaRuntime['qPath'] = '/';
 }
 // The PANEL component overrides the SITE component
-elseif (startsWith($arraySoftwareState['phpRequestURI'], '/panel/')) {
-  $arraySoftwareState['requestComponent'] = 'panel';
+elseif (str_starts_with($gaRuntime['phpRequestURI'], '/panel/')) {
+  $gaRuntime['qComponent'] = 'panel';
 }
 // The SPECIAL component overrides the SITE component
-elseif (startsWith($arraySoftwareState['phpRequestURI'], '/special/')) {
-  $arraySoftwareState['requestComponent'] = 'special';
+elseif (str_starts_with($gaRuntime['phpRequestURI'], '/special/')) {
+  $gaRuntime['qComponent'] = 'special';
 }
 
 // --------------------------------------------------------------------------------------------------------------------
 
-// Load component based on requestComponent
-if ($arraySoftwareState['requestComponent'] && array_key_exists($arraySoftwareState['requestComponent'], COMPONENTS)) {
-  require_once(COMPONENTS[$arraySoftwareState['requestComponent']]);
+// Load component based on qComponent
+if ($gaRuntime['qComponent'] && array_key_exists($gaRuntime['qComponent'], COMPONENTS)) {
+  require_once(COMPONENTS[$gaRuntime['qComponent']]);
 }
 else {
-  if (!$arraySoftwareState['debugMode']) {
-    funcSendHeader('404');
+  if (!$gaRuntime['debugMode']) {
+    gfHeader(404);
   }
-  funcError('Invalid component');
+  gfError('Invalid component');
 }
 
 // ====================================================================================================================

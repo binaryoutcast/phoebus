@@ -15,7 +15,7 @@ $moduleReadManifest    = new classReadManifest();
 
 $addonManifest = $moduleReadManifest->getAddon('panel-by-id', 'abprime@projects.binaryoutcast.com');
 
-funcGenerateContent('Manifest', $addonManifest);
+gfGenContent('Manifest', $addonManifest);
 
 // ====================================================================================================================
 

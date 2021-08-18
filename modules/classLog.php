@@ -8,27 +8,25 @@ class classLog {
   * Class constructor that sets initial state of things
   ********************************************************************************************************************/
   function __construct() {  
-    if (!funcCheckModule('database')) {
-      funcError(__CLASS__ . '::' . __FUNCTION__ . ' - database is required to be included in the global scope');
-    }
+    gfEnsureModules(__CLASS__, 'database');
   }
 
   /********************************************************************************************************************
   * Add a log record to the log table in the database
   ********************************************************************************************************************/
   public function record($aAction, $aReturnData = null) {
-    global $arraySoftwareState;
-    global $moduleDatabase;
+    global $gaRuntime;
+    global $gmDatabase;
 
     $data = array(
       'epoch'     => time(),
-      'username'  => $arraySoftwareState['authentication']['username'] ?? 'anonymous',
-      'ip'        => $arraySoftwareState['remoteAddr'],
+      'username'  => $gaRuntime['authentication']['username'] ?? 'anonymous',
+      'ip'        => $gaRuntime['remoteAddr'],
       'action'    => $aAction,
     );
 
     $query = "INSERT ?n SET ?u";
-    $moduleDatabase->query('normal', $query, 'log', $data);
+    $gmDatabase->query('normal', $query, 'log', $data);
 
     if ($aReturnData) {
       return $data;
@@ -39,15 +37,15 @@ class classLog {
   * Get logs
   ********************************************************************************************************************/
   public function fetch($aGetAllLogs = null) {
-    global $moduleDatabase;
+    global $gmDatabase;
 
     $query = "SELECT * FROM ?n ORDER BY ?n";
 
     if (!$aGetAllLogs) {
-      $query .= " DESC LIMIT 100";
+      $query .= " DESC LIMIT 250";
     }
 
-    $result = $moduleDatabase->query('rows', $query, 'log', 'eventID');
+    $result = $gmDatabase->query('rows', $query, 'log', 'eventID');
 
     if ($result) {
       foreach ($result as $_key => $_value) {

@@ -17,7 +17,7 @@ $result = array(
   $_SERVER['REMOTE_ADDR'] ?? null
 );
 
-funcGenerateContent('IP Address', $result);
+gfGenContent('IP Address', $result);
 
 // ====================================================================================================================
 

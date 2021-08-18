@@ -20,7 +20,7 @@ $moduleDatabase->query('normal', $query, $strHashIP);
 $query = "SELECT `haship` from `tap`";
 $queryRV = $moduleDatabase->query('col', $query);
 
-funcGenerateContent('SQL Result', $queryRV);
+gfGenContent('SQL Result', $queryRV);
 
 // ====================================================================================================================
 

@@ -18,7 +18,7 @@ $moduleLog = new classLog();
 
 $result = $moduleLog->fetch();
 
-funcGenerateContent('Log Test', $result);
+gfGenContent('Log Test', $result);
 
 // ====================================================================================================================
 

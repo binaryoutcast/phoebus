@@ -18,7 +18,7 @@ $blocked = '{34274bf4-1d97-a289-e984-17e546307e4f}';
 $query = "SELECT `id`, `blocked` FROM `amo` WHERE `id` = ?s AND `blocked` = 1";
 $result = $GLOBALS['moduleDatabase']->query('rows', $query, $notBlocked);
 
-funcGenerateContent('AMO Extension IDs', $result);
+gfGenContent('AMO Extension IDs', $result);
 
 // ====================================================================================================================
 

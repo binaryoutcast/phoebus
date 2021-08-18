@@ -20,7 +20,7 @@ $boolHasPostData = !empty($_POST);
 
 if ($boolHasPostData) {
   $result = $moduleWriteManifest->publicValidator();
-  funcGenerateContent('Validator Result', $result);
+  gfGenContent('Validator Result', $result);
 }
 
 $content = '<form method="POST" accept-charset="UTF-8" autocomplete="off" enctype="multipart/form-data">' .
@@ -29,7 +29,7 @@ $content = '<form method="POST" accept-charset="UTF-8" autocomplete="off" enctyp
            '<input type="submit" value="Upload" />' .
            '</form>';
 
-funcGenerateContent('Validator Test', $content);
+gfGenContent('Validator Test', $content);
 
 // ====================================================================================================================
 

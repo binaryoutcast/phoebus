@@ -15,7 +15,7 @@ $moduleReadManifest    = new classReadManifest();
 
 $addonManifest = $moduleReadManifest->getAddons('panel-unreviewed-addons');
 
-funcGenerateContent('Unreviewed Add-ons Excluding JustOff the Traitor', $addonManifest);
+gfGenContent('Unreviewed Add-ons Excluding JustOff the Traitor', $addonManifest);
 
 // ====================================================================================================================
 

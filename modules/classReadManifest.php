@@ -39,19 +39,17 @@ class classReadManifest {
   * Class constructor that sets inital state of things
   ********************************************************************************************************************/
   function __construct() {  
-    if (!funcCheckModule('database')) {
-      funcError(__CLASS__ . '::' . __FUNCTION__ . ' - database is required to be included in the global scope');
-    }
+    global $gaRuntime;
 
-    if ($GLOBALS['arraySoftwareState']['requestComponent'] == 'panel') {
-      if (!funcCheckModule('account')) {
-        funcError(__CLASS__ . '::' . __FUNCTION__ . ' - account is required to be included in the global scope when using the panel component');
-      }
+    gfEnsureModules(__CLASS__, 'database');
+
+    if ($gaRuntime['qComponent'] == 'panel') {
+      gfEnsureModules(__CLASS__, 'database');
     }
     
     // Assign currentApplication
-    $this->currentApplication = $GLOBALS['arraySoftwareState']['currentApplication'];
-    $this->currentAppID = TARGET_APPLICATION_ID[$GLOBALS['arraySoftwareState']['currentApplication']];
+    $this->currentApplication = $gaRuntime['currentApplication'];
+    $this->currentAppID = TARGET_APPLICATION_ID[$gaRuntime['currentApplication']];
   }
 
  /********************************************************************************************************************
@@ -62,6 +60,8 @@ class classReadManifest {
   * @returns                indexed array of manifests or null
   ********************************************************************************************************************/
   public function getAddon($aQueryType, $aQueryData) {
+    global $gmDatabase;
+
     $query = null;
     $returnInactive = null;
     $returnUnreviewed = null;
@@ -77,7 +77,7 @@ class classReadManifest {
                   WHERE ?n = 1
                   AND `id` = ?s
                   AND `type` IN ('extension', 'theme', 'langpack')";
-        $queryResult = $GLOBALS['moduleDatabase']->query('row', $query, $this->currentApplication, $aQueryData);
+        $queryResult = $gmDatabase->query('row', $query, $this->currentApplication, $aQueryData);
         break;
       case 'by-slug':
         $returnUnreviewed = true;
@@ -89,18 +89,7 @@ class classReadManifest {
                   WHERE ?n = 1
                   AND `slug` = ?s
                   AND `type` IN ('extension', 'theme', 'langpack')";
-        $queryResult = $GLOBALS['moduleDatabase']->query('row', $query, $this->currentApplication, $aQueryData);
-
-        if ($queryResult) {
-        // Exclude JustOff from this list due to being a traitor
-          $addonsJustOff = $GLOBALS['moduleDatabase']->query('row', "SELECT `addons` FROM `user` WHERE `username` = 'justoff'");
-          $addonsJustOff = json_decode($addonsJustOff['addons']);
-          if ($addonsJustOff) {
-            if (in_array($queryResult['slug'], $addonsJustOff)) {
-              $queryResult = null;
-            }
-          }
-        }
+        $queryResult = $gmDatabase->query('row', $query, $this->currentApplication, $aQueryData);
         break;
       case 'panel-by-id':
         $returnInactive = true;
@@ -109,7 +98,7 @@ class classReadManifest {
                   FROM `addon`
                   WHERE `id` = ?s
                   AND `type` IN ('extension', 'theme', 'langpack')";
-        $queryResult = $GLOBALS['moduleDatabase']->query('row', $query, $aQueryData);
+        $queryResult = $gmDatabase->query('row', $query, $aQueryData);
         break;
       case 'panel-by-slug':
         $returnInactive = true;
@@ -119,10 +108,10 @@ class classReadManifest {
                   JOIN `client` ON addon.id = client.addonID
                   WHERE `slug` = ?s
                   AND `type` IN ('extension', 'theme', 'external', 'langpack')";
-        $queryResult = $GLOBALS['moduleDatabase']->query('row', $query, $aQueryData);
+        $queryResult = $gmDatabase->query('row', $query, $aQueryData);
         break;
       default:
-        funcError(__CLASS__ . '::' . __FUNCTION__ . ' - Unknown query type');
+        gfError(__CLASS__ . '::' . __FUNCTION__ . ' - Unknown query type');
     }
 
     if (!$queryResult) {
@@ -150,6 +139,8 @@ class classReadManifest {
   * @returns                indexed array of manifests or null
   ********************************************************************************************************************/
   public function getAddons($aQueryType, $aQueryData = null) {
+    global $gmDatabase;
+
     $query = null;
     $returnInactive = null;
     $returnUnreviewed = null;
@@ -165,7 +156,7 @@ class classReadManifest {
                   AND `category` = ?s
                   AND NOT `category` = 'unlisted'
                   ORDER BY `name`";
-        $queryResults = $GLOBALS['moduleDatabase']->query('rows', $query, $this->currentApplication, $aQueryData);
+        $queryResults = $gmDatabase->query('rows', $query, $this->currentApplication, $aQueryData);
         break;
       case 'site-all-extensions':
         $query = "SELECT `id`, `slug`, `type`, `name`, `description`, `url`, `reviewed`, `active`
@@ -175,7 +166,7 @@ class classReadManifest {
                  AND `type` IN ('extension', 'external')
                  AND NOT `category` IN ('unlisted', 'themes', 'langpack')
                  ORDER BY `name`";
-        $queryResults = $GLOBALS['moduleDatabase']->query('rows', $query, $this->currentApplication);
+        $queryResults = $gmDatabase->query('rows', $query, $this->currentApplication);
         break;
       case 'site-search':
         $query = "SELECT `id`, `slug`, `type`, `name`, `description`, `url`, `reviewed`, `active`
@@ -185,7 +176,7 @@ class classReadManifest {
                   AND `type` IN ('extension', 'theme', 'langpack', 'external')
                   AND NOT `category` = 'unlisted'
                   AND MATCH(`tags`) AGAINST(?s IN NATURAL LANGUAGE MODE)";
-        $queryResults = $GLOBALS['moduleDatabase']->query('rows', $query, $this->currentApplication, $aQueryData);
+        $queryResults = $gmDatabase->query('rows', $query, $this->currentApplication, $aQueryData);
         break;
       case 'api-search':
         $xpInstallFixup = null;
@@ -197,7 +188,7 @@ class classReadManifest {
                   AND `type` IN ('extension', 'theme', 'langpack')
                   AND NOT `category` = 'unlisted'
                   AND MATCH(`tags`) AGAINST(?s IN NATURAL LANGUAGE MODE)";
-        $queryResults = $GLOBALS['moduleDatabase']->query('rows', $query, $this->currentApplication, $aQueryData);
+        $queryResults = $gmDatabase->query('rows', $query, $this->currentApplication, $aQueryData);
         break;
       case 'api-get':
         $xpInstallFixup = null;
@@ -208,7 +199,7 @@ class classReadManifest {
                   WHERE ?n = 1
                   AND `id` IN (?a)
                   AND `type` IN ('extension', 'theme', 'langpack')";
-        $queryResults = $GLOBALS['moduleDatabase']->query('rows', $query, $this->currentApplication, $aQueryData);
+        $queryResults = $gmDatabase->query('rows', $query, $this->currentApplication, $aQueryData);
         break;
       case 'panel-user-addons':
         $returnInactive = true;
@@ -220,7 +211,7 @@ class classReadManifest {
                   WHERE `slug` IN (?a)
                   AND `type` IN ('extension', 'theme')
                   ORDER BY `name`";
-        $queryResults = $GLOBALS['moduleDatabase']->query('rows', $query, $aQueryData);
+        $queryResults = $gmDatabase->query('rows', $query, $aQueryData);
         break;
       case 'panel-unreviewed-addons':
         $returnInactive = true;
@@ -232,11 +223,11 @@ class classReadManifest {
                   WHERE `type` IN ('extension', 'theme')
                   AND `reviewed` = 0
                   ORDER BY `name`";
-        $queryResults = $GLOBALS['moduleDatabase']->query('rows', $query);
+        $queryResults = $gmDatabase->query('rows', $query);
 
         if ($queryResults) {
           // Exclude JustOff from this list due to being a traitor
-          $addonsJustOff = $GLOBALS['moduleDatabase']->query('row', "SELECT `addons` FROM `user` WHERE `username` = 'justoff'");
+          $addonsJustOff = $gmDatabase->query('row', "SELECT `addons` FROM `user` WHERE `username` = 'justoff'");
           $addonsJustOff = json_decode($addonsJustOff['addons']);
 
           if ($addonsJustOff) {
@@ -261,10 +252,10 @@ class classReadManifest {
                   FROM `addon`
                   WHERE `type` = ?s
                   ORDER BY `name`";
-        $queryResults = $GLOBALS['moduleDatabase']->query('rows', $query, $aQueryData);
+        $queryResults = $gmDatabase->query('rows', $query, $aQueryData);
         break;
       default:
-        funcError(__CLASS__ . '::' . __FUNCTION__ . ' - Unknown query type');
+        gfError(__CLASS__ . '::' . __FUNCTION__ . ' - Unknown query type');
     }
 
     if (!$queryResults) {
@@ -344,6 +335,8 @@ class classReadManifest {
                                    $returnUnreviewed = null,
                                    $processContent = true,
                                    $xpInstallFixup = true) {
+    global $gaRuntime;
+
     // Cast the int-strings to bool
     $addonManifest['reviewed'] = (bool)$addonManifest['reviewed'];
     $addonManifest['active'] = (bool)$addonManifest['active'];
@@ -357,7 +350,7 @@ class classReadManifest {
     }
 
     // In the PANEL we join the client table but we only need it for externals
-    if ($GLOBALS['arraySoftwareState']['requestComponent'] == 'panel' && $addonManifest['type'] != 'external') {
+    if ($gaRuntime['qComponent'] == 'panel' && $addonManifest['type'] != 'external') {
       foreach (TARGET_APPLICATION_ID as $_key => $_value) {
         unset($addonManifest[$_key]);
       }
@@ -366,10 +359,10 @@ class classReadManifest {
     }
 
     // It would be nice if we could have the owner of an add-on in the panel
-    if ($GLOBALS['arraySoftwareState']['requestComponent'] == 'panel') {
-      $level = $GLOBALS['arraySoftwareState']['authentication']['level'] ?? 0;
+    if ($gaRuntime['qComponent'] == 'panel') {
+      $level = $gaRuntime['authentication']['level'] ?? 0;
       if ($level >= 3) {
-        $addonManifest['owner'] = $GLOBALS['moduleAccount']->findUserAddon($addonManifest['slug']) ?? null;
+        $addonManifest['owner'] = $GLOBALS['gmAccount']->findUserAddon($addonManifest['slug']) ?? null;
       }
     }
 
@@ -407,7 +400,7 @@ class classReadManifest {
     // If content exists, process it
     if ($processContent && array_key_exists('content', $addonManifest)) {
       // Check to ensure that there really is content
-      $addonManifest['content'] = funcUnifiedVariable('var', $addonManifest['content']);
+      $addonManifest['content'] = gfSuperVar('var', $addonManifest['content']);
 
       // Process content or assign description to it
       if ($addonManifest['content'] != null) {
@@ -426,16 +419,14 @@ class classReadManifest {
     // XXX: Why the fuck do we need this?
     // Set baseURL if applicable
     if ($addonManifest['type'] != 'external') {
-      $forcedScheme = funcCheckEnabledFeature('https', true) ? 'https://' : 'http://';
+      $forcedScheme = gfEnabledFeature('https', true) ? 'https://' : 'http://';
       $addonManifest['baseURL'] = $forcedScheme .
-                                  $GLOBALS['arraySoftwareState']['currentDomain'] .
-                                  '/?component=download&version=latest&id=';
+                                  $gaRuntime['currentDomain'] . '/?component=download&version=latest&id=';
     }
 
     // XXX: Do we need this?
     // Set Datastore Paths 
-    $addonManifest['basePath'] =
-      '.' . DATASTORE_RELPATH . 'addons/' . $addonManifest['slug'] . '/';
+    $addonManifest['basePath'] = '.' . DATASTORE_RELPATH . 'addons/' . $addonManifest['slug'] . '/';
 
     // XXX: Ditto
     // Set reletive url paths
@@ -443,7 +434,7 @@ class classReadManifest {
     $_defaultPath = str_replace($addonManifest['slug'], 'default', $_addonPath);
 
     // Legacy Externals have their icons in an ex-### directory
-    if ($addonManifest['type'] == 'external' && contains($addonManifest['id'], '@ex-')) {
+    if ($addonManifest['type'] == 'external' && str_contains($addonManifest['id'], '@ex-')) {
       // Extract the legacy external id
       $_oldID = preg_replace('/(.*)\@(.*)/iU', '$2', $addonManifest['id']);
 
@@ -496,41 +487,33 @@ class classReadManifest {
     // Replace new lines with <br />
     $aAddonContent = nl2br($aAddonContent, true);
 
-    // create an array that contains the strs to pseudo-bbcode to real html
-    $arrayPhoebusCode = array(
-      'simple' => array(
-        '[b]' => '<strong>',
-        '[/b]' => '</strong>',
-        '[i]' => '<em>',
-        '[/i]' => '</em>',
-        '[u]' => '<u>',
-        '[/u]' => '</u>',
-        '[ul]' => '</p><ul><fixme />',
-        '[/ul]' => '</ul><p><fixme />',
-        '[ol]' => '</p><ol><fixme />',
-        '[/ol]' => '</ol><p><fixme />',
-        '[li]' => '<li>',
-        '[/li]' => '</li>',
-        '[section]' => '</p><h3>',
-        '[/section]' => '</h3><p><fixme />'
-      ),
-      'complex' => array(
-        '\<(ul|\/ul|li|\/li|p|\/p)\><br \/>' => '<$1>',
-        '\[url=(.*)\](.*)\[\/url\]' => '<a href="$1" target="_blank">$2</a>',
-        '\[url\](.*)\[\/url\]' => '<a href="$1" target="_blank">$1</a>',
-        '\[img(.*)\](.*)\[\/img\]' => ''
-      )
+    $phoebusCodeSimpleTags = array(
+      '[b]' => '<strong>',
+      '[/b]' => '</strong>',
+      '[i]' => '<em>',
+      '[/i]' => '</em>',
+      '[u]' => '<u>',
+      '[/u]' => '</u>',
+      '[ul]' => '</p><ul><fixme />',
+      '[/ul]' => '</ul><p><fixme />',
+      '[ol]' => '</p><ol><fixme />',
+      '[/ol]' => '</ol><p><fixme />',
+      '[li]' => '<li>',
+      '[/li]' => '</li>',
+      '[section]' => '</p><h3>',
+      '[/section]' => '</h3><p><fixme />'
     );
 
-    // str replace pseudo-bbcode with real html
-    foreach ($arrayPhoebusCode['simple'] as $_key => $_value) {
-      $aAddonContent = str_replace($_key, $_value, $aAddonContent);
-    }
-    
-    // Regex replace pseudo-bbcode with real html
-    foreach ($arrayPhoebusCode['complex'] as $_key => $_value) {
-      $aAddonContent = preg_replace('/' . $_key . '/iU', $_value, $aAddonContent);
-    }
+    $phoebusCodeRegexTags = array(
+      '\<(ul|\/ul|li|\/li|p|\/p)\><br \/>' => '<$1>',
+      '\[url=(.*)\](.*)\[\/url\]' => '<a href="$1" target="_blank">$2</a>',
+      '\[url\](.*)\[\/url\]' => '<a href="$1" target="_blank">$1</a>',
+      '\[img(.*)\](.*)\[\/img\]' => EMPTY_STRING
+    );
+
+    // Process the substs
+    $aAddonContent = gfSubst('simple', $phoebusCodeSimpleTags, $aAddonContent);
+    $aAddonContent = gfSubst('regex', $phoebusCodeRegexTags, $aAddonContent);
 
     // Less hacky than what is in funcReadManifest
     // Remove linebreak special cases
@@ -576,7 +559,7 @@ class classReadManifest {
     }
 
     if ($aAddonManifest['license'] != null) {
-      if ($aAddonManifest['license'] == 'custom' && startsWith($aAddonManifest['licenseURL'], 'http')) {
+      if ($aAddonManifest['license'] == 'custom' && str_starts_with($aAddonManifest['licenseURL'], 'http')) {
         $aAddonManifest['license'] = 'custom';
         $aAddonManifest['licenseName'] = $arrayLicenses[$aAddonManifest['license']];
 

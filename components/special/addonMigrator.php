@@ -25,7 +25,7 @@ $moduleMozillaRDF = new classMozillaRDF();
 // == | Functions | ===================================================================================================
 
 function funcMigratorReadFileFromZip($_archive, $_file, $_checkExistance = null) {
-  $file = funcUnifiedVariable('var', @file_get_contents('zip://' . ROOT_PATH . $_archive . "#" . $_file));
+  $file = gfSuperVar('var', @file_get_contents('zip://' . ROOT_PATH . $_archive . "#" . $_file));
 
   if (!$file) {
     return null;
@@ -200,7 +200,7 @@ function funcExternals() {
   foreach ($arrayExternals as $_key => $_value) {
     foreach ($_value as $_key2 => $_value2) {
       // We don't like AMO..
-      if (contains($_value2['url'], 'addons.mozilla.org')) {
+      if (str_contains($_value2['url'], 'addons.mozilla.org')) {
         continue;
       }
 
@@ -327,7 +327,7 @@ function funcUsers() {
   // Process Users
   foreach ($arrayGlobJSON as $_value) {
     // We don't want to use the FTP admin passwords
-    if (contains($_value, 'admin.json')) {
+    if (str_contains($_value, 'admin.json')) {
       continue;
     }
 
@@ -420,7 +420,7 @@ function funcSQL($_arrayAddons, $_arrayUsers) {
 
 // == | Main | ========================================================================================================
 
-funcSendHeader('html');
+gfHeader('html');
 
 // Include old category array - $arrayCategoriesDB
 require_once(LIVE_ROOT_PATH . '/db/categories.php');

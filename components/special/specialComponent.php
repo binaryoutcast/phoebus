@@ -8,7 +8,7 @@
 /**********************************************************************************************************************
 * Strips path to obtain the slug
 *
-* @param $aPath     $arraySoftwareState['requestPath']
+* @param $aPath     $gaRuntime['qPath']
 * @param $aPrefix   Prefix to strip 
 * @returns          slug
 ***********************************************************************************************************************/
@@ -18,12 +18,12 @@ function funcStripPath($aPath, $aPrefix) {
 
 // == | Main | ========================================================================================================
 
-$strComponentPath = dirname(COMPONENTS[$arraySoftwareState['requestComponent']]) . '/';
-$strStripPath = funcStripPath($arraySoftwareState['requestPath'], '/special/');
+$strComponentPath = dirname(COMPONENTS[$gaRuntime['qComponent']]) . '/';
+$strStripPath = funcStripPath($gaRuntime['qPath'], '/special/');
 
-if (!$arraySoftwareState['debugMode']) {
-  if ($strStripPath != 'phpinfo' && $arraySoftwareState['phpRequestURI'] != '/special/test/?case=validator') {
-    funcRedirect('/');
+if (!$gaRuntime['debugMode']) {
+  if ($strStripPath != 'phpinfo' && $gaRuntime['phpRequestURI'] != '/special/test/?case=validator') {
+    gfRedirect('/');
   }
 }
 
@@ -34,23 +34,20 @@ switch ($strStripPath) {
     phpinfo(INFO_GENERAL | INFO_CONFIGURATION | INFO_ENVIRONMENT | INFO_VARIABLES);
     break;
   case 'software-state':
-    $arrayIncludes = ['database', 'account'];
-    foreach ($arrayIncludes as $_value) { require_once(MODULES[$_value]); }
-    $moduleDatabase = new classDatabase();
-    $moduleAccount = new classAccount();
-    $moduleAccount->authenticate();
-    funcGenerateContent('Authenticated Software State', $arraySoftwareState);
+    gfImportModules('database', 'account');
+    $gmAccount->authenticate();
+    gfGenContent('Authenticated Software State', $gaRuntime);
     break;
   case 'migrator':
     if (file_exists(ROOT_PATH . '/.migration')) {
       require_once($strComponentPath . 'addonMigrator.php');
     }
     else {
-      funcRedirect('/');
+      gfRedirect('/');
     }
     break;
   case 'test':
-    $arraySoftwareState['requestTestCase'] = funcUnifiedVariable('get', 'case');
+    $gaRuntime['requestTestCase'] = gfSuperVar('get', 'case');
     $arrayTestsGlob = glob($strComponentPath . 'tests/*.php');
     $arrayFinalTests = [];
 
@@ -62,9 +59,9 @@ switch ($strStripPath) {
 
     unset($arrayTestsGlob);
 
-    if ($arraySoftwareState['requestTestCase'] &&
-        in_array($arraySoftwareState['requestTestCase'], $arrayFinalTests)) {
-      require_once($strComponentPath . 'tests/' . $arraySoftwareState['requestTestCase'] . '.php');
+    if ($gaRuntime['requestTestCase'] &&
+        in_array($gaRuntime['requestTestCase'], $arrayFinalTests)) {
+      require_once($strComponentPath . 'tests/' . $gaRuntime['requestTestCase'] . '.php');
     }
 
     $testsHTML = '';
@@ -75,13 +72,13 @@ switch ($strStripPath) {
 
     $testsHTML = '<ul>' . $testsHTML . '</ul>';
 
-    funcGenerateContent('Special Test Cases', $testsHTML);
+    gfGenContent('Special Test Cases', $testsHTML);
     break;
   default:
     $rootHTML = '<a href="/special/test/">Test Cases</a></li><li>' .
                 '<a href="/special/phpinfo/">PHP Info</a></li><li>' .
                 '<a href="/special/software-state/">Authenticated Software State</a>';
-    funcGenerateContent('Special Component', $rootHTML, null, true);
+    gfGenContent('Special Component', $rootHTML, null, true);
 }
 
 exit();

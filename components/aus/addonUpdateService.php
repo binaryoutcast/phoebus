@@ -43,121 +43,90 @@ const BAD_ADDON_IDS = array(
 );
 
 // Include modules
-$arrayIncludes = ['database', 'readManifest', 'persona', 'generateContent'];
+gfImportModules('database', 'readManifest', 'persona', 'generateContent');
 
-foreach ($arrayIncludes as $_value) { require_once(MODULES[$_value]); }
-
-// Instantiate modules
-$moduleDatabase = new classDatabase();
-$moduleReadManifest = new classReadManifest();
-$modulePersona = new classPersona();
-$moduleGenerateContent = new classGenerateContent();
-
-// ====================================================================================================================
-
-// == | Functions | ===================================================================================================
-
-/**********************************************************************************************************************
-* Sends update request to AMO
-*
-* @param $aAppID        Application ID that we are claiming to be
-* @param $aAppVersion   Application Version that we are claiming to be
-**********************************************************************************************************************/
-function funcSendToAMO($aAppID, $aAppVersion) {
-  funcRedirect( 
-    'https://versioncheck.addons.mozilla.org/update/VersionCheck.php?reqVersion=2' .
-    '&id=' . $GLOBALS['arraySoftwareState']['requestAddonID'] .
-    '&version=' . $GLOBALS['arraySoftwareState']['requestAddonVersion'] .
-    '&appID=' . $aAppID . '&appVersion=' . $aAppVersion .
-    '&compatMode=' . $GLOBALS['arraySoftwareState']['requestAddonCompatMode']
-  );
-}
+// Assign HTTP GET arguments to the software state
+$gaRuntime['qPersona']          = gfSuperVar('get', 'persona');
+$gaRuntime['qAddonID']          = gfSuperVar('get', 'id');
+$gaRuntime['qAddonVersion']     = gfSuperVar('get', 'version');
+$gaRuntime['qAppID']            = gfSuperVar('get', 'appID');
+$gaRuntime['qAppVersion']       = gfSuperVar('get', 'appVersion');
+$gaRuntime['qAddonCompatMode']  = gfSuperVar('get', 'compatMode');
+$gaRuntime['qMozXPIUpdate']     = gfSuperVar('server', 'HTTP_MOZ_XPI_UPDATE') ?? gfSuperVar('get', 'updateOverride');
 
 // ====================================================================================================================
 
 // == | Main | ========================================================================================================
 
 // Deal with Personas before anything else
-$arraySoftwareState['requestPersona'] = funcUnifiedVariable('get', 'persona');
+if ($gaRuntime['qPersona']) {
+  $personaManifest = $gmPersona->getPersonaByID($gaRuntime['qPersona']);
 
-if ($arraySoftwareState['requestPersona']) {
-  $personaManifest = $modulePersona->getPersonaByID($arraySoftwareState['requestPersona']);
-
-  funcSendHeader('json');
+  gfHeader('json');
 
   if (!$personaManifest) {
     print('{}');
     exit();
   }
 
-  print(json_encode($personaManifest, 320));
+  print(json_encode($personaManifest, JSON_ENCODE_FLAGS));
   exit();
 }
 
 // --------------------------------------------------------------------------------------------------------------------
 
-// Assign HTTP GET arguments to the software state
-$arraySoftwareState['requestAddonID'] = funcUnifiedVariable('get', 'id');
-$arraySoftwareState['requestAddonVersion'] = funcUnifiedVariable('get', 'version');
-$arraySoftwareState['requestAppID'] = funcUnifiedVariable('get', 'appID');
-$arraySoftwareState['requestAppVersion'] = funcUnifiedVariable('get', 'appVersion');
-$arraySoftwareState['requestAddonCompatMode'] = funcUnifiedVariable('get', 'compatMode');
-$arraySoftwareState['requestMozXPIUpdate'] = funcUnifiedVariable('server', 'HTTP_MOZ_XPI_UPDATE') ?? funcUnifiedVariable('get', 'updateOverride');
-
-// --------------------------------------------------------------------------------------------------------------------
-
 // Sanity
-if (!$arraySoftwareState['requestAddonID'] || !$arraySoftwareState['requestAddonVersion'] ||
-    !$arraySoftwareState['requestAppID'] || !$arraySoftwareState['requestAppVersion'] ||
-    !$arraySoftwareState['requestAddonCompatMode']) {
-  if (!$arraySoftwareState['debugMode']) {
+if (!$gaRuntime['qAddonID'] || !$gaRuntime['qAddonVersion'] ||
+    !$gaRuntime['qAppID'] || !$gaRuntime['qAppVersion'] ||
+    !$gaRuntime['qAddonCompatMode']) {
+  if (!$gaRuntime['debugMode']) {
     // Send blank rdf response
-    $moduleGenerateContent->addonUpdateService(null);
+    $gmGenerateContent->addonUpdateService(null);
   }
-  funcError('Missing minimum required arguments.');
+  gfError('Missing minimum required arguments.');
 }
 
 // Check for Moz-XPI-Update header
-if (!$arraySoftwareState['requestMozXPIUpdate']) {
-  if (!$arraySoftwareState['debugMode']) {
+if (!$gaRuntime['qMozXPIUpdate']) {
+  if (!$gaRuntime['debugMode']) {
     // Send blank rdf response
-    $moduleGenerateContent->addonUpdateService(null);
+    $gmGenerateContent->addonUpdateService(null);
   }
-  funcError('Compatibility check failed.');
+  gfError('Compatibility check failed.');
 }
 
 // --------------------------------------------------------------------------------------------------------------------
 
 // Check for "Bad" Add-on IDs
-if (in_array($arraySoftwareState['requestAddonID'], BAD_ADDON_IDS)) {
-  if (!$arraySoftwareState['debugMode']) {
+if (in_array($gaRuntime['qAddonID'], BAD_ADDON_IDS)) {
+  if (!$gaRuntime['debugMode']) {
     // Send blank rdf response
-    $moduleGenerateContent->addonUpdateService(null);
+    $gmGenerateContent->addonUpdateService(null);
   }
-  funcError('"Bad" Add-on ID Detected');
+  gfError('"Bad" Add-on ID Detected');
 }
 
 // --------------------------------------------------------------------------------------------------------------------
 
 // Check for Add-on Updates
-if ($arraySoftwareState['requestAppID'] == $arraySoftwareState['targetApplicationID'] ||
-    ($arraySoftwareState['debugMode'] && $arraySoftwareState['orginalApplication'])) {
-  $addonManifest = $moduleReadManifest->getAddon('by-id', $arraySoftwareState['requestAddonID']);
+if ($gaRuntime['qAppID'] == $gaRuntime['targetApplicationID'] ||
+    ($gaRuntime['debugMode'] && $gaRuntime['orginalApplication'])) {
+  $addonManifest = $gmReadManifest->getAddon('by-id', $gaRuntime['qAddonID']);
 
   if (!$addonManifest) {
     // Add-on is non-existant send blank rdf response
-    $moduleGenerateContent->addonUpdateService(null);
+    $gmGenerateContent->addonUpdateService(null);
   }
   
   // Add-on exists so send update.rdf
-  $moduleGenerateContent->addonUpdateService($addonManifest);
+  $gmGenerateContent->addonUpdateService($addonManifest);
 }
 else {
-  if (!$arraySoftwareState['debugMode']) {
+  if (!$gaRuntime['debugMode']) {
     // Send blank rdf response
-    $moduleGenerateContent->addonUpdateService(null);
+    $gmGenerateContent->addonUpdateService(null);
   }
-  funcError('Mismatched or Invalid Application ID');
+  gfError('Mismatched or Invalid Application ID');
 }
 
 // ====================================================================================================================
