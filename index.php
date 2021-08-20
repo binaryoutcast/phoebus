@@ -335,7 +335,7 @@ function gfValidClientVersion($aCheckVersion = null, $aVersion = null) {
   }
 
   // If we are supplying the version number to check make sure it actually matches the UA.
-  if ($aCheckVersion && ($aCheckVersion != $uaVersion)) {
+  if ($aVersion && ($currentVersion != $uaVersion)) {
     return false;
   }
 
