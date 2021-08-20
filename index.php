@@ -252,6 +252,16 @@ function gfValidClientVersion($aCheckVersion = null, $aVersion = null) {
 
   $currentApplication = $gaRuntime['currentApplication'];
 
+  // No user agent is a blatantly bullshit state
+  if (!$gaRuntime['userAgent']) {
+    gfError('Reference Code - ID-10-T');
+  }
+
+  // Non-web clients get a pass because they aren't web clients... for NOW.
+  if (gfEnabledFeature('disable-xpinstall', true)) {
+    return true;
+  }
+
   // Knock the UA to lowercase so it is easier to deal with
   $userAgent = strtolower($gaRuntime['userAgent']);
 
@@ -260,8 +270,28 @@ function gfValidClientVersion($aCheckVersion = null, $aVersion = null) {
 
   // This is our basic client ua check.
   if (!$aCheckVersion) {
-    //Check for old and insecure Windows versions and enemy hackjobs
-    foreach (['nt 5', 'nt 6.0', 'basilisk/52.9.0', '55.0', 'goanna/4.0', 'bnavigator/', 'mypal/'] as $_value) {
+    // Check for invalid clients
+    foreach (['curl/', 'wget/', 'git/'] as $_value) {
+      if (str_contains($userAgent, $_value)) {
+        gfError('Reference Code - ID-10-T');
+      }
+    }
+
+    $oldAndInsecureHackJobs = array(
+      'nt 5',
+      'nt 6.0',
+      'goanna/3.5',
+      'goanna/4.0',
+      'rv:3.5',
+      'rv:52.9',
+      'basilisk/52.9.0',
+      '55.0',
+      'mypal/'
+      'bnavigator/',
+    );
+
+    // Check for old and insecure Windows versions and enemy hackjobs
+    foreach ($oldAndInsecureHackJobs as $_value) {
       if (str_contains($userAgent, $_value)) {
         return false;
       }
@@ -269,11 +299,6 @@ function gfValidClientVersion($aCheckVersion = null, $aVersion = null) {
 
     // Check if the application slice matches the current site.
     if (!str_contains($userAgent, $currentApplication)) {
-      // Non-web clients get a pass because they aren't web clients
-      if (gfEnabledFeature('disable-xpinstall', true)) {
-        return true;
-      }
-
       return false;
     }
 
@@ -283,11 +308,6 @@ function gfValidClientVersion($aCheckVersion = null, $aVersion = null) {
   // ------------------------------------------------------------------------------------------------------------------
 
   // This is the main meat of this function. To detect old and insecure application versions
-  // Again non-web clients get a pass because they aren't web clients
-  if (gfEnabledFeature('disable-xpinstall', true)) {
-    return true;
-  }
-
   // Try to find the position of the application slice in the UA
   $uaVersion = strpos($userAgent, $currentApplication . SLASH);
 
@@ -375,14 +395,6 @@ $gaRuntime = array(
   'qDebugOff'           => gfSuperVar('get', 'debugOff'),
   'qSearchTerms'        => gfSuperVar('get', 'terms'),
 );
-
-// --------------------------------------------------------------------------------------------------------------------
-
-foreach (['curl/', 'wget/', 'git/'] as $_value) {
-  if (str_contains(strtolower($gaRuntime['userAgent']), $_value)) {
-    gfError('Reference Code - ID-10-T');
-  }
-}
 
 // --------------------------------------------------------------------------------------------------------------------
 
