@@ -493,15 +493,16 @@ function gfImportModules(...$aModules) {
 
     $className = 'class' . ucfirst($_value);
     $moduleName = 'gm' . ucfirst($_value);
-
-    // Special case for nsIVersionComparator
-    if ($_value == 'vc') {
-      $className = 'ToolkitVersionComparator';
-      $moduleName = 'gm' . strtoupper($_value);
-    }
-   
+ 
     if (array_key_exists($moduleName, $GLOBALS)) {
       gfError('Module ' . $_value . ' has already been imported');
+    }
+
+    // Special case for nsIVersionComparator because it is static
+    if ($_value == 'vc') {
+       $GLOBALS['gmVC'] = true;
+       require(MODULES['vc']);
+       continue;
     }
 
     require(MODULES[$_value]);

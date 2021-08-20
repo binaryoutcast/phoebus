@@ -147,6 +147,9 @@ const OTHER_CATEGORY_SLUGS = array(
 // Load fundamental constants and global functions
 require_once('./fundamentals.php');
 
+// nsIVersionComparator is now needed software wide so include it.
+gfImportModules('vc');
+
 // ====================================================================================================================
 
 // == | Functions | ===================================================================================================

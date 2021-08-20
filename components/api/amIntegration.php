@@ -9,10 +9,10 @@
 gfImportModules('database', 'readManifest', 'generateContent']);
 
 // Assign HTTP GET arguments to the software state
-$gaRuntime['qAPIScope'] = gfSuperVar('get', 'type');
-$gaRuntime['qAPIFunction'] = gfSuperVar('get', 'request');
+$gaRuntime['qAPIScope']       = gfSuperVar('get', 'type');
+$gaRuntime['qAPIFunction']    = gfSuperVar('get', 'request');
 $gaRuntime['qAPISearchQuery'] = gfSuperVar('get', 'q');
-$gaRuntime['qAPISearchGUID'] = gfSuperVar('get', 'addonguid');
+$gaRuntime['qAPISearchGUID']  = gfSuperVar('get', 'addonguid');
 
 // ====================================================================================================================
 
@@ -41,7 +41,7 @@ if ($gaRuntime['qAPIScope'] == 'internal') {
       $searchManifest = $gmReadManifest->getAddons('api-get', $gaRuntime['qAPISearchGUID'], 2);
       $gmGenerateContent->amSearch($searchManifest);
     case 'recommended':
-      // This is apperently not used anymore but provide an empty response
+      // This is apparently not used anymore but provide an empty response
       gfHeader('xml');
       print('<?xml version="1.0" encoding="utf-8" ?>' . NEW_LINE . '<addons />');
       exit();

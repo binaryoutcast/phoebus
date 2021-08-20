@@ -31,6 +31,7 @@ if (!$gaRuntime['debugMode']) {
 
 switch ($strStripPath) {
   case 'phpinfo':
+    gfHeader('html');
     phpinfo(INFO_GENERAL | INFO_CONFIGURATION | INFO_ENVIRONMENT | INFO_VARIABLES);
     break;
   case 'software-state':
