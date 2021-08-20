@@ -72,6 +72,7 @@ const LIBRARIES = array(
 const TARGET_APPLICATION_SITE = array(
   'palemoon' => array(
     'enabled'       => true,
+    'oldVersion'    => '29.2.0',
     'name'          => 'Pale Moon - Add-ons',
     'domain'        => array('live' => 'addons.palemoon.org', 'dev' => 'addons-dev.palemoon.org'),
     'features'      => array('https', 'extensions', 'extensions-cat', 'themes',
@@ -79,24 +80,28 @@ const TARGET_APPLICATION_SITE = array(
   ),
   'basilisk' => array(
     'enabled'       => true,
+    'oldVersion'    => '20210105',
     'name'          => 'Basilisk: add-ons',
     'domain'        => array('live' => 'addons.basilisk-browser.org', 'dev' => null),
     'features'      => array('https', 'extensions', 'themes', 'personas', 'search-plugins')
   ),
   'ambassador' => array(
-    'enabled'       => true,
+    'enabled'       => false,
+    'oldVersion'    => '0.1',
     'name'          => 'Add-ons - Ambassador',
     'domain'        => array('live' => 'ab-addons.thereisonlyxul.org', 'dev' => null),
     'features'      => array('extensions', 'themes', 'disable-xpinstall')
   ),
   'borealis' => array(
     'enabled'       => false,
+    'oldVersion'    => '0.1',
     'name'          => 'Borealis Add-ons - Binary Outcast',
     'domain'        => array('live' => 'borealis-addons.binaryoutcast.com', 'dev' => null),
     'features'      => array('https', 'extensions', 'themes', 'search-plugins')
   ),
   'interlink' => array(
     'enabled'       => true,
+    'oldVersion'    => '0.1',
     'name'          => 'Interlink Add-ons - Binary Outcast',
     'domain'        => array('live' => 'interlink-addons.binaryoutcast.com', 'dev' => null),
     'features'      => array('https', 'extensions', 'themes', 'search-plugins', 'disable-xpinstall')
@@ -216,31 +221,15 @@ function gfGenContent($aTitle, $aContent, $aTextBox = null, $aList = null, $aErr
 }
 
 /**********************************************************************************************************************
-* Check if a module is in $arrayIncludes
-*
-* @param $_value    A module
-* @returns          true or null depending on if $_value is in $arrayIncludes
-**********************************************************************************************************************/
-function funcCheckModule($_value) {
-  if (!array_key_exists('arrayIncludes', $GLOBALS)) {
-    gfError('$arrayIncludes is not defined');
-  }
-  
-  if (!in_array($_value, $GLOBALS['arrayIncludes'])) {
-    return null;
-  }
-  
-  return true;
-}
-
-/**********************************************************************************************************************
 * Checks for enabled features
 *
 * @param $aFeature    feature
 * @param $aReturn     if true we will return a value else 404
 ***********************************************************************************************************************/
 function gfEnabledFeature($aFeature, $aReturn = null) {
-  $currentApplication = $GLOBALS['gaRuntime']['currentApplication'];
+  global $gaRuntime;
+
+  $currentApplication = $gaRuntime['currentApplication'];
   if (!in_array($aFeature, TARGET_APPLICATION_SITE[$currentApplication]['features'])) {
     if(!$aReturn) {
       gfHeader(404);
@@ -249,6 +238,113 @@ function gfEnabledFeature($aFeature, $aReturn = null) {
     return null;
   }
 
+  return true;
+}
+
+/**********************************************************************************************************************
+* Checks for old versions
+*
+* @param $aFeature    feature
+* @param $aReturn     if true we will return a value else 404
+***********************************************************************************************************************/
+function gfValidClientVersion($aCheckVersion = null, $aVersion = null) {
+  global $gaRuntime;
+
+  $currentApplication = $gaRuntime['currentApplication'];
+
+  // Knock the UA to lowercase so it is easier to deal with
+  $userAgent = strtolower($gaRuntime['userAgent']);
+
+
+  // ------------------------------------------------------------------------------------------------------------------
+
+  // This is our basic client ua check.
+  if (!$aCheckVersion) {
+    //Check for old and insecure Windows versions and enemy hackjobs
+    foreach (['nt 5', 'nt 6.0', 'basilisk/52.9.0', '55.0', 'goanna/4.0', 'bnavigator/', 'mypal/'] as $_value) {
+      if (str_contains($userAgent, $_value)) {
+        return false;
+      }
+    }
+
+    // Check if the application slice matches the current site.
+    if (!str_contains($userAgent, $currentApplication)) {
+      // Non-web clients get a pass because they aren't web clients
+      if (gfEnabledFeature('disable-xpinstall', true)) {
+        return true;
+      }
+
+      return false;
+    }
+
+    return true;
+  }
+
+  // ------------------------------------------------------------------------------------------------------------------
+
+  // This is the main meat of this function. To detect old and insecure application versions
+  // Again non-web clients get a pass because they aren't web clients
+  if (gfEnabledFeature('disable-xpinstall', true)) {
+    return true;
+  }
+
+  // Try to find the position of the application slice in the UA
+  $uaVersion = strpos($userAgent, $currentApplication . SLASH);
+
+  // Make sure we have a position for the application slice
+  // If we don't then it ain't gonna match the current add-ons site
+  if ($uaVersion === false) {
+    return false;
+  }
+
+  // Extract the application slice by slicing off everything before it
+  // UXP Applications ALWAYS have the application slice at the end of the UA
+  $uaVersion = substr($userAgent, $uaVersion, $uaVersion);
+
+  // Extract the application version
+  $uaVersion = str_replace($currentApplication . SLASH, EMPTY_STRING, $uaVersion);
+
+  // Make sure we actually have a string
+  if (!gfSuperVar('var', $uaVersion)) {
+    return false;
+  }
+
+  // Set currentVersion to the supplied version else the extracted version from the ua
+  $currentVersion = $aVersion ?? $uaVersion;
+
+  // ------------------------------------------------------------------------------------------------------------------
+
+  // Set the old version to compare against 
+  $oldVersion = TARGET_APPLICATION_SITE[$currentApplication]['oldVersion'];
+
+  // Basilisk needs special handling because .. It is Basilisk.
+  // Convert any use the full mozilla-style version so it matches the UA slice when
+  // general.useragent.appVersionIsBuildID is true which is default.
+  // Just need to knock off the 52.9. and the dots
+  if ($currentApplication == 'basilisk') {
+    $lockedVersionPrefix = '52.9';
+    if (str_starts_with($uaVersion, $lockedVersionPrefix . DOT . '20')) {
+      $uaVersion = str_replace($lockedVersionPrefix, EMPTY_STRING, $uaVersion);
+      $uaVersion = str_replace(DOT, EMPTY_STRING, $uaVersion);
+    }
+
+    if (str_starts_with($currentVersion, $lockedVersionPrefix . DOT . '20')) {
+      $currentVersion = str_replace($lockedVersionPrefix, EMPTY_STRING, $currentVersion);
+      $currentVersion = str_replace(DOT, EMPTY_STRING, $currentVersion);
+    }
+  }
+
+  // If we are supplying the version number to check make sure it actually matches the UA.
+  if ($aCheckVersion && ($aCheckVersion != $uaVersion)) {
+    return false;
+  }
+
+  // NOW we can compare it against the old version.. Finally.
+  if (ToolkitVersionComparator::compare($currentVersion, $oldVersion) <= 0) {
+    return false;
+  }
+
+  // Welp, seems it is newer than the currently stated old version so pass
   return true;
 }
 
@@ -264,12 +360,15 @@ $gaRuntime = array(
   'currentName'         => null,
   'currentScheme'       => gfSuperVar('server', 'SCHEME') ?? (gfSuperVar('server', 'HTTPS') ? 'https' : 'http'),
   'currentDomain'       => null,
+  'validClient'         => null,
+  'validVersion'        => null,
   'debugMode'           => null,
   'useSmarty'           => null,
   'phpServerName'       => gfSuperVar('server', 'SERVER_NAME'),
   'phpRequestURI'       => gfSuperVar('server', 'REQUEST_URI'),
   'remoteAddr'          => gfSuperVar('server', 'HTTP_X_FORWARDED_FOR') ??
                            gfSuperVar('server', 'REMOTE_ADDR'),
+  'userAgent'           => gfSuperVar('server', 'HTTP_USER_AGENT'),
   'qComponent'          => gfSuperVar('get', 'component'),
   'qPath'               => gfSuperVar('get', 'path'),
   'qApplication'        => gfSuperVar('get', 'appOverride'),
@@ -278,6 +377,15 @@ $gaRuntime = array(
 );
 
 // --------------------------------------------------------------------------------------------------------------------
+
+foreach (['curl/', 'wget/', 'git/'] as $_value) {
+  if (str_contains(strtolower($gaRuntime['userAgent']), $_value)) {
+    gfError('Reference Code - ID-10-T');
+  }
+}
+
+// --------------------------------------------------------------------------------------------------------------------
+
 // If the entire site is offline but nothing above is busted.. We want to serve proper but empty responses
 if (file_exists(ROOT_PATH . '/.offline') && !gfSuperVar('cookie', 'overrideOffline')) {
   $strOfflineMessage = 'Phoebus, and by extension this Add-ons Site, is currently unavailable. Please try again later.';
@@ -388,6 +496,12 @@ if (!TARGET_APPLICATION_SITE[$gaRuntime['currentApplication']]['enabled']) {
   gfError('This ' . ucfirst($gaRuntime['currentApplication']) . ' Add-ons Site has been disabled. ' .
             'Please contact the Phoebus Administrator');
 }
+
+// --------------------------------------------------------------------------------------------------------------------
+
+// Set valid client
+$gaRuntime['validClient'] = gfValidClientVersion();
+$gaRuntime['validVersion'] = gfValidClientVersion(true);
 
 // --------------------------------------------------------------------------------------------------------------------
 
