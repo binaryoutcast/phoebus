@@ -20,7 +20,7 @@ const URI_ADMIN                         = URI_PANEL . 'administration/';
 $gaRuntime['useSmarty'] = true;
 
 // Include modules
-gfImportModules('database', 'account', 'log', 'mozillaRDF', 'vc', 'readManifest', 'writeManifest', 'generateContent');
+gfImportModules('database', 'account', 'log', 'mozillaRDF', 'readManifest', 'writeManifest', 'generateContent');
 
 // Request arguments
 $gaRuntime['qPanelTask'] = gfSuperVar('get', 'task');
