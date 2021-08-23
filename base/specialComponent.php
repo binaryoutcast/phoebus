@@ -21,12 +21,6 @@ function funcStripPath($aPath, $aPrefix) {
 $strComponentPath = dirname(COMPONENTS[$gaRuntime['qComponent']]) . '/';
 $strStripPath = funcStripPath($gaRuntime['qPath'], '/special/');
 
-if (!$gaRuntime['debugMode']) {
-  if ($strStripPath != 'phpinfo' && $gaRuntime['phpRequestURI'] != '/special/test/?case=validator') {
-    gfRedirect('/');
-  }
-}
-
 // --------------------------------------------------------------------------------------------------------------------
 
 switch ($strStripPath) {
@@ -39,14 +33,21 @@ switch ($strStripPath) {
     $gmAccount->authenticate();
     gfGenContent('Authenticated Software State', $gaRuntime);
     break;
-  case 'migrator':
-    if (file_exists(ROOT_PATH . '/.migration')) {
-      require_once($strComponentPath . 'addonMigrator.php');
+  case 'validator':
+    gfImportModules('database', 'account', 'mozillaRDF', 'readManifest', 'writeManifest');
+
+    if ($_POST ?? false) {
+      $result = $gmWriteManifest->publicValidator();
+      gfGenContent('Validator Result', $result);
     }
-    else {
-      gfRedirect('/');
-    }
-    break;
+
+    $content = '<form method="POST" accept-charset="UTF-8" autocomplete="off" enctype="multipart/form-data">' .
+               '<input type="file" name="xpiUpload" />' .
+               '<input type="hidden" name="slug" value="1" />' .
+               '<input type="submit" value="Upload" />' .
+               '</form>';
+
+    gfGenContent('Validator Test', $content);
   case 'test':
     $gaRuntime['requestTestCase'] = gfSuperVar('get', 'case');
     $arrayTestsGlob = glob($strComponentPath . 'tests/*.php');
@@ -76,6 +77,7 @@ switch ($strStripPath) {
     gfGenContent('Special Test Cases', $testsHTML);
     break;
   default:
+    $rootHTML = '<a href="/special/validator/">Add-on Validator</a></li><li>' .
     $rootHTML = '<a href="/special/test/">Test Cases</a></li><li>' .
                 '<a href="/special/phpinfo/">PHP Info</a></li><li>' .
                 '<a href="/special/software-state/">Authenticated Software State</a>';

@@ -24,21 +24,22 @@ const SOFTWARE_NAME       = 'Phoebus';
 const SOFTWARE_VERSION    = '2.2.0a1';
 const DATASTORE_RELPATH   = '/datastore/';
 const OBJ_RELPATH         = '/.obj/';
+const BASE_RELPATH        = '/base/';
 const COMPONENTS_RELPATH  = '/components/';
 const DATABASES_RELPATH   = '/databases/';
 const MODULES_RELPATH     = '/modules/';
 const LIB_RELPATH         = '/libraries/';
-const SPECIAL_SKIN_PATH   = ROOT_PATH . '/components/special/skin/default/';
+const SPECIAL_SKIN_PATH   = ROOT_PATH . '/base/skin/default/';
 
 // Define components
 const COMPONENTS = array(
-  'aus'             => ROOT_PATH . COMPONENTS_RELPATH . 'aus/addonUpdateService.php',
+  'aus'             => ROOT_PATH . COMPONENTS_RELPATH . 'api/addonUpdateService.php',
   'discover'        => ROOT_PATH . COMPONENTS_RELPATH . 'discover/discoverPane.php',
-  'download'        => ROOT_PATH . COMPONENTS_RELPATH . 'download/addonDownload.php',
+  'download'        => ROOT_PATH . BASE_RELPATH . 'addonDownload.php',
   'integration'     => ROOT_PATH . COMPONENTS_RELPATH . 'api/amIntegration.php',
   'panel'           => ROOT_PATH . COMPONENTS_RELPATH . 'panel/phoebusPanel.php',
-  'site'            => ROOT_PATH . COMPONENTS_RELPATH . 'site/addonSite.php',
-  'special'         => ROOT_PATH . COMPONENTS_RELPATH . 'special/specialComponent.php'
+  'site'            => ROOT_PATH . BASE_RELPATH . 'addonSite.php',
+  'special'         => ROOT_PATH . BASE_RELPATH . 'specialComponent.php'
 );
 
 // Define modules
@@ -67,7 +68,7 @@ const LIBRARIES = array(
   'rdfParser'       => ROOT_PATH . LIB_RELPATH . 'librdf/rdf_parser.php',
 );
 
-// Define the target applications that the site will accomidate with
+// Define the target applications that the site will accommodate with
 // the enabled site features
 const TARGET_APPLICATION_SITE = array(
   'palemoon' => array(
@@ -286,7 +287,7 @@ function gfValidClientVersion($aCheckVersion = null, $aVersion = null) {
       'rv:52.9',
       'basilisk/52.9.0',
       '55.0',
-      'mypal/'
+      'mypal/',
       'bnavigator/',
     );
 
