@@ -278,7 +278,7 @@ class classGenerateContent {
     $addonXPInstall = $aAddonManifest['xpinstall'][$aAddonManifest['releaseXPI']];
     $addonTargetApplication = $addonXPInstall['targetApplication'][$gaRuntime['targetApplicationID']];
     
-    // Language Packs are an 'item' as far as update.rdf is conserned
+    // Language Packs are an 'item' as far as update.rdf is concerned
     if ($aAddonManifest['type'] == 'langpack') {
       $aAddonManifest['type'] = 'item';
     }

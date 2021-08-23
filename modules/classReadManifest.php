@@ -289,23 +289,29 @@ class classReadManifest {
   * @returns                indexed array of manifests or null
   ********************************************************************************************************************/
   public function getSearchPlugins() {
-    $datastorePath = ROOT_PATH . DATASTORE_RELPATH . '/searchplugins/';
-    $arraySearchPlugins = array();
-
     require_once(DATABASES['searchPlugins']);
-
+    $datastorePath = gfBuildPath(ROOT_PATH, 'datastore', 'searchplugins');
+    $searchPlugins = EMPTY_ARRAY;
     asort($searchPluginsDB, SORT_NATURAL);
 
     foreach ($searchPluginsDB as $_key => $_value) {
-      $arraySearchPluginXML = simplexml_load_file($datastorePath . $_value);
-      $arraySearchPlugins[(string)$arraySearchPluginXML->ShortName]['type'] = 'search-plugin';
-      $arraySearchPlugins[(string)$arraySearchPluginXML->ShortName]['id'] = $_key;
-      $arraySearchPlugins[(string)$arraySearchPluginXML->ShortName]['name'] = (string)$arraySearchPluginXML->ShortName;
-      $arraySearchPlugins[(string)$arraySearchPluginXML->ShortName]['slug'] = substr($_value, 0, -4);
-      $arraySearchPlugins[(string)$arraySearchPluginXML->ShortName]['icon'] = (string)$arraySearchPluginXML->Image;
+      $metadata = EMPTY_ARRAY;
+      $xml = gfObjectToArray(simplexml_load_file($datastorePath . $_value));
+
+      if (!$xml) {
+        continue;
+      }
+
+      $metadata['type'] = 'search-plugin';
+      $metadata['id'] = $_key;
+      $metadata['slug'] = substr($_value, 0, -4);
+      $metadata['name'] = $xml['ShortName'];
+      $metadata['icon'] = $xml['Image'];
+
+      $searchPlugins[$metadata['name']] = $metadata;
     }
 
-    return $arraySearchPlugins;
+    return $searchPlugins;
   }
 
  /********************************************************************************************************************

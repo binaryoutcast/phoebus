@@ -691,6 +691,18 @@ function gfSubst($aMode, $aSubsts, $aString) {
 }
 
 /**********************************************************************************************************************
+* Hack to turn an object into an array
+*
+* @param $aObject   Object to be transformed
+* @returns          Array
+**********************************************************************************************************************/
+function gfObjectToArray($aObject) {
+  $rv = json_encode($aObject, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+  $rv = json_decode($rv, true);
+  return $rv;
+}
+
+/**********************************************************************************************************************
 * Request HTTP Basic Authentication
 *
 * @dep SOFTWARE_NAME
