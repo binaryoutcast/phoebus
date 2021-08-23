@@ -122,7 +122,7 @@ $substs = array(
   '{%EPOCH}'                  => time()
 );
 
-gfSubst('simple', $substs, $strHTMLTemplate);
+$strHTMLTemplate = gfSubst('simple', $substs, $strHTMLTemplate);
 
 gfHeader('html');
 print($strHTMLTemplate);
