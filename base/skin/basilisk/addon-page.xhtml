@@ -65,12 +65,31 @@
 
 <div class="category-addon" style="margin-bottom: 0px">
   <div class="alignright" style="margin-top: 0px;">
+  {if $VALID_CLIENT}
+    {if $VALID_VERSION}
     <a class="button"
        style="margin-top: 8px; margin-right: 0px;"
        href="/?component=download&id={$PAGE_DATA.id}&version={$PAGE_DATA['xpinstall'][$PAGE_DATA['releaseXPI']]['version']}"
-       title="Basilisk Add-on Compatiblity Version {$PAGE_DATA['xpinstall'][$PAGE_DATA['releaseXPI']]['targetApplication'][$APPLICATION_ID]['minVersion']} to {$PAGE_DATA['xpinstall'][$PAGE_DATA['releaseXPI']]['targetApplication'][$APPLICATION_ID]['maxVersion']}">
-    <span>Install Now</span>
-  </a>
+       title="Basilisk Add-on Compatibility Version {$PAGE_DATA['xpinstall'][$PAGE_DATA['releaseXPI']]['targetApplication'][$APPLICATION_ID]['minVersion']} to {$PAGE_DATA['xpinstall'][$PAGE_DATA['releaseXPI']]['targetApplication'][$APPLICATION_ID]['maxVersion']}">
+      <span>Install Now</span>
+    </a>
+    {else}
+    <a class="button"
+       style="margin-top: 8px; margin-right: 0px;"
+       href="http://www.basilisk-browser.org/download.shtml"
+       target="_blank">
+      <span>Upgrade Basilisk</span>
+    </a>
+    {/if}
+    {else}
+    <a class="button"
+       style="margin-top: 8px; margin-right: 0px;"
+       href="http://www.basilisk-browser.org/download.shtml"
+       target="_blank">
+      <span>Only on Basilisk</span>
+    </a>
+  {/if}
+
   </div>
   <p style="margin-top: 8px;">
     <strong>Version {$PAGE_DATA['xpinstall'][$PAGE_DATA['releaseXPI']]['version']}</strong><br />
@@ -86,7 +105,7 @@
         <a class="button"
            style="margin-top: 8px; margin-right: 0px;"
            href="/?component=download&id={$PAGE_DATA.id}&version={$key.version}"
-           title="Basilisk Add-on Compatiblity Version {$key['targetApplication'][$APPLICATION_ID]['minVersion']} to {$key['targetApplication'][$APPLICATION_ID]['maxVersion']}">
+           title="Basilisk Add-on Compatibility Version {$key['targetApplication'][$APPLICATION_ID]['minVersion']} to {$key['targetApplication'][$APPLICATION_ID]['maxVersion']}">
         <span>Install Now</span>
       </a>
       </div>

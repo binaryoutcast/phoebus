@@ -222,6 +222,8 @@ class classGenerateContent {
     $this->libSmarty->assign('SITE_NAME', $gaRuntime['currentName']);
     $this->libSmarty->assign('SEARCH_TERMS', $gaRuntime['qSearchTerms']);
     $this->libSmarty->assign('APPLICATION_ID', $gaRuntime['targetApplicationID']);
+    $this->libSmarty->assign('VALID_CLIENT', $gaRuntime['validClient']);
+    $this->libSmarty->assign('VALID_VERSION', $gaRuntime['validVersion']);
     $this->libSmarty->assign('PAGE_TYPE', $aType);
     $this->libSmarty->assign('PAGE_DATA', $aData);
     $this->libSmarty->assign('EXTRA_DATA', $aExtraData);

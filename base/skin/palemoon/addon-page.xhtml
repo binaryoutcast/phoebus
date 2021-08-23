@@ -72,30 +72,64 @@
   {/if}
 
   <p style="text-align: center; padding: 10px;">
+  {if $VALID_CLIENT}
+    {if $VALID_VERSION}
     <a class="dllink_green" href="/?component=download&id={$PAGE_DATA.id}&version={$PAGE_DATA['xpinstall'][$PAGE_DATA['releaseXPI']]['version']}">
       <img border="0" src="{$BASE_PATH}download.png" alt="" style="width: 24px; height: 24px; position: relative; top: 7px; right: 4px;" />
       <span>Install Now</span>
     </a>
+    {else}
+    <a class="dllink_blue" href="http://palemoon.org/" target="_blank">
+      <img border="0" src="{$BASE_PATH}download.png" alt="" style="width: 24px; height: 24px; position: relative; top: 7px; right: 4px;" />
+      <span>Upgrade Pale Moon</span>
+    </a>
+    {/if}
+  {else}
+    <a class="dllink_blue" href="http://palemoon.org/" target="_blank">
+      <img border="0" src="{$BASE_PATH}download.png" alt="" style="width: 24px; height: 24px; position: relative; top: 7px; right: 4px;" />
+      <span>Only on Pale Moon</span>
+    </a>
+  {/if}
   </p>
+
 {/if}
 
 {if $PAGE_TYPE == 'addon-releases'}
   {foreach $PAGE_DATA.xpinstall as $key}
     <div class="fake-table-row category-addon">
-      <div class="alignright" style="margin-top: 8px;"><a class="dllink_green" href="/?component=download&id={$PAGE_DATA.id}&version={$key.version}">
-        <img border="0" src="{$BASE_PATH}download.png" style="width: 24px; height: 24px; position: relative; top: 7px; right: 4px;" />
-        <span>Install Now</span>
-      </a>
+      <div class="alignright" style="margin-top: 8px;">
+      {if $VALID_CLIENT}
+        {if $VALID_VERSION}
+        <a class="dllink_green" href="/?component=download&id={$PAGE_DATA.id}&version={$key.version}">
+          <img border="0" src="{$BASE_PATH}download.png" alt="" style="width: 24px; height: 24px; position: relative; top: 7px; right: 4px;" />
+          <span>Install Now</span>
+        </a>
+        {else}
+        <a class="dllink_blue" href="http://palemoon.org/" target="_blank">
+          <img border="0" src="{$BASE_PATH}download.png" alt="" style="width: 24px; height: 24px; position: relative; top: 7px; right: 4px;" />
+          <span>Upgrade Pale Moon</span>
+        </a>
+        {/if}
+        {else}
+        <a class="dllink_blue" href="http://palemoon.org/" target="_blank">
+          <img border="0" src="{$BASE_PATH}download.png" alt="" style="width: 24px; height: 24px; position: relative; top: 7px; right: 4px;" />
+          <span>Only on Pale Moon</span>
+        </a>
+      {/if}
       </div>
       <p style="margin-top: 8px;">
         <strong>Version {$key.version}</strong><br />
         <small>Released: {$key.date}<br />
+        {if $VALID_CLIENT && $VALID_VERSION}
           Works with Pale Moon {$key['targetApplication'][$APPLICATION_ID]['minVersion']} to
           {if $key['targetApplication'][$APPLICATION_ID]['maxVersion'] == '*'}
             Unknown
           {else}
             {$key['targetApplication'][$APPLICATION_ID]['maxVersion']}
           {/if}
+        {else}
+          Works with Pale Moon
+        {/if}
         </small>
       </p>
     </div>
@@ -109,7 +143,7 @@
     <h3>Release Information</h3>
     Version {$PAGE_DATA['xpinstall'][$PAGE_DATA['releaseXPI']]['version']}<br />
     Updated on {$PAGE_DATA['xpinstall'][$PAGE_DATA['releaseXPI']]['date']}
-    
+    {if $VALID_CLIENT && $VALID_VERSION}
     <h3>
       Compatibility
     </h3>
@@ -122,6 +156,7 @@
         {$PAGE_DATA['xpinstall'][$PAGE_DATA['releaseXPI']]['targetApplication'][$APPLICATION_ID]['maxVersion']}
       {/if}
     </p>
+    {/if}
 {/if}
 
 {if $PAGE_DATA.license != null && $PAGE_DATA.license != 'copyright'}

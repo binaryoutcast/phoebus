@@ -6,13 +6,14 @@
 // == | Setup | =======================================================================================================
 
 // Include modules
-gfImportModules('database', 'readManifest', 'generateContent']);
+gfImportModules('database', 'readManifest', 'generateContent');
 
 // Assign HTTP GET arguments to the software state
 $gaRuntime['qAPIScope']       = gfSuperVar('get', 'type');
 $gaRuntime['qAPIFunction']    = gfSuperVar('get', 'request');
 $gaRuntime['qAPISearchQuery'] = gfSuperVar('get', 'q');
 $gaRuntime['qAPISearchGUID']  = gfSuperVar('get', 'addonguid');
+$gaRuntime['qAPIVersion']     = gfSuperVar('get', 'version');
 
 // ====================================================================================================================
 
@@ -29,11 +30,18 @@ if (!$gaRuntime['qAPIScope'] ||
 if ($gaRuntime['qAPIScope'] == 'internal') {
   switch ($gaRuntime['qAPIFunction']) {
     case 'search':
+      if (!gfValidClientVersion(true, $gaRuntime['qAPIVersion'])) {
+        $gmGenerateContent->amSearch();
+      }
       $searchManifest = $gmReadManifest->getAddons('api-search', $gaRuntime['qAPISearchQuery'], 1);
       $gmGenerateContent->amSearch($searchManifest);
     case 'get':
+      if (!gfValidClientVersion(true, $gaRuntime['qAPIVersion'])) {
+        $gmGenerateContent->amSearch();
+      }
+
       if (!$gaRuntime['qAPISearchGUID']) {
-        $gmGenerateContent->amSearch(null);
+        $gmGenerateContent->amSearch();
       }
 
       $gaRuntime['qAPISearchGUID'] = explode(',', $gaRuntime['qAPISearchGUID']);
@@ -43,7 +51,7 @@ if ($gaRuntime['qAPIScope'] == 'internal') {
     case 'recommended':
       // This is apparently not used anymore but provide an empty response
       gfHeader('xml');
-      print('<?xml version="1.0" encoding="utf-8" ?>' . NEW_LINE . '<addons />');
+      print(XML_TAG . NEW_LINE . '<addons />');
       exit();
     default:
       gfError('Unknown Internal Request');

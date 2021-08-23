@@ -97,6 +97,24 @@ if (!$gaRuntime['qMozXPIUpdate']) {
 
 // --------------------------------------------------------------------------------------------------------------------
 
+if (!$gaRuntime['validClient']) {
+  if (!$gaRuntime['debugMode']) {
+    // Send blank rdf response
+    $gmGenerateContent->addonUpdateService(null);
+  }
+  gfError('Client check failed.');
+}
+
+if (!gfValidClientVersion(true, $gaRuntime['qAppVersion'])) {
+  if (!$gaRuntime['debugMode']) {
+    // Send blank rdf response
+    $gmGenerateContent->addonUpdateService(null);
+  }
+  gfError('Version check failed.');
+}
+
+// --------------------------------------------------------------------------------------------------------------------
+
 // Check for "Bad" Add-on IDs
 if (in_array($gaRuntime['qAddonID'], BAD_ADDON_IDS)) {
   if (!$gaRuntime['debugMode']) {
