@@ -110,7 +110,7 @@ class classGenerateContent {
     $stylesheet = $this->getContentTemplate('site-stylesheet.css');
 
     if (!$stylesheet) {
-      gfError('Mail stylesheet file could not be read or is missing');
+      gfError('Main stylesheet file could not be read or is missing');
     }
 
     // ----------------------------------------------------------------------------------------------------------------
