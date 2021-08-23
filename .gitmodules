@@ -6,4 +6,4 @@
 	url = https://github.com/colshrapnel/safemysql.git
 [submodule "libraries/librdf"]
 	path = libraries/librdf
-	url = https://github.com/binoc-lab01/librdf.git
+url=https://repo.palemoon.org/binaryoutcast/librdf.git
