@@ -288,6 +288,7 @@ function gfValidClientVersion($aCheckVersion = null, $aVersion = null) {
       'basilisk/52.9.0',
       '55.0',
       'mypal/',
+      'centaury/',
       'bnavigator/',
     );
 
