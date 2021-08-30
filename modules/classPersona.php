@@ -7,12 +7,10 @@
 
 class classPersona {
   /********************************************************************************************************************
-  * Class constructor that sets inital state of things
+  * Class constructor that sets initial state of things
   ********************************************************************************************************************/
   function __construct() {  
-    if (!funcCheckModule('database')) {
-      funcError(__CLASS__ . '::' . __FUNCTION__ . ' - database is required to be included in the global scope');
-    }
+    gfEnsureModules(__CLASS__, 'database');
   }
 
  /********************************************************************************************************************
@@ -22,13 +20,14 @@ class classPersona {
   * @returns                reduced add-on manifest or null
   ********************************************************************************************************************/
   public function getPersonaByID($_addonID) {
+    global $gmDatabase;
     $query = "
       SELECT *
       FROM `persona`
       WHERE `id` = ?s
       ORDER BY `name`
     ";
-    $queryResult = $GLOBALS['moduleDatabase']->query('row', $query, $_addonID);
+    $queryResult = $gmDatabase->query('row', $query, $_addonID);
 
     if (!$queryResult) {
       return null;
@@ -52,6 +51,8 @@ class classPersona {
   * @returns                indexed array of manifests or null
   ********************************************************************************************************************/
   public function getPersonas($aQueryType, $aQueryData = null) {
+    global $gmDatabase;
+
     $query = null;
     $returnInactive = null;
     $returnUnreviewed = null;
@@ -64,7 +65,7 @@ class classPersona {
           FROM `persona`
           ORDER BY `name`
         ";
-        $queryResults = $GLOBALS['moduleDatabase']->query('rows', $query);
+        $queryResults = $gmDatabase->query('rows', $query);
         break;
       case 'panel-user-personas':
         $returnInactive = true;
@@ -76,7 +77,7 @@ class classPersona {
           AND `type` IN ('extension', 'theme')
           ORDER BY `name`
         ";
-        $queryResults = $GLOBALS['moduleDatabase']->query('rows', $query, $aQueryData);
+        $queryResults = $gmDatabase->query('rows', $query, $aQueryData);
         break;
       case 'panel-all-personas':
         $returnInactive = true;
@@ -86,10 +87,10 @@ class classPersona {
           FROM `persona`
           ORDER BY `name`
         ";
-        $queryResults = $GLOBALS['moduleDatabase']->query('rows', $query);
+        $queryResults = $gmDatabase->query('rows', $query);
         break;
       default:
-        funcError(__CLASS__ . '::' . __FUNCTION__ . ' - Unknown query type');
+        gfError(__CLASS__ . '::' . __FUNCTION__ . ' - Unknown query type');
     }
 
     if (!$queryResults) {
@@ -123,6 +124,8 @@ class classPersona {
   private function funcProcessManifest($aPersonaManifest,
                                        $aReturnInactive = null,
                                        $aReturnUnreviewed = null) {
+    global $gaRuntime;
+
     // Cast the int-strings to bool
     $aPersonaManifest['reviewed'] = (bool)$aPersonaManifest['reviewed'];
     $aPersonaManifest['active'] = (bool)$aPersonaManifest['active'];
@@ -142,7 +145,7 @@ class classPersona {
     }
 
     // Assign Icon, Header, and Footer
-    $strPersonaDomainPrefix = 'http://' . $GLOBALS['arraySoftwareState']['currentDomain'];
+    $strPersonaDomainPrefix = 'http://' . $gaRuntime['currentDomain'];
     $strPersonaBasePath = DATASTORE_RELPATH . 'personas/' . $aPersonaManifest['id'] . '/';
 
     $aPersonaManifest['headerURL'] = $strPersonaDomainPrefix . $strPersonaBasePath . 'header.png';

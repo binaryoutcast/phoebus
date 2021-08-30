@@ -16,23 +16,16 @@ const URI_ACCOUNT                       = URI_PANEL . 'account/';
 const URI_ADDONS                        = URI_PANEL . 'addons/';
 const URI_ADMIN                         = URI_PANEL . 'administration/';
 
-// Include modules
-$arrayIncludes = ['database', 'account', 'log', 'mozillaRDF', 'vc', 'readManifest', 'writeManifest', 'generateContent'];
-foreach ($arrayIncludes as $_value) { require_once(MODULES[$_value]); }
+// Enable Smarty Content Generation
+$gaRuntime['useSmarty'] = true;
 
-// Instantiate modules
-$moduleDatabase                         = new classDatabase();
-$moduleAccount                          = new classAccount();
-$moduleLog                              = new classLog();
-$moduleMozillaRDF                       = new classMozillaRDF();
-$moduleReadManifest                     = new classReadManifest();
-$moduleWriteManifest                    = new classWriteManifest();
-$moduleGenerateContent                  = new classGenerateContent('smarty');
+// Include modules
+gfImportModules('database', 'account', 'log', 'mozillaRDF', 'readManifest', 'writeManifest', 'generateContent');
 
 // Request arguments
-$arraySoftwareState['requestPanelTask'] = funcUnifiedVariable('get', 'task');
-$arraySoftwareState['requestPanelWhat'] = funcUnifiedVariable('get', 'what');
-$arraySoftwareState['requestPanelSlug'] = funcUnifiedVariable('get', 'slug');
+$gaRuntime['qPanelTask'] = gfSuperVar('get', 'task');
+$gaRuntime['qPanelWhat'] = gfSuperVar('get', 'what');
+$gaRuntime['qPanelSlug'] = gfSuperVar('get', 'slug');
 
 // ====================================================================================================================
 
@@ -44,13 +37,15 @@ $arraySoftwareState['requestPanelSlug'] = funcUnifiedVariable('get', 'slug');
 * @param $_level    Required level
 * @returns          true 404
 ***********************************************************************************************************************/
-function funcCheckAccessLevel($aLevel, $aReturnNull = null) {
-  if ($GLOBALS['arraySoftwareState']['authentication']['level'] >= $aLevel) {
+function gfCheckAccessLevel($aLevel, $aReturnNull = null) {
+  global $gaRuntime;
+
+  if ($gaRuntime['authentication']['level'] >= $aLevel) {
     return true;
   }
 
   if (!$aReturnNull) {
-    funcRedirect('/panel/login/');
+    gfRedirect('/panel/login/');
   }
 
   return null;
@@ -60,82 +55,82 @@ function funcCheckAccessLevel($aLevel, $aReturnNull = null) {
 
 // == | Main | ========================================================================================================
 
-if (file_exists(ROOT_PATH . '/.disablePanel') && !funcUnifiedVariable('cookie', 'overrideDisablePanel')) {
-  funcError('The Panel is currently disabled. Please try again later.');
+if (file_exists(ROOT_PATH . '/.disablePanel') && !gfSuperVar('cookie', 'overrideDisablePanel')) {
+  gfError('The Panel is currently disabled. Please try again later.');
 }
 
-$strComponentPath = dirname(COMPONENTS[$arraySoftwareState['requestComponent']]) . '/';
+$strComponentPath = dirname(COMPONENTS[$gaRuntime['qComponent']]) . '/';
 $boolHasPostData = !empty($_POST);
 
 // --------------------------------------------------------------------------------------------------------------------
 
 // The Panel can ONLY be used on HTTPS so redirect those sites without https to Pale Moon
-if (!in_array('https', TARGET_APPLICATION_SITE[$arraySoftwareState['currentApplication']]['features'])) {
-  funcRedirect('https://addons.palemoon.org/panel/');
+if (!in_array('https', TARGET_APPLICATION_SITE[$gaRuntime['currentApplication']]['features'])) {
+  gfRedirect('https://addons.palemoon.org/panel/');
 }
 
-if ($arraySoftwareState['currentScheme'] != 'https') {
-  funcRedirect('https://' . $arraySoftwareState['currentDomain'] . '/panel/');
+if ($gaRuntime['currentScheme'] != 'https') {
+  gfRedirect('https://' . $gaRuntime['currentDomain'] . '/panel/');
 }
 
 // --------------------------------------------------------------------------------------------------------------------
 
 // Handle URIs
-switch ($arraySoftwareState['requestPath']) {
+switch ($gaRuntime['qPath']) {
   case URI_PANEL:
-    $moduleGenerateContent->addonSite('panel-frontpage.xhtml', 'Landing Page');
+    $gmGenerateContent->addonSite('panel-frontpage.xhtml', 'Landing Page');
     break;
   case URI_REG:
     if ($boolHasPostData) {
-      $boolRegComplete = $moduleAccount->registerUser();
+      $boolRegComplete = $gmAccount->registerUser();
 
       if (!$boolRegComplete) {
-        funcError('Something has gone horribly wrong!');
+        gfError('Something has gone horribly wrong!');
       }
 
-      $moduleGenerateContent->addonSite('panel-account-registration-done', 'Registration Complete', $moduleAccount->validationEmail);
+      $gmGenerateContent->addonSite('panel-account-registration-done', 'Registration Complete', $gmAccount->validationEmail);
     }
 
-    $moduleGenerateContent->addonSite('panel-account-registration', 'Registration');
+    $gmGenerateContent->addonSite('panel-account-registration', 'Registration');
     break;
   case URI_VERIFY:
     if ($boolHasPostData) {
-      $boolVerificationComplete = $moduleAccount->verifyUser();
+      $boolVerificationComplete = $gmAccount->verifyUser();
 
       if (!$boolVerificationComplete) {
-        funcError('Something has gone horribly wrong!');
+        gfError('Something has gone horribly wrong!');
       }
 
-      funcRedirect(URI_LOGIN);
+      gfRedirect(URI_LOGIN);
     }
-    $moduleGenerateContent->addonSite('panel-account-validation', 'Account Verification');
+    $gmGenerateContent->addonSite('panel-account-validation', 'Account Verification');
     break;
   case URI_LOGIN:
-    $moduleAccount->authenticate();
-    if (funcCheckAccessLevel(3, true)) {
-      funcRedirect(URI_ADMIN);
+    $gmAccount->authenticate();
+    if (gfCheckAccessLevel(3, true)) {
+      gfRedirect(URI_ADMIN);
     }
-    funcRedirect(URI_DEV);
+    gfRedirect(URI_DEV);
     break;
   case URI_LOGOUT:
-    $moduleAccount->authenticate('logout');
+    $gmAccount->authenticate('logout');
     break;
   case URI_DEV:
   case URI_ACCOUNT:
   case URI_ADDONS:
-    $moduleAccount->authenticate();
-    funcCheckAccessLevel(1);
+    $gmAccount->authenticate();
+    gfCheckAccessLevel(1);
     require_once($strComponentPath . 'developer.php');
     break;
   default:
-    if (startsWith($arraySoftwareState['requestPath'], URI_ADMIN)){
-      $moduleAccount->authenticate();
-      funcCheckAccessLevel(3);
+    if (str_starts_with($gaRuntime['qPath'], URI_ADMIN)){
+      $gmAccount->authenticate();
+      gfCheckAccessLevel(3);
       require_once($strComponentPath . 'administration.php');
     }
 
     // No clue send 404
-    funcSend404();
+    gfHeader(404);
 }
 
 // ====================================================================================================================

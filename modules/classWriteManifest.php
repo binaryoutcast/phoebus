@@ -10,38 +10,40 @@ class classWriteManifest {
   private $bulkUpload;
 
   /********************************************************************************************************************
-  * Class constructor that sets inital state of things
+  * Class constructor that sets initial state of things
   ********************************************************************************************************************/
   function __construct() {  
-    if (!funcCheckModule('database')) {
-      funcError(__CLASS__ . '::' . __FUNCTION__ . ' - database is required to be included in the global scope');
-    }
+    gfEnsureModules(__CLASS__, 'database', 'account', 'readManifest', 'mozillaRDF', 'vc');
 
-    $this->xpiUpload          = funcUnifiedVariable('files', 'xpiUpload');
-    $this->iconUpload         = funcUnifiedVariable('files', 'iconUpload');
-    $this->previewUpload      = funcUnifiedVariable('files', 'previewUpload');
-    $this->bulkUpload         = funcUnifiedVariable('files', 'bulkUpload');
+    $this->xpiUpload          = gfSuperVar('files', 'xpiUpload');
+    $this->iconUpload         = gfSuperVar('files', 'iconUpload');
+    $this->previewUpload      = gfSuperVar('files', 'previewUpload');
+    $this->bulkUpload         = gfSuperVar('files', 'bulkUpload');
   }
 
   /********************************************************************************************************************
   * Submits a new Add-on
   ********************************************************************************************************************/
   public function submitNewAddon($aLangPack = null, $aAccumulateErrors = null) {
+    global $gaRuntime;
+    global $gmDatabase;
+    global $gmAccount;
+
     // Populate Post Data with data from $_POST
     $this->postData = array(
-      'slug'          => funcUnifiedVariable('post', 'slug'),
+      'slug'          => gfSuperVar('post', 'slug'),
     );
 
     if (!$aLangPack) {
       if (!$this->postData['slug'] || preg_match('/[^a-z0-9\-]|(^\-)/', $this->postData['slug']) ||
           strlen($this->postData['slug']) < 3 || strlen($this->postData['slug']) > 32) {
-        funcError('You did not specify a valid slug.
+        gfError('You did not specify a valid slug.
                    Slugs must be 3+ chars not exceeding 32 chars.
                    Please use only lower case letters, numbers, and/or dashes (-)');
       }
     }
 
-    $this->validateAddon((bool)($GLOBALS['arraySoftwareState']['authentication']['level'] < 3), $aLangPack, $aAccumulateErrors);
+    $this->validateAddon((bool)($gaRuntime['authentication']['level'] < 3), $aLangPack, $aAccumulateErrors);
 
     // For langpacks create a slug
     if ($aLangPack) {
@@ -64,7 +66,7 @@ class classWriteManifest {
 
     $addonAMO = $this->addonAMO($this->validatorData['installManifest']['id']);
 
-    if ($addonAMO && $GLOBALS['arraySoftwareState']['authentication']['level'] < 3) {
+    if ($addonAMO && $gaRuntime['authentication']['level'] < 3) {
       return $this->error('The add-on id <strong>' . $this->validatorData['installManifest']['id'] . '</strong> is known to have existed on the Mozilla Add-ons Site.</li><li>' .
                           'If you are the original developer of this add-on, you will need to contact a member of the Add-ons Team or a Phoebus Administrator to check the validity of this submission and verify your identity.</li><li>' .
                           'If this add-on is a proper fork, you can simply change the add-on\'s id and submit again.',
@@ -79,7 +81,7 @@ class classWriteManifest {
     }
 
     if (!$addonType) {
-      return $this->error('Unable to determin Add-on Type', $aAccumulateErrors);
+      return $this->error('Unable to determine Add-on Type', $aAccumulateErrors);
     }
 
     $releaseXPI = $this->postData['slug'] . '-' . $this->validatorData['installManifest']['version'] . '.xpi';
@@ -92,8 +94,8 @@ class classWriteManifest {
       'id'          => $this->validatorData['installManifest']['id'],
       'slug'        => $this->postData['slug'],
       'type'        => $addonType,
-      'active'      => (bool)($GLOBALS['arraySoftwareState']['authentication']['level'] > 1),
-      'reviewed'    => (bool)($GLOBALS['arraySoftwareState']['authentication']['level'] > 2),
+      'active'      => (bool)($gaRuntime['authentication']['level'] > 1),
+      'reviewed'    => (bool)($gaRuntime['authentication']['level'] > 2),
       'releaseXPI'  => $releaseXPI,
       'category'    => 'unlisted',
       'url'         => '/addon/' . $this->postData['slug'] . '/',
@@ -112,7 +114,7 @@ class classWriteManifest {
       $addonManifest['description'] = 'Pale Moon Language Pack';
     }
     else {
-      $GLOBALS['moduleAccount']->assignAddonToUser($GLOBALS['arraySoftwareState']['authentication']['username'],
+      $gmAccount->assignAddonToUser($gaRuntime['authentication']['username'],
                                                    $addonManifest['slug']);
     }
 
@@ -130,8 +132,8 @@ class classWriteManifest {
 
     // Insert the new manifest data into the database
     $query = "INSERT INTO ?n SET ?u";
-    $GLOBALS['moduleDatabase']->query('normal', $query, 'client', $this->validatorData['supportedApplications']);
-    $GLOBALS['moduleDatabase']->query('normal', $query, 'addon', $addonManifest);
+    $gmDatabase->query('normal', $query, 'client', $this->validatorData['supportedApplications']);
+    $gmDatabase->query('normal', $query, 'addon', $addonManifest);
 
     if ($aAccumulateErrors) {
       return true;
@@ -144,9 +146,12 @@ class classWriteManifest {
   * Update Add-on Release
   ********************************************************************************************************************/
   public function updateAddonRelease($aAddonManifest, $aLangPack = null, $aAccumulateErrors = null) {
+    global $gmDatabase;
+    global $gmReadManifest;
+
     // Populate Post Data with data from $_POST
     $this->postData = array(
-      'slug'          => funcUnifiedVariable('post', 'slug'),
+      'slug'          => gfSuperVar('post', 'slug'),
     );
 
     if (!$aAccumulateErrors) {
@@ -175,7 +180,7 @@ class classWriteManifest {
     }
 
     if ($aAddonManifest['type'] != $addonType) {
-      return $this->error('Unable to determin Add-on Type', $aAccumulateErrors);
+      return $this->error('Unable to determine Add-on Type', $aAccumulateErrors);
     }
 
     if ($aLangPack && !($this->validatorData['supportedApplications']['palemoon'] ?? false)) {
@@ -226,13 +231,12 @@ class classWriteManifest {
 
     // Update the manifest data in the database
     $queryClient = "UPDATE `client` SET ?u WHERE `addonID` = ?s";
-    $GLOBALS['moduleDatabase']->query('normal',
-                                      $queryClient,
-                                      $this->validatorData['supportedApplications'],
-                                      $aAddonManifest['id']);
+    $gmDatabase->query('normal', $queryClient,
+                                 $this->validatorData['supportedApplications'],
+                                 $aAddonManifest['id']);
 
     $queryAddon = "UPDATE `addon` SET ?u WHERE `slug` = ?s";
-    $GLOBALS['moduleDatabase']->query('normal', $queryAddon, $addonManifest, $aAddonManifest['slug']);
+    $gmDatabase->query('normal', $queryAddon, $addonManifest, $aAddonManifest['slug']);
 
     if ($aAccumulateErrors) {
       return true;
@@ -245,29 +249,32 @@ class classWriteManifest {
   * Updates the manifest data for Extensions, Themes, and Language Packs (if allowed)
   ********************************************************************************************************************/
   public function updateAddonMetadata($aAddonManifest) {
+    global $gaRuntime;
+    global $gmDatabase;
+
     // Populate Post Data with data from $_POST
     $this->postData = array(
-      'slug'          => funcUnifiedVariable('post', 'slug'),
-      'active'        => (bool)funcUnifiedVariable('post', 'active'),
-      'reviewed'      => (bool)funcUnifiedVariable('post', 'reviewed'),
-      'category'      => funcUnifiedVariable('post', 'category'),
-      'license'       => funcUnifiedVariable('post', 'license'),
-      'licenseText'   => funcUnifiedVariable('post', 'licenseText'),
-      'repository'    => funcUnifiedVariable('post', 'repository'),
-      'supportURL'    => funcUnifiedVariable('post', 'supportURL'),
-      'supportEmail'  => funcUnifiedVariable('post', 'supportEmail'),
-      'tags'          => funcUnifiedVariable('post', 'tags'),
+      'slug'          => gfSuperVar('post', 'slug'),
+      'active'        => (bool)gfSuperVar('post', 'active'),
+      'reviewed'      => (bool)gfSuperVar('post', 'reviewed'),
+      'category'      => gfSuperVar('post', 'category'),
+      'license'       => gfSuperVar('post', 'license'),
+      'licenseText'   => gfSuperVar('post', 'licenseText'),
+      'repository'    => gfSuperVar('post', 'repository'),
+      'supportURL'    => gfSuperVar('post', 'supportURL'),
+      'supportEmail'  => gfSuperVar('post', 'supportEmail'),
+      'tags'          => gfSuperVar('post', 'tags'),
       'url'           => '/addon/' . $aAddonManifest['slug'] . '/',
-      'content'       => funcUnifiedVariable('post', 'content')
+      'content'       => gfSuperVar('post', 'content')
     );
 
     // Sanity
     if (!$this->postData['slug']) {
-      funcError('Slug was not found in POST');
+      gfError('Slug was not found in POST');
     }
 
     if ($this->postData['slug'] != $aAddonManifest['slug']) {
-      funcError('POST Slug does not match GET/Manifest Slug');
+      gfError('POST Slug does not match GET/Manifest Slug');
     }
 
     if ($aAddonManifest['type'] == 'langpack') {
@@ -281,7 +288,7 @@ class classWriteManifest {
     }
 
     // Hackers are a superstitious cowardly lot
-    if ($GLOBALS['arraySoftwareState']['authentication']['level'] < 3) {
+    if ($gaRuntime['authentication']['level'] < 3) {
       unset($this->postData['active']);
       unset($this->postData['reviewed']);
       unset($this->postData['slug']);
@@ -293,7 +300,7 @@ class classWriteManifest {
 
     if (empty($this->postData['licenseText'])) {
       if ($this->postData['license'] == 'custom') {
-        funcError('You must specify a custom license text');
+        gfError('You must specify a custom license text');
       }
 
       $this->postData['licenseText'] = null;
@@ -306,7 +313,7 @@ class classWriteManifest {
 
     // Insert the new manifest data into the database
     $query = "UPDATE `addon` SET ?u WHERE `slug` = ?s";
-    $GLOBALS['moduleDatabase']->query('normal', $query, $this->postData, $aAddonManifest['slug']);
+    $gmDatabase->query('normal', $query, $this->postData, $aAddonManifest['slug']);
 
     return true;
   }
@@ -315,9 +322,11 @@ class classWriteManifest {
   * Submits a new External
   ********************************************************************************************************************/
   public function submitNewExternal() {
+    global $gmDatabase;
+
     // Populate Post Data with data from $_POST
     $this->postData = array(
-      'slug'          => funcUnifiedVariable('post', 'slug'),
+      'slug'          => gfSuperVar('post', 'slug'),
       'active'        => false,
       'reviewed'      => true,
       'type'          => 'external'
@@ -325,9 +334,9 @@ class classWriteManifest {
 
     if (!$this->postData['slug'] || preg_match('/[^a-z0-9\-]|(^\-)/', $this->postData['slug']) ||
         strlen($this->postData['slug']) < 3 || strlen($this->postData['slug']) > 32) {
-      funcError('You did not specify a valid slug.
-                 Slugs must be 3+ chars not exceeding 32 chars.
-                 Please use only lower case letters, numbers, and/or dashes (-)');
+      gfError('You did not specify a valid slug.
+               Slugs must be 3+ chars not exceeding 32 chars.
+               Please use only lower case letters, numbers, and/or dashes (-)');
     }
 
     $externalID = $this->postData['slug'] . '@external';
@@ -335,15 +344,15 @@ class classWriteManifest {
     $addonExists = $this->addonExists($externalID, $this->postData['slug']);
 
     if ($addonExists) {
-      funcError('The slug you chose is not available. Please select another.');
+      gfError('The slug you chose is not available. Please select another.');
     }
 
     $this->postData['id'] = $externalID;
 
     // Insert the new manifest data into the database
     $query = "INSERT INTO ?n SET ?u";
-    $GLOBALS['moduleDatabase']->query('normal', $query, 'client', array('addonID' => $this->postData['id']));
-    $GLOBALS['moduleDatabase']->query('normal', $query, 'addon', $this->postData);
+    $gmDatabase->query('normal', $query, 'client', array('addonID' => $this->postData['id']));
+    $gmDatabase->query('normal', $query, 'addon', $this->postData);
 
     return $this->postData['slug'];
   }
@@ -352,38 +361,40 @@ class classWriteManifest {
   * Updates the manifest data for Externals
   ********************************************************************************************************************/
   public function updateExternalMetadata($aAddonManifest) {
+    global $gmDatabase;
+
     // Populate Post Data with data from $_POST
     $this->postData = array(
-      'slug'          => funcUnifiedVariable('post', 'slug'),
-      'active'        => (bool)funcUnifiedVariable('post', 'active'),
+      'slug'          => gfSuperVar('post', 'slug'),
+      'active'        => (bool)gfSuperVar('post', 'active'),
       'reviewed'      => true,
-      'category'      => funcUnifiedVariable('post', 'category'),
-      'name'          => funcUnifiedVariable('post', 'name'),
-      'description'   => funcUnifiedVariable('post', 'description'),
-      'url'           => funcUnifiedVariable('post', 'url'),
-      'tags'          => funcUnifiedVariable('post', 'tags'),
+      'category'      => gfSuperVar('post', 'category'),
+      'name'          => gfSuperVar('post', 'name'),
+      'description'   => gfSuperVar('post', 'description'),
+      'url'           => gfSuperVar('post', 'url'),
+      'tags'          => gfSuperVar('post', 'tags'),
     );
 
     $arrayApplications = array(
-      'palemoon'      => (bool)funcUnifiedVariable('post', 'palemoon'),
-      'basilisk'      => (bool)funcUnifiedVariable('post', 'basilisk'),
-      'ambassador'    => (bool)funcUnifiedVariable('post', 'ambassador'),
-      'borealis'      => (bool)funcUnifiedVariable('post', 'borealis'),
-      'interlink'     => (bool)funcUnifiedVariable('post', 'interlink'),
+      'palemoon'      => (bool)gfSuperVar('post', 'palemoon'),
+      'basilisk'      => (bool)gfSuperVar('post', 'basilisk'),
+      'ambassador'    => (bool)gfSuperVar('post', 'ambassador'),
+      'borealis'      => (bool)gfSuperVar('post', 'borealis'),
+      'interlink'     => (bool)gfSuperVar('post', 'interlink'),
     );
 
     // Sanity
     if (!$this->postData['slug']) {
-      funcError('Slug was not found in POST');
+      gfError('Slug was not found in POST');
     }
 
     if ($this->postData['slug'] != $aAddonManifest['slug']) {
-      funcError('POST Slug does not match GET/Manifest Slug');
+      gfError('POST Slug does not match GET/Manifest Slug');
     }
 
     foreach ($this->postData as $_key => $_value) {
       if ($_key != 'active' && $_key != 'tags' && !$_value) {
-        funcError('Please ensure that all fields are filled in');
+        gfError('Please ensure that all fields are filled in');
       }
     }
 
@@ -394,7 +405,7 @@ class classWriteManifest {
 
     // Insert the new manifest data into the database
     $query = "UPDATE `addon` JOIN `client` ON addon.id = client.addonID SET ?u WHERE `slug` = ?s";
-    $GLOBALS['moduleDatabase']->query('normal', $query, array_merge($this->postData, $arrayApplications), $aAddonManifest['slug']);
+    $gmDatabase->query('normal', $query, array_merge($this->postData, $arrayApplications), $aAddonManifest['slug']);
 
     return true;
   }
@@ -403,20 +414,23 @@ class classWriteManifest {
   * Remove an Add-on
   ********************************************************************************************************************/
   public function deleteAddon($aAddonManifest) {
+    global $gmDatabase;
+    global $gmAccount;
+
     // Populate Post Data with data from $_POST
     $this->postData = array(
-      'confirm'       => (bool)funcUnifiedVariable('post', 'confirm'),
-      'slug'          => funcUnifiedVariable('post', 'slug'),
+      'confirm'       => (bool)gfSuperVar('post', 'confirm'),
+      'slug'          => gfSuperVar('post', 'slug'),
     );
 
     // Make sure that this is confirmed and someone didn't just use DOMi and enable the button
     if (!$this->postData['confirm']) {
-      funcError('The deletion operation cannot be confirmed');
+      gfError('The deletion operation cannot be confirmed');
     }
 
     // Make sure the form posted slug is the same as the manifest slug
     if ($this->postData['slug'] != $aAddonManifest['slug']) {
-      funcError('Add-on Slug mismatch');
+      gfError('Add-on Slug mismatch');
     }
 
     // ----------------------------------------------------------------------------------------------------------------
@@ -433,13 +447,13 @@ class classWriteManifest {
 
       // Test to see if the directory is writable
       if (!is_writable($realAddonPath)) {
-        funcError('Datastore directory for ' . $aAddonManifest['slug'] . ' is not writable');
+        gfError('Datastore directory for ' . $aAddonManifest['slug'] . ' is not writable');
       }
 
       // Test to see if each file in the directory is writable
       foreach ($glob as $_value) {
         if (!is_writable($_value)) {
-          funcError('Datastore file ' . basename($_value) . ' for ' . $aAddonManifest['slug'] . ' is not writable');
+          gfError('Datastore file ' . basename($_value) . ' for ' . $aAddonManifest['slug'] . ' is not writable');
         }
       }
     }
@@ -448,20 +462,20 @@ class classWriteManifest {
 
     // Remove the data from the database
     $query = "DELETE FROM ?n WHERE ?n = ?s";
-    $resultATable = $GLOBALS['moduleDatabase']->query('normal', $query, 'addon', 'id', $aAddonManifest['id']);
-    $resultCTable = $GLOBALS['moduleDatabase']->query('normal', $query, 'client', 'addonID', $aAddonManifest['id']);
+    $resultATable = $gmDatabase->query('normal', $query, 'addon', 'id', $aAddonManifest['id']);
+    $resultCTable = $gmDatabase->query('normal', $query, 'client', 'addonID', $aAddonManifest['id']);
 
     // Extensions and Themes are assigned to users
     if (in_array($aAddonManifest['type'], ['extension', 'theme'])) {
       if (!$aAddonManifest['owner']) {
-        funcError('No one seems to own ' . $aAddonManifest['slug']);
+        gfError('No one seems to own ' . $aAddonManifest['slug']);
       }
 
       // Remove the add-on from the list of add-ons assigned to that user
-      $removeFromUser = $GLOBALS['moduleAccount']->removeAddonFromUser($aAddonManifest['owner'], $aAddonManifest['slug']);
+      $removeFromUser = $gmAccount->removeAddonFromUser($aAddonManifest['owner'], $aAddonManifest['slug']);
 
       if (!$removeFromUser) {
-        funcError('This ' . $aAddonManifest['type'] . ' could not be removed from assigned user: ' . $aAddonManifest['owner']);
+        gfError('This ' . $aAddonManifest['type'] . ' could not be removed from assigned user: ' . $aAddonManifest['owner']);
       }
     }
 
@@ -486,31 +500,33 @@ class classWriteManifest {
   * Bulk Add-on Uploader
   ********************************************************************************************************************/
   public function bulkUploader($aType) {
+    global $gmReadManifest;
+
     if ($aType != 'langpack') {
-      funcError('Unknown bulk upload type');
+      gfError('Unknown bulk upload type');
     }
 
     if (!$this->bulkUpload || $this->bulkUpload['type'] != 'application/zip') {
-      funcError('An error occurred with the uploaded file. Please try again.');
+      gfError('An error occurred with the uploaded file. Please try again.');
     }
     
     $obj = ROOT_PATH . OBJ_RELPATH . 'bulk-upload/' . $aType . '-' . time() . '/';
     $zip = new ZipArchive();
 
     if (!@$zip->open($this->bulkUpload['tmp_name'])) {
-      funcError('Could not read zip file');
+      gfError('Could not read zip file');
     }
 
     $result = @mkdir($obj);
 
     if (!$result) {
-      funcError('Could not create ' . $obj);
+      gfError('Could not create ' . $obj);
     }
 
     $result = @$zip->extractTo($obj);
 
     if (!$result) {
-      funcError('There was an error extracting the zip file');
+      gfError('There was an error extracting the zip file');
     }
 
     $zip->close();
@@ -518,7 +534,7 @@ class classWriteManifest {
     $glob = glob($obj . '*.xpi');
 
     if (!$glob || empty($glob)) {
-      funcError('There does not seem to be any XPI files in ' . $obj);
+      gfError('There does not seem to be any XPI files in ' . $obj);
     }
 
     $accumulatedErrors = [];
@@ -539,8 +555,8 @@ class classWriteManifest {
         $_result = $this->validateAddon(false, true, true, true);
         
         if (is_string($_result)) {
-          if (contains($_result, 'uploaded') || contains($_result, 'Jetpack') ||
-              contains($_result, 'Jetpack') || contains($_result, 'WebExtensions')) {
+          if (str_contains($_result, 'uploaded') || str_contains($_result, 'Jetpack') ||
+              str_contains($_result, 'Jetpack') || str_contains($_result, 'WebExtensions')) {
             $accumulatedErrors[] = $basename . $_result;
             continue; 
           }
@@ -600,7 +616,7 @@ class classWriteManifest {
       );
 
       $accumulatedMessages[] = $basename . 'Getting manifest data';
-      $addonManifest = $GLOBALS['moduleReadManifest']->getAddon('panel-by-slug', $_key);
+      $addonManifest = $gmReadManifest->getAddon('panel-by-slug', $_key);
 
       if (!$addonManifest) {
         $accumulatedErrors[] = $basename . 'Could not get manifest data';
@@ -631,7 +647,7 @@ class classWriteManifest {
 
     // ----------------------------------------------------------------------------------------------------------------
 
-    //funcError([$accumulatedErrors, $accumulatedMessages, $glob, $addons], 99);
+    //gfError([$accumulatedErrors, $accumulatedMessages, $glob, $addons], 99);
     return ['errors' => $accumulatedErrors, 'messages' => $accumulatedMessages];
   }
 
@@ -640,7 +656,7 @@ class classWriteManifest {
   ********************************************************************************************************************/
   public function publicValidator() {
     if (!$this->xpiUpload) {
-      funcError('You did not upload an XPI file');
+      gfError('You did not upload an XPI file');
     }
 
     $checkID = true;
@@ -660,6 +676,10 @@ class classWriteManifest {
   ********************************************************************************************************************/
   private function validateAddon($aCheckID = null, $aLangPack = null,
                                  $aAccumulateErrors = null, $aReturnIDOnly = null) {
+    global $gmReadManifest;
+    global $gmMozillaRDF;
+    global $gmVC;
+
     $this->validatorData = array(
       'errors' => [],
       'status' => array(
@@ -742,10 +762,10 @@ class classWriteManifest {
 
     if ($this->validatorData['installManifest']) {
       $this->validatorData['installManifest'] =
-        $GLOBALS['moduleMozillaRDF']->parseInstallManifest($this->validatorData['installManifest']);
+        $gmMozillaRDF->parseInstallManifest($this->validatorData['installManifest']);
 
       if (is_string($this->validatorData['installManifest'])) {
-        funcError('RDF Parsing Error: ' . $this->validatorData['installManifest'], $aAccumulateErrors);
+        gfError('RDF Parsing Error: ' . $this->validatorData['installManifest'], $aAccumulateErrors);
       }
     }
 
@@ -884,7 +904,7 @@ class classWriteManifest {
       // We support an em:license with a value matching the LICENSES array class constant in classReadManifest
       // Except for custom of course.. That will have to be done through the panel
       if ($this->validatorData['installManifest']['license'] ?? false) {
-        $arrayLicenses = array_keys(array_change_key_case($GLOBALS['moduleReadManifest']::LICENSES, CASE_LOWER));
+        $arrayLicenses = array_keys(array_change_key_case($gmReadManifest::LICENSES, CASE_LOWER));
         $licenseCode = strtolower($this->validatorData['installManifest']['license']);
     
         if (!in_array($licenseCode, $arrayLicenses) || $licenseCode == 'custom') {
@@ -915,7 +935,7 @@ class classWriteManifest {
       }
 
       foreach ($arrayRestrictedIDs as $_value) {
-        if (contains($this->validatorData['installManifest']['id'], $_value)) {
+        if (str_contains($this->validatorData['installManifest']['id'], $_value)) {
           $this->validatorData['status']['isRestrictedID'] = true;
         }
       }
@@ -984,7 +1004,7 @@ class classWriteManifest {
   * Read file from zip
   ********************************************************************************************************************/
   private function readFileFromArchive($aArchive, $aFile, $aCheckExistance = null) {
-    $file = funcUnifiedVariable('var', @file_get_contents('zip://' . $aArchive . "#" . $aFile));
+    $file = gfSuperVar('var', @file_get_contents('zip://' . $aArchive . "#" . $aFile));
 
     if (!$file) {
       return null;
@@ -1002,8 +1022,10 @@ class classWriteManifest {
   * Checks if a slug or id in the database
   ********************************************************************************************************************/
   private function addonExists($aID, $aSlug) {
+    global $gmDatabase;
+
     $query = "SELECT `id`, `slug` FROM `addon` WHERE `id` = ?s OR `slug` = ?s";
-    $result = $GLOBALS['moduleDatabase']->query('rows', $query, $aID, $aSlug);
+    $result = $gmDatabase->query('rows', $query, $aID, $aSlug);
 
     if ($result) {
       return true;
@@ -1016,8 +1038,10 @@ class classWriteManifest {
   * Checks if an ID was known to be on AMO
   ********************************************************************************************************************/
   private function addonAMO($aSlug) {
+    global $gmDatabase;
+
     $query = "SELECT `id`, `blocked` FROM `amo` WHERE `id` = ?s AND `blocked` = 1";
-    $result = $GLOBALS['moduleDatabase']->query('rows', $query, $aSlug);
+    $result = $gmDatabase->query('rows', $query, $aSlug);
 
     if ($result) {
       return true;
@@ -1038,7 +1062,7 @@ class classWriteManifest {
         return $this->error('I have no idea how you managed to upload an XPI file for an external but.. NOPE!', $aAccumulateErrors);
       }
 
-      if (contains($aID, '@ex-')) {
+      if (str_contains($aID, '@ex-')) {
         $strAddonDir = ROOT_PATH . DATASTORE_RELPATH . 'addons/' . preg_replace('/(.*)\@(.*)/iU', '$2', $aID);
       }
     }
@@ -1092,34 +1116,34 @@ class classWriteManifest {
     // Handle icon
     if ($this->iconUpload) {
       if (!in_array($this->iconUpload['type'], $arrayAllowedImageTypes)) {
-        funcError('Icon must be a png image!');
+        gfError('Icon must be a png image!');
       }
 
       if ($this->iconUpload['size'] > $intMaxImageBytes) {
-        funcError('Icon file size must not exceed ' . (string)$intMaxImageBytes . ' bytes!');
+        gfError('Icon file size must not exceed ' . (string)$intMaxImageBytes . ' bytes!');
       }
 
       $result = @move_uploaded_file($this->iconUpload['tmp_name'], $strAddonDir . $iconFile);
 
       if (!$result) {
-        funcError('Could not create ' . str_replace(ROOT_PATH, '', $strAddonDir) . $iconFile);
+        gfError('Could not create ' . str_replace(ROOT_PATH, '', $strAddonDir) . $iconFile);
       }
     }
 
     // Handle preview
     if ($this->previewUpload) {
       if (!in_array($this->previewUpload['type'], $arrayAllowedImageTypes)) {
-        funcError('Preview must be a png image!');
+        gfError('Preview must be a png image!');
       }
 
       if ($this->previewUpload['size'] > $intMaxImageBytes) {
-        funcError('Preview file size must not exceed ' . (string)$intMaxImageBytes . ' bytes!');
+        gfError('Preview file size must not exceed ' . (string)$intMaxImageBytes . ' bytes!');
       }
 
       $result = @move_uploaded_file($this->previewUpload['tmp_name'], $strAddonDir . $previewFile);
 
       if (!$result) {
-        funcError('Could not create ' . str_replace(ROOT_PATH, '', $strAddonDir) . $previewFile);
+        gfError('Could not create ' . str_replace(ROOT_PATH, '', $strAddonDir) . $previewFile);
       }
     }
 
@@ -1127,7 +1151,7 @@ class classWriteManifest {
   }
 
   /********************************************************************************************************************
-  * Error method to better accumilate errors when using bulkLangPackUpload
+  * Error method to better accumulate errors when using bulkLangPackUpload
   * Should only be used in bulkLangPackUpload, submitNewAddon, updateAddonRelease, and the xpi part of filesToDatastore
   ********************************************************************************************************************/
   private function error($aErrorMessage, $aAccumulateErrors = null, $aValidatorErrors = null) {
@@ -1139,10 +1163,10 @@ class classWriteManifest {
           $validatorErrors .= '<li>' . $_value . '</li>';
         }
 
-        funcGenerateContent('Add-on Validator Error', '<ul>' . $validatorErrors . '</ul>');
+        gfGenContent('Add-on Validator Error', '<ul>' . $validatorErrors . '</ul>');
       }
 
-      funcError($aErrorMessage);
+      gfError($aErrorMessage);
     }
 
     return $aErrorMessage;

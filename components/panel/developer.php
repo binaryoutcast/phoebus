@@ -5,178 +5,178 @@
 
 // == | Main | ========================================================================================================
 
-switch ($arraySoftwareState['requestPath']) {
+switch ($gaRuntime['qPath']) {
   case URI_DEV:
-    if (funcCheckAccessLevel(3, true)) {
-      funcRedirect(URI_ADMIN);
+    if (gfCheckAccessLevel(3, true)) {
+      gfRedirect(URI_ADMIN);
     }
 
-    $moduleGenerateContent->addonSite('developer-frontpage.xhtml', 'Add-on Developer');
+    $gmGenerateContent->addonSite('developer-frontpage.xhtml', 'Add-on Developer');
     break;
   case URI_ACCOUNT:
     // Users level 3 or above should use the administration codepath
-    if (funcCheckAccessLevel(3, true)) {
-      funcRedirect(URI_ADMIN . '?task=update&what=user&slug=' . $arraySoftwareState['authentication']['username']);
+    if (gfCheckAccessLevel(3, true)) {
+      gfRedirect(URI_ADMIN . '?task=update&what=user&slug=' . $gaRuntime['authentication']['username']);
     }
 
-    $userManifest = $moduleAccount->getSingleUser($arraySoftwareState['authentication']['username'], true);
+    $userManifest = $gmAccount->getSingleUser($gaRuntime['authentication']['username'], true);
 
     // Check if manifest is valid
     if (!$userManifest) {
-      funcError('User Manifest is null');
+      gfError('User Manifest is null');
     }
 
     // Deal with writing the updated user manifest
     if ($boolHasPostData) {
-      $boolUpdate = $moduleAccount->updateUserManifest($userManifest);
+      $boolUpdate = $gmAccount->updateUserManifest($userManifest);
 
       // If an error happened stop.
       if (!$boolUpdate) {
-        funcError('Something has gone horribly wrong');
+        gfError('Something has gone horribly wrong');
       }
 
       // Manifest updated go somewhere
-      funcRedirect(URI_DEV);
+      gfRedirect(URI_DEV);
     }
 
-    $moduleGenerateContent->addonSite('developer-account', 'Your Account', $arraySoftwareState['authentication']);
+    $gmGenerateContent->addonSite('developer-account', 'Your Account', $gaRuntime['authentication']);
     break;
   case URI_ADDONS:
     // Serve the Developer Add-ons page
-    if ($arraySoftwareState['requestPath'] == URI_ADDONS && !$arraySoftwareState['requestPanelTask']) {
+    if ($gaRuntime['qPath'] == URI_ADDONS && !$gaRuntime['qPanelTask']) {
       // Users level 3 or above should use the administration codepath
-      if (funcCheckAccessLevel(3, true)) {
-        funcRedirect(URI_ADMIN . '?task=list&what=user-addons&slug=' . $arraySoftwareState['authentication']['username']);
+      if (gfCheckAccessLevel(3, true)) {
+        gfRedirect(URI_ADMIN . '?task=list&what=user-addons&slug=' . $gaRuntime['authentication']['username']);
       }
 
-      $addons = $moduleReadManifest->getAddons('panel-user-addons', $arraySoftwareState['authentication']['addons']) ?? [];
-      $moduleGenerateContent->addonSite('developer-addons-list', 'Your Add-ons', $addons);
+      $addons = $gmReadManifest->getAddons('panel-user-addons', $gaRuntime['authentication']['addons']) ?? [];
+      $gmGenerateContent->addonSite('developer-addons-list', 'Your Add-ons', $addons);
     }
 
     // Users level 3 and above should redirect to the administration codepath
-    if (funcCheckAccessLevel(3, true)) {
-      funcRedirect(str_replace(URI_ADDONS, URI_ADMIN, $arraySoftwareState['phpRequestURI']));
+    if (gfCheckAccessLevel(3, true)) {
+      gfRedirect(str_replace(URI_ADDONS, URI_ADMIN, $gaRuntime['phpRequestURI']));
     }
 
-    switch ($arraySoftwareState['requestPanelTask']) {
+    switch ($gaRuntime['qPanelTask']) {
       case 'submit':
-        if (!$arraySoftwareState['requestPanelWhat']) {
-          funcError('You did not specify what you want to submit');
+        if (!$gaRuntime['qPanelWhat']) {
+          gfError('You did not specify what you want to submit');
         }
 
-        switch ($arraySoftwareState['requestPanelWhat']) {
+        switch ($gaRuntime['qPanelWhat']) {
           case 'addon':
             if ($boolHasPostData) {
-              $finalSlug = $moduleWriteManifest->submitNewAddon();
+              $finalSlug = $gmWriteManifest->submitNewAddon();
 
               // If an error happened stop.
               if (!$finalSlug) {
-                funcError('Something has gone horribly wrong');
+                gfError('Something has gone horribly wrong');
               }
 
-              $moduleLog->record('SUCCESS - Submitted Add-on: ' . $finalSlug);
+              $gmLog->record('SUCCESS - Submitted Add-on: ' . $finalSlug);
 
               // Add-on Submitted go to edit metadata
-              funcRedirect(URI_ADDONS . '?task=update&what=metadata' . '&slug=' . $finalSlug);
+              gfRedirect(URI_ADDONS . '?task=update&what=metadata' . '&slug=' . $finalSlug);
             }
 
             // Generate the submit page
-            $moduleGenerateContent->addonSite('panel-submit-addon', 'Submit new Add-on');
+            $gmGenerateContent->addonSite('panel-submit-addon', 'Submit new Add-on');
             break;
           default:
-            funcError('Invalid submit request');
+            gfError('Invalid submit request');
         }
         break;
       case 'update':
-        switch ($arraySoftwareState['requestPanelWhat']) {
+        switch ($gaRuntime['qPanelWhat']) {
           case 'release':
             // Check for valid slug
-            if (!$arraySoftwareState['requestPanelSlug']) {
-              funcError('You did not specify a slug');
+            if (!$gaRuntime['qPanelSlug']) {
+              gfError('You did not specify a slug');
             }
 
             // Get the manifest
-            $addonManifest = $moduleReadManifest->getAddon('panel-by-slug', $arraySoftwareState['requestPanelSlug']);
+            $addonManifest = $gmReadManifest->getAddon('panel-by-slug', $gaRuntime['qPanelSlug']);
 
             // Check if manifest is valid
             if (!$addonManifest || !in_array($addonManifest['type'], ['extension', 'theme'])) {
-              funcError('Add-on Manifest is null');
+              gfError('Add-on Manifest is null');
             }
 
-            if (!in_array($arraySoftwareState['requestPanelSlug'], $arraySoftwareState['authentication']['addons'])) {
-              $moduleLog->record('FAIL - Tried to update an add-on that was not assigned: ' . $addonManifest['slug']);
-              funcError('You do not own this add-on. Stop trying to fuck with other people\'s shit!');
+            if (!in_array($gaRuntime['qPanelSlug'], $gaRuntime['authentication']['addons'])) {
+              $gmLog->record('FAIL - Tried to update an add-on that was not assigned: ' . $addonManifest['slug']);
+              gfError('You do not own this add-on. Stop trying to fuck with other people\'s shit!');
             }
 
             if ($boolHasPostData) {
-              $finalType = $moduleWriteManifest->updateAddonRelease($addonManifest);
+              $finalType = $gmWriteManifest->updateAddonRelease($addonManifest);
 
               // If an error happened stop.
               if (!$finalType) {
-                funcError('Something has gone horribly wrong');
+                gfError('Something has gone horribly wrong');
               }
 
               // Add-on Submitted go to edit metadata
-              $moduleLog->record('SUCCESS - Updated Add-on Release: ' . $addonManifest['slug']);
-              funcRedirect(URI_ADDONS);
+              $gmLog->record('SUCCESS - Updated Add-on Release: ' . $addonManifest['slug']);
+              gfRedirect(URI_ADDONS);
             }
 
-            $moduleGenerateContent->addonSite('panel-update-release', 'Release new version Add-on', $addonManifest['slug']);
+            $gmGenerateContent->addonSite('panel-update-release', 'Release new version Add-on', $addonManifest['slug']);
             break;
           case 'metadata':
             // Check for valid slug
-            if (!$arraySoftwareState['requestPanelSlug']) {
-              funcError('You did not specify a slug');
+            if (!$gaRuntime['qPanelSlug']) {
+              gfError('You did not specify a slug');
             }
 
             // Get the manifest
-            $addonManifest = $moduleReadManifest->getAddon('panel-by-slug', $arraySoftwareState['requestPanelSlug']);
+            $addonManifest = $gmReadManifest->getAddon('panel-by-slug', $gaRuntime['qPanelSlug']);
 
             // Check if manifest is valid
             if (!$addonManifest || !in_array($addonManifest['type'], ['extension', 'theme'])) {
-              funcError('Add-on Manifest is null');
+              gfError('Add-on Manifest is null');
             }
 
-            if (!in_array($arraySoftwareState['requestPanelSlug'], $arraySoftwareState['authentication']['addons'])) {
-              funcError('You do not own this add-on. Stop trying to fuck with other people\'s shit!');
+            if (!in_array($gaRuntime['qPanelSlug'], $gaRuntime['authentication']['addons'])) {
+              gfError('You do not own this add-on. Stop trying to fuck with other people\'s shit!');
             }
 
             // We have post data so we should update the manifest data via classWriteManifest
             if ($boolHasPostData) {
-              $boolUpdate = $moduleWriteManifest->updateAddonMetadata($addonManifest);
+              $boolUpdate = $gmWriteManifest->updateAddonMetadata($addonManifest);
 
               // If an error happened stop.
               if (!$boolUpdate) {
-                funcError('Something has gone horribly wrong');
+                gfError('Something has gone horribly wrong');
               }
 
-              $moduleLog->record('SUCCESS - Updated Add-on Metadata: ' . $addonManifest['slug']);
+              $gmLog->record('SUCCESS - Updated Add-on Metadata: ' . $addonManifest['slug']);
 
               // Manifest updated go somewhere
-              funcRedirect(URI_ADDONS);
+              gfRedirect(URI_ADDONS);
             }
 
             // Create an array to hold extra data to send to smarty
             // Such as the list of licenses
-            $arrayExtraData = array('licenses' => array_keys($moduleReadManifest::LICENSES));
+            $arrayExtraData = array('licenses' => array_keys($gmReadManifest::LICENSES));
 
             // Extensions need the associative array of extension categories as well
             if ($addonManifest['type'] == 'extension') {
-              $arrayExtraData['categories'] = $moduleReadManifest::EXTENSION_CATEGORY_SLUGS;
+              $arrayExtraData['categories'] = $gmReadManifest::EXTENSION_CATEGORY_SLUGS;
             }
 
             // Generate the edit add-on metadata page
-            $moduleGenerateContent->addonSite('developer-edit-addon-metadata',
+            $gmGenerateContent->addonSite('developer-edit-addon-metadata',
                                                'Editing Metadata for ' . $addonManifest['name'],
                                                $addonManifest,
                                                $arrayExtraData);
             break;
           default:
-            funcError('Invalid update request');
+            gfError('Invalid update request');
         }
         break;
       default:
-        funcSendHeader('501');
+        gfHeader(501);
     }
     break;
 }
