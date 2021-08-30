@@ -21,7 +21,7 @@ define('DEBUG_MODE', $_GET['debug'] ?? null);
 
 // Define basic constants for the software
 const SOFTWARE_NAME       = 'Phoebus';
-const SOFTWARE_VERSION    = '2.2.0a1';
+const SOFTWARE_VERSION    = '2.2.0';
 const DATASTORE_RELPATH   = '/datastore/';
 const OBJ_RELPATH         = '/.obj/';
 const BASE_RELPATH        = '/base/';
