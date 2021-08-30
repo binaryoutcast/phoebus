@@ -23,21 +23,19 @@ class classAccount {
   private $banned;
 
   /********************************************************************************************************************
-  * Class constructor that sets inital state of things
+  * Class constructor that sets initial state of things
   ********************************************************************************************************************/
   function __construct() {
-    if (!funcCheckModule('database')) {
-      funcError(__CLASS__ . '::' . __FUNCTION__ . ' - database module is required to be included in the global scope');
-    }
+    gfEnsureModules(__CLASS__, 'database');
 
     $this->postData = array(
-      'username'      => funcUnifiedVariable('post', 'username'),
-      'password'      => funcUnifiedVariable('post', 'password'),
-      'active'        => (bool)funcUnifiedVariable('post', 'active'),
-      'level'         => (int)funcUnifiedVariable('post', 'level'),
-      'displayName'   => funcUnifiedVariable('post', 'displayName'),
-      'email'         => funcUnifiedVariable('post', 'email'),
-      'verification'  => funcUnifiedVariable('post', 'verification'),
+      'username'      => gfSuperVar('post', 'username'),
+      'password'      => gfSuperVar('post', 'password'),
+      'active'        => (bool)gfSuperVar('post', 'active'),
+      'level'         => (int)gfSuperVar('post', 'level'),
+      'displayName'   => gfSuperVar('post', 'displayName'),
+      'email'         => gfSuperVar('post', 'email'),
+      'verification'  => gfSuperVar('post', 'verification'),
     );
 
     $this->banned = array(
@@ -49,6 +47,8 @@ class classAccount {
   * Register an account
   ********************************************************************************************************************/
   public function registerUser() {   
+    global $gmDatabase;
+
     $regex = '/[^a-z0-9_\-]/';
 
     $this->postData['active'] = false;
@@ -60,7 +60,7 @@ class classAccount {
         strlen($this->postData['username']) < 3 ||
         strlen($this->postData['username']) > 32 ||
         $this->postData['username'] !== $username) {
-      funcError('You did not specify a valid username.</li>' .
+      gfError('You did not specify a valid username.</li>' .
                 '<li>Usernames must be 3+ chars not exceeding 32 chars.</li>' .
                 '<li>Please use only lower case letters, numbers, and/or underscore (_) or dash (-)');
     }
@@ -68,40 +68,39 @@ class classAccount {
     if (!$this->postData['password'] ||
         strlen($this->postData['password']) < 8 ||
         strlen($this->postData['password']) > 64 ) {
-      funcError('You did not specify a valid password. Passwords must be 8+ chars not exceeding 64 chars.');
+      gfError('You did not specify a valid password. Passwords must be 8+ chars not exceeding 64 chars.');
     }
 
     $this->postData['password'] = password_hash($this->postData['password'], PASSWORD_BCRYPT);
 
     if (!$this->postData['email']) {
-      funcError('You did not specify a valid email address. You will not be able to activate your account without one');
+      gfError('You did not specify a valid email address. You will not be able to activate your account without one');
     }
 
     if (!$this->postData['displayName']) {
-      funcError('You did not specify a display name.');
+      gfError('You did not specify a display name.');
     }
 
     $query = "SELECT `username`, `email` FROM `user` WHERE `username` = ?s OR `email` = ?s";
-    (bool)$isUsernameOrEmailExisting = $GLOBALS['moduleDatabase']->query('rows',
-                                                                         $query,
-                                                                         $this->postData['username'],
-                                                                         $this->postData['email']);
+    (bool)$isUsernameOrEmailExisting = $gmDatabase->query('rows', $query,
+                                                          $this->postData['username'],
+                                                          $this->postData['email']);
 
     $isEmailBlacklisted = $this->checkEmailAgainstBlacklist($this->postData['email']);
     if ($isUsernameOrEmailExisting || $isEmailBlacklisted) {
-      funcError('Your username or e-mail address is not available. Please select another.</li>' .
+      gfError('Your username or e-mail address is not available. Please select another.</li>' .
                 '<li>You may only have one account per valid e-mail address.');
     }
 
     foreach ($this->banned as $_value) {
-      if (contains($this->postData['username'], $_value) || contains($this->postData['email'], $_value)) {
-        funcError('Yourself or someone like you has been permanently banned from using this software and service.</li><li>' . 
+      if (str_contains($this->postData['username'], $_value) || str_contains($this->postData['email'], $_value)) {
+        gfError('Yourself or someone like you has been permanently banned from using this software and service.</li><li>' . 
                   'If this automatic determination is in error please contact the Add-ons Team or a Phoebus Administrator.</li><li>' .
                   'Have a nice day!');
       }
     }
 
-    $code = $this->generateCode($this->postData['username'], $this->postData['email']);
+    $code = gfHexString();
 
     $extraData = array(
       'regEpoch' => time(),
@@ -112,7 +111,7 @@ class classAccount {
     $this->postData['addons'] = '[]';
 
     $query = "INSERT INTO `user` SET ?u";
-    $boolQueryRV = $GLOBALS['moduleDatabase']->query('normal', $query, $this->postData);
+    $boolQueryRV = $gmDatabase->query('normal', $query, $this->postData);
 
     if (!$boolQueryRV) {
       return null;
@@ -132,22 +131,24 @@ class classAccount {
   * Verify an account
   ********************************************************************************************************************/
   public function verifyUser() {
+    global $gmDatabase;
+
     if (!$this->postData['username'] || !$this->postData['verification']) {
-      funcError('You must provide a username and verification code!');
+      gfError('You must provide a username and verification code!');
     }
 
     $userManifest = $this->getSingleUser($this->postData['username'], true);
 
     if (!$userManifest) {
-      funcError('You must provide a valid registered username');
+      gfError('You must provide a valid registered username');
     }
 
     if (!$userManifest['extraData']['verification']) {
-      funcError('This account has already been verified.');
+      gfError('This account has already been verified.');
     }
 
     if ($userManifest['extraData']['verification'] != $this->postData['verification']) {
-      funcError('The verification code is incorrect. Please try again!');
+      gfError('The verification code is incorrect. Please try again!');
     }
 
     $userManifest['extraData']['verification'] = null;
@@ -160,7 +161,7 @@ class classAccount {
     );
 
     $query = "UPDATE `user` SET ?u WHERE `username` = ?s";
-    $boolQueryRV = $GLOBALS['moduleDatabase']->query('normal', $query, $insertManifest, $userManifest['username']);
+    $boolQueryRV = $gmDatabase->query('normal', $query, $insertManifest, $userManifest['username']);
 
     if (!$boolQueryRV) {
       return null;
@@ -173,14 +174,16 @@ class classAccount {
   * Update a user manifest
   ********************************************************************************************************************/
   public function updateUserManifest($aUserManifest) {
+    global $gaRuntime;
+    global $gmDatabase;
     unset($aUserManifest['addons']);
 
     if (!$this->postData['username']) {
-      funcError('Username was not found in POST');
+      gfError('Username was not found in POST');
     }
 
     if ($this->postData['username'] != $aUserManifest['username']) {
-      funcError('POST Slug does not match GET/Manifest Slug');
+      gfError('POST Slug does not match GET/Manifest Slug');
     }
 
     if (!in_array($this->postData['level'], [1, 2, 3, 4, 5])) {
@@ -188,27 +191,25 @@ class classAccount {
     }
 
     // Hackers are a superstitious cowardly lot
-    if ($GLOBALS['arraySoftwareState']['authentication']['level'] < 3) {
+    if ($gaRuntime['authentication']['level'] < 3) {
       unset($this->postData['active']);
       unset($this->postData['level']);
       unset($this->postData['username']);
 
       // User code path for dealing with email addresses
       if ($aUserManifest['email'] != $this->postData['email']) {
-        (bool)$isExistingEmail = $GLOBALS['moduleDatabase']->query('rows',
-                                                                   "SELECT `username`, `email`
-                                                                    FROM `user`
-                                                                    WHERE `email` = ?s",
-                                                                    $this->postData['email']);
+        (bool)$isExistingEmail = $gmDatabase->query('rows',
+                                                    "SELECT `username`, `email` FROM `user` WHERE `email` = ?s",
+                                                    $this->postData['email']);
         $isEmailBlacklisted = $this->checkEmailAgainstBlacklist($this->postData['email']);
         if ($isExistingEmail || $isEmailBlacklisted) {
-          funcError('Your email address is not available. Please select another.');
+          gfError('Your email address is not available. Please select another.');
         }
 
         $this->postData['extraData'] = $aUserManifest['extraData'];
         unset($this->postData['extraData']['regDate']);
 
-        $code = $this->generateCode($aUserManifest['username'], $this->postData['email']);
+        $code = gfHexString();
         $this->postData['extraData']['verification'] = $code;
 
         $this->sendVerificationEmail($this->postData['email'], $code);
@@ -216,15 +217,15 @@ class classAccount {
       }
     }
     else {
-      if ($GLOBALS['arraySoftwareState']['authentication']['level'] != 5 &&
-          $this->postData['level'] >= $GLOBALS['arraySoftwareState']['authentication']['level']) {
-        switch ($GLOBALS['arraySoftwareState']['authentication']['username']) {
+      if ($gaRuntime['authentication']['level'] != 5 &&
+          $this->postData['level'] >= $gaRuntime['authentication']['level']) {
+        switch ($gaRuntime['authentication']['username']) {
           case $this->postData['username']:
-            if ($this->postData['level'] <= $GLOBALS['arraySoftwareState']['authentication']['level']) {
+            if ($this->postData['level'] <= $gaRuntime['authentication']['level']) {
               break;
             }
           default:
-            funcError('Seriously, did you think manipulating user levels was going to work? I\'m disappointed!');
+            gfError('Seriously, did you think manipulating user levels was going to work? I\'m disappointed!');
         }
       }
 
@@ -239,7 +240,7 @@ class classAccount {
 
     if ($this->postData['password']) {
       if (strlen($this->postData['password']) < 8 || strlen($this->postData['password']) > 64 ) {
-        funcError('You did not specify a valid password. Passwords must be 8+ chars not exceeding 64 chars.');
+        gfError('You did not specify a valid password. Passwords must be 8+ chars not exceeding 64 chars.');
       }
       $this->postData['password'] = password_hash($this->postData['password'], PASSWORD_BCRYPT);
     }
@@ -256,7 +257,7 @@ class classAccount {
 
     // Insert the new manifest data into the database
     $query = "UPDATE `user` SET ?u WHERE `username` = ?s";
-    $GLOBALS['moduleDatabase']->query('normal', $query, $this->postData, $aUserManifest['username']);
+    $gmDatabase->query('normal', $query, $this->postData, $aUserManifest['username']);
 
     return true;
   }
@@ -265,16 +266,19 @@ class classAccount {
   * Gets all users at or below the requesting user level
   ********************************************************************************************************************/
   public function getUsers() {
-    if ($GLOBALS['arraySoftwareState']['authentication']['level'] < 3) {
-      funcError('I have no idea how you managed to get here but seriously you need to piss off...');
+    global $gaRuntime;
+    global $gmDatabase;
+
+    if ($gaRuntime['authentication']['level'] < 3) {
+      gfError('I have no idea how you managed to get here but seriously you need to piss off...');
     }
 
     $query = "SELECT * FROM `user` WHERE ?i = 5 OR `level` < ?i OR `username` = ?s";
-    $allUsers = $GLOBALS['moduleDatabase']->query('rows',
-                                                  $query,
-                                                  $GLOBALS['arraySoftwareState']['authentication']['level'],
-                                                  $GLOBALS['arraySoftwareState']['authentication']['level'],
-                                                  $GLOBALS['arraySoftwareState']['authentication']['username']);
+    $allUsers = $gmDatabase->query('rows',
+                                   $query,
+                                   $gaRuntime['authentication']['level'],
+                                   $gaRuntime['authentication']['level'],
+                                   $gaRuntime['authentication']['username']);
 
     foreach ($allUsers as $_key => $_value) {
       unset($allUsers[$_key]['password']);
@@ -292,8 +296,10 @@ class classAccount {
   * Gets a single user manifest
   ********************************************************************************************************************/
   public function getSingleUser($aUserName, $aRemovePassword = null) {
+    global $gmDatabase;
+
     $query = "SELECT * FROM `user` WHERE `username` = ?s";
-    $userManifest = $GLOBALS['moduleDatabase']->query('row', $query, $aUserName);
+    $userManifest = $gmDatabase->query('row', $query, $aUserName);
 
     if (!$userManifest) {
       return null;
@@ -315,8 +321,10 @@ class classAccount {
   * Assigns an Add-on slug to a user
   ********************************************************************************************************************/
   public function assignAddonToUser($aUsername, $aSlug) {
+    global $gmDatabase;
+
     $query = "SELECT `username`, `addons` FROM `user` WHERE `username` = ?s";
-    $userManifest = $GLOBALS['moduleDatabase']->query('row', $query, $aUsername);
+    $userManifest = $gmDatabase->query('row', $query, $aUsername);
 
     if (!$userManifest) {
       return null;
@@ -330,7 +338,7 @@ class classAccount {
 
       // Insert the new manifest data into the database
       $query = "UPDATE `user` SET ?u WHERE `username` = ?s";
-      $GLOBALS['moduleDatabase']->query('normal', $query, array('addons' => $userAddons), $userManifest['username']);
+      $gmDatabase->query('normal', $query, array('addons' => $userAddons), $userManifest['username']);
     }
 
     return true;
@@ -340,8 +348,10 @@ class classAccount {
   * Removes an Add-on slug from a user
   ********************************************************************************************************************/
   public function removeAddonFromUser($aUsername, $aSlug) {
+    global $gmDatabase;
+
     $query = "SELECT `username`, `addons` FROM `user` WHERE `username` = ?s";
-    $userManifest = $GLOBALS['moduleDatabase']->query('row', $query, $aUsername);
+    $userManifest = $gmDatabase->query('row', $query, $aUsername);
 
     if (!$userManifest) {
       return null;
@@ -359,7 +369,7 @@ class classAccount {
 
     // Insert the updated manifest data into the database
     $query = "UPDATE `user` SET ?u WHERE `username` = ?s";
-    $rv = $GLOBALS['moduleDatabase']->query('normal', $query, array('addons' => $userAddons), $userManifest['username']);
+    $rv = $gmDatabase->query('normal', $query, array('addons' => $userAddons), $userManifest['username']);
 
     return true;
   }
@@ -368,15 +378,17 @@ class classAccount {
   * Find a user by Add-on Slug
   ********************************************************************************************************************/
   public function findUserAddon($aSlug) {
+    global $gmDatabase;
+
     $query = "SELECT `username` FROM `user` WHERE `addons` LIKE '%\"{$aSlug}\"%'";
-    $usernames = $GLOBALS['moduleDatabase']->query('col', $query);
+    $usernames = $gmDatabase->query('col', $query);
 
     if (!$usernames) {
       return null;
     }
 
     if (count($usernames) > 1) {
-      funcError('Unable to determine a single user for slug ' . $aSlug);
+      gfError('Unable to determine a single user for slug ' . $aSlug);
     }
 
     return $usernames[0];
@@ -386,19 +398,23 @@ class classAccount {
   * Performs authentication
   ********************************************************************************************************************/
   public function authenticate($aLogout = null) {
+    global $gaRuntime;
+    global $gmDatabase;
+
     // Get Username and Password from HTTP Basic Authentication 
-    $strUsername = funcUnifiedVariable('server', 'PHP_AUTH_USER');
-    $strPassword = funcUnifiedVariable('server', 'PHP_AUTH_PW');
+    $strUsername = gfSuperVar('server', 'PHP_AUTH_USER');
+    $strPassword = gfSuperVar('server', 'PHP_AUTH_PW');
 
     // Check for the existance of username and password as well as the special 'logout' user
     if (!$strUsername || $strUsername == 'logout' || !$strPassword ) {
-      $this->promptCredentials();
+      gfBasicAuthPrompt();
     }
+
     // This will handle a logout situation using a dirty javascript trick
     // It will not work without javascript or on IE but then again neither will the PANEL
     if ($aLogout) {
-      $url = 'https://logout:logout@' . $GLOBALS['arraySoftwareState']['currentDomain'] . '/panel/logout/';
-      funcSendHeader('html');
+      $url = 'https://logout:logout@' . $gaRuntime['currentDomain'] . '/panel/logout/';
+      gfHeader('html');
       die(
         '<html><head><script>' .
         'var xmlHttp = new XMLHttpRequest();' .
@@ -407,7 +423,7 @@ class classAccount {
         'window.location = "/panel/";' .
         '</script></head><body>' .
         '<p>Logging out...</p>' .
-        '<p>If you are not redirected you also are not logged out. Enable Javascript or stop using IE/Edge!<br>' .
+        '<p>If you are not redirected you also are not logged out. Enable JavaScript or stop using IE/Edge!<br>' .
         'Additionally, you can just close the browser or clear private data.</p>' .
         '</body></html>'
       );
@@ -422,24 +438,24 @@ class classAccount {
     // then reprompt until the user cancels
     if (!$userManifest || !password_verify($strPassword, $userManifest['password'])) {
       $userManifest = null;
-      $this->promptCredentials();
+      gfBasicAuthPrompt();
     }
 
     // Not validated then send to validation page
     if ($userManifest['extraData']['verification']) {
-      funcRedirect(URI_VERIFY);
+      gfRedirect(URI_VERIFY);
     }
 
     // Deal with inactive users.. If inactive prompt forever
     if (!$userManifest['active']) {
       $userManifest = null;
-      $this->promptCredentials();
+      gfBasicAuthPrompt();
     }
 
     // Levels 1 and 2 need to add their email and displayName so force them
-    if ($userManifest['level'] < 3 && $GLOBALS['arraySoftwareState']['requestPath'] != '/panel/account/') {
+    if ($userManifest['level'] < 3 && $gaRuntime['qPath'] != '/panel/account/') {
       if (!$userManifest['email'] || !$userManifest['displayName']) {
-        funcRedirect('/panel/account/');
+        gfRedirect('/panel/account/');
       }
     }
 
@@ -449,37 +465,19 @@ class classAccount {
     // ----------------------------------------------------------------------------------------------------------------
 
     // Assign the userManifest to the softwareState
-    $GLOBALS['arraySoftwareState']['authentication'] = $userManifest;
+    $gaRuntime['authentication'] = $userManifest;
 
     return true;
-  }
-
-  /********************************************************************************************************************
-  * Prompts for credentals or shows 401
-  ********************************************************************************************************************/
-  private function promptCredentials() {
-    header('WWW-Authenticate: Basic realm="' . SOFTWARE_NAME . '"');
-    header('HTTP/1.0 401 Unauthorized');   
-    funcError('You need to enter a valid username and password.');
-    exit();
-  }
-
-  /********************************************************************************************************************
-  * Generates a verification code
-  ********************************************************************************************************************/
-  private function generateCode($aUsername, $aEmail) {
-    $secretFile = ROOT_PATH . DATASTORE_RELPATH . '.phoebus/code';
-    $secret = funcUnifiedVariable('var', @file_get_contents(secretFile)) ?? time();
-    $code = hash('sha256', time() . $aUsername . $aEmail . $secret);
-    return $code;
   }
 
   /********************************************************************************************************************
   * Send a verification email
   ********************************************************************************************************************/
   private function sendVerificationEmail($aEmail, $aValidationCode) {
-    if (!funcUnifiedVariable('var', $aEmail)) {
-      funcError('Unable to send verification email because it is null');
+    global $gaRuntime;
+
+    if (!gfSuperVar('var', $aEmail)) {
+      gfError('Unable to send verification email because it is null');
     }
 
     ini_set("sendmail_from", "addons@palemoon.org");
@@ -490,7 +488,7 @@ class classAccount {
       'X-Mailer' => SOFTWARE_NAME . '/' . SOFTWARE_VERSION,
     );
 
-    $strSubDomain = $GLOBALS['arraySoftwareState']['debugMode'] ? 'addons-dev.' : 'addons.';
+    $strSubDomain = $gaRuntime['debugMode'] ? 'addons-dev.' : 'addons.';
 
     $strSendMailBody = 'Your verification code is: ' . $aValidationCode . NEW_LINE . NEW_LINE .
                        'You can verify and/or activate your account by navigating to https://' .

@@ -11,7 +11,7 @@ class classMozillaRDF {
   private $rdfParser;
 
   /********************************************************************************************************************
-  * Class constructor that sets inital state of things
+  * Class constructor that sets initial state of things
   ********************************************************************************************************************/
   function __construct() {
     // Include the Rdf_parser
@@ -41,10 +41,10 @@ class classMozillaRDF {
     $targetArray = array();
     if (!empty($data['manifest']['targetApplication']) && is_array($data['manifest']['targetApplication'])) {
       foreach ($data['manifest']['targetApplication'] as $targetApp) {
-        if (startsWith($data[$targetApp][self::EM_NS."id"], self::ANON_PREFIX) ||
-            startsWith($data[$targetApp][self::EM_NS.'minVersion'], self::ANON_PREFIX) ||
-            startsWith($data[$targetApp][self::EM_NS.'maxVersion'], self::ANON_PREFIX)) {
-          funcError('em:targetApplication description tags/attributes em:id, em:minVersion, and em:maxVersion MUST have a value');
+        if (str_starts_with($data[$targetApp][self::EM_NS."id"], self::ANON_PREFIX) ||
+            str_starts_with($data[$targetApp][self::EM_NS.'minVersion'], self::ANON_PREFIX) ||
+            str_starts_with($data[$targetApp][self::EM_NS.'maxVersion'], self::ANON_PREFIX)) {
+          gfError('em:targetApplication description tags/attributes em:id, em:minVersion, and em:maxVersion MUST have a value');
         }
 
         $id = $data[$targetApp][self::EM_NS."id"];
@@ -101,7 +101,7 @@ class classMozillaRDF {
         $prop = substr($predicate, $length, strlen($predicate)-$length);
 
         if (in_array($prop, $singleProps) &&
-            !startsWith($object, self::ANON_PREFIX) &&
+            !str_starts_with($object, self::ANON_PREFIX) &&
             $object != 'false') {
           $data['manifest'][$prop] = $object;
         }

@@ -6,18 +6,13 @@
 // == | Setup | =======================================================================================================
 
 // Include modules
-$arrayIncludes = ['database', 'readManifest'];
-foreach ($arrayIncludes as $_value) { require_once(MODULES[$_value]); }
-
-// Instantiate modules
-$moduleDatabase = new classDatabase();
-$moduleReadManifest = new classReadManifest();
+gfImportModules('database', 'readManifest');
 
 // ====================================================================================================================
 
 // == | funcDownloadXPI | ===============================================
 
-function funcDownloadXPI($aAddonManifest, $aAddonVersion, $aBinaryStream = null) {
+function gfDownloadXPI($aAddonManifest, $aAddonVersion, $aBinaryStream = null) {
   $versionXPI = null;
   
   if ($aAddonVersion == 'latest') {
@@ -38,7 +33,7 @@ function funcDownloadXPI($aAddonManifest, $aAddonVersion, $aBinaryStream = null)
       $addonFile = $aAddonManifest['basePath'] . $versionXPI;
     }
     else {
-      funcError('Unknown XPI version');
+      gfError('Unknown XPI version');
     }
   }
 
@@ -58,7 +53,7 @@ function funcDownloadXPI($aAddonManifest, $aAddonVersion, $aBinaryStream = null)
     header('X-Accel-Redirect: ' . ltrim($addonFile, '.'));
   }
   else {
-    funcError('XPI file not found');
+    gfError('XPI file not found');
   }
 
   // We are done here
@@ -69,7 +64,7 @@ function funcDownloadXPI($aAddonManifest, $aAddonVersion, $aBinaryStream = null)
 
 // == | funcDownloadSearchPlugin | ============================================
 
-function funcDownloadSearchPlugin($aSearchPluginName, $aBinaryStream = null) {
+function gfDownloadSearchPlugin($aSearchPluginName, $aBinaryStream = null) {
   $searchPluginFile = './datastore/searchplugins/' . $aSearchPluginName;
   
   if (file_exists($searchPluginFile)) {
@@ -80,13 +75,14 @@ function funcDownloadSearchPlugin($aSearchPluginName, $aBinaryStream = null) {
     else {
       header('Content-Type: text/xml');
     }
+
     header('Content-Disposition: inline; filename="' . $aSearchPluginName .'"');
     header('Cache-Control: no-cache');
     
     readfile($searchPluginFile);
   }
   else {
-    funcError('Search Plugin XML file not found');
+    gfError('Search Plugin XML file not found');
   }
   
   // We are done here
@@ -97,38 +93,53 @@ function funcDownloadSearchPlugin($aSearchPluginName, $aBinaryStream = null) {
 
 // == | Main | ================================================================
 
-$strRequestAddonID = funcUnifiedVariable('get', 'id');
-$strRequestAddonVersion = funcUnifiedVariable('get', 'version') ?? 'latest';
-$boolRequestPanel = funcUnifiedVariable('get', 'panel');
-$boolRequestBinaryStream = in_array('disable-xpinstall', TARGET_APPLICATION_SITE[$arraySoftwareState['currentApplication']]['features']);
-                    
+$gaRuntime['qAddonID'] = gfSuperVar('get', 'id');
+$gaRuntime['qVersion'] = gfSuperVar('get', 'version') ?? 'latest';
+$gaRuntime['qPanel']   = gfSuperVar('get', 'panel');
+$gaRuntime['qBinary']  = in_array('disable-xpinstall',
+                                  TARGET_APPLICATION_SITE[$gaRuntime['currentApplication']]['features']);
 
 // Sanity
-if ($strRequestAddonID == null) {
-  funcError('Missing minimum required arguments.');
+if ($gaRuntime['qAddonID'] == null) {
+  gfError('Missing minimum required arguments.');
+}
+
+if (!$gaRuntime['validClient']){
+  if (!$gaRuntime['debugMode']) {
+    gfHeader(404);
+  }
+  gfError('Client check failed.');
+}
+
+if (!$gaRuntime['validVersion']) {
+  if (!$gaRuntime['debugMode']) {
+    gfHeader(404);
+  }
+  gfError('Version check failed.');
+  
 }
 
 // Search for add-ons in our databases
-if ($boolRequestPanel) {
-  $addonManifest = $moduleReadManifest->getAddon('panel-by-id', $strRequestAddonID);
-  $boolRequestBinaryStream = true;
+if ($gaRuntime['qPanel']) {
+  $addonManifest = $gmReadManifest->getAddon('panel-by-id', $gaRuntime['qAddonID']);
+  $gaRuntime['qBinary'] = true;
 }
 else {
-  $addonManifest = $moduleReadManifest->getAddon('by-id', $strRequestAddonID);
+  $addonManifest = $gmReadManifest->getAddon('by-id', $gaRuntime['qAddonID']);
 }
 
 if ($addonManifest != null) {
   $addonManifest['release'] = $addonManifest['releaseXPI'];
-  funcDownloadXPI($addonManifest, $strRequestAddonVersion, $boolRequestBinaryStream);
+  gfDownloadXPI($addonManifest, $gaRuntime['qVersion'], $gaRuntime['qBinary']);
 }
 else {  
   // Search Plugins
   require_once(DATABASES['searchPlugins']);
-  if (array_key_exists($strRequestAddonID, $searchPluginsDB)) {
-    funcDownloadSearchPlugin($searchPluginsDB[$strRequestAddonID], $boolRequestBinaryStream);
+  if (array_key_exists($gaRuntime['qAddonID'], $searchPluginsDB)) {
+    gfDownloadSearchPlugin($searchPluginsDB[$gaRuntime['qAddonID']], $gaRuntime['qBinary']);
   }
   else {
-    funcError('Add-on could not be found in our database');
+    gfError('Add-on could not be found in our database');
   }
 }
 

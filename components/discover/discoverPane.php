@@ -9,13 +9,13 @@ $strApplication = null;
 $strPromoText = null;
 $strDivTextAlign = 'center';
 
-switch ($arraySoftwareState['currentApplication']) {
+switch ($gaRuntime['currentApplication']) {
   case 'palemoon':
     $strApplication = 'Pale Moon';
     $strAppType = 'browser';
     $strDivTextAlign = 'left';
     $strPromoText = ' the following <a href="https://' . 
-                    $arraySoftwareState['currentDomain'] . 
+                    $gaRuntime['currentDomain'] . 
                     '/" target="_blank">Add-ons Site</a> categories';
     break;
   case 'basilisk':
@@ -33,14 +33,14 @@ switch ($arraySoftwareState['currentApplication']) {
 }
 
 if (!$strApplication) {
-  $strApplication = ucfirst($arraySoftwareState['currentApplication']);
+  $strApplication = ucfirst($gaRuntime['currentApplication']);
 }
 
 $strPromoTextPre = 'You can take advantage of ' . $strApplication . '\'s exceptional extensibility by installing add-ons from';
 $strComponentPath = str_replace(ROOT_PATH, '', dirname(COMPONENTS['discover']));
 
-$strAMOButton = '<a class="amobutton" href="http://' . $arraySoftwareState['currentDomain'] . '/" target="_blank">' .
-                '<img class="alignleft" src="' . $strComponentPath . '/skin/' . $arraySoftwareState['currentApplication'] . '.png?{%EPOCH}" />' .
+$strAMOButton = '<a class="amobutton" href="http://' . $gaRuntime['currentDomain'] . '/" target="_blank">' .
+                '<img class="alignleft" src="' . $strComponentPath . '/skin/' . $gaRuntime['currentApplication'] . '.png?{%EPOCH}" />' .
                 '<p><strong>' . $strApplication . ' Add-ons Site</strong></p>' .
                 '<p><small>Browse add-ons for ' . $strApplication . '</small></p>' .
                 '</a>';
@@ -48,10 +48,10 @@ $strAMOButton = '<a class="amobutton" href="http://' . $arraySoftwareState['curr
 $strPageButtons = '';
 
 
-if (in_array('extensions-cat', TARGET_APPLICATION_SITE[$arraySoftwareState['currentApplication']]['features']) &&
-    $arraySoftwareState['currentApplication'] == 'palemoon') {
+if (in_array('extensions-cat', TARGET_APPLICATION_SITE[$gaRuntime['currentApplication']]['features']) &&
+    $gaRuntime['currentApplication'] == 'palemoon') {
   foreach (array_merge(EXTENSION_CATEGORY_SLUGS, OTHER_CATEGORY_SLUGS) as $_key => $_value) {
-    $strCategoryURL = 'https://' . $arraySoftwareState['currentDomain'] . '/';
+    $strCategoryURL = 'https://' . $gaRuntime['currentDomain'] . '/';
     switch ($_key) {
       case 'themes':
         $_description = 'Complete Themes';
@@ -90,7 +90,7 @@ if (in_array('extensions-cat', TARGET_APPLICATION_SITE[$arraySoftwareState['curr
     $strPageButtons .= $_button;
   }
 }
-elseif ($arraySoftwareState['currentApplication'] == 'basilisk') {
+elseif ($gaRuntime['currentApplication'] == 'basilisk') {
 $strPageButtons = $strAMOButton .
                 '<a class="amobutton" href="https://github.com/JustOff/ca-archive/releases" target="_blank">' .
                 '<img class="alignleft" src="' . $strComponentPath . '/skin/caa-extension.png?{%EPOCH}" />' .
@@ -102,19 +102,19 @@ else {
   $strPageButtons = $strAMOButton;
 }
 
-if ($arraySoftwareState['currentApplication'] == 'palemoon') {
+if ($gaRuntime['currentApplication'] == 'palemoon') {
   $strHTMLTemplate = file_get_contents(ROOT_PATH . $strComponentPath . '/content/template-announcement.xhtml');
 }
 else {
   $strHTMLTemplate = file_get_contents(ROOT_PATH . $strComponentPath . '/content/template.xhtml');
 }
 
-$arrayFilterSubstitute = array(
+$substs = array(
   '{%BASE_PATH}'              => $strComponentPath,
-  '{%SITE_DOMAIN}'            => $arraySoftwareState['currentDomain'],
+  '{%SITE_DOMAIN}'            => $gaRuntime['currentDomain'],
   '{%PAGE_TITLE}'             => 'Discover Add-ons for ' . $strApplication,
   '{%APPLICATION_NAME}'       => $strApplication,
-  '{%APPLICATION_SHORTNAME}'  => $arraySoftwareState['currentApplication'],
+  '{%APPLICATION_SHORTNAME}'  => $gaRuntime['currentApplication'],
   '{%APPLICATION_TYPE}'       => $strAppType,
   '{%PROMO_TEXT}'             => $strPromoTextPre . $strPromoText . ':',
   '{%DIV_TEXTALIGN}'          => $strDivTextAlign,
@@ -122,11 +122,9 @@ $arrayFilterSubstitute = array(
   '{%EPOCH}'                  => time()
 );
 
-foreach ($arrayFilterSubstitute as $_key => $_value) {
-  $strHTMLTemplate = str_replace($_key, $_value, $strHTMLTemplate);
-}
+$strHTMLTemplate = gfSubst('simple', $substs, $strHTMLTemplate);
 
-funcSendHeader('html');
+gfHeader('html');
 print($strHTMLTemplate);
 
 // We are done here...

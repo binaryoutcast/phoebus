@@ -18,43 +18,42 @@ class classGenerateContent {
   /********************************************************************************************************************
   * Class constructor that sets inital state of things
   ********************************************************************************************************************/
-  function __construct($aUseSmarty = null) {
-    // Assign current software state to a class property by reference
-    $GLOBALS['arraySoftwareState'] = &$GLOBALS['arraySoftwareState'];
+  function __construct() {
+    global $gaRuntime;
 
     // Set the Application ID
-    $GLOBALS['arraySoftwareState']['targetApplicationID'] =
-      TARGET_APPLICATION_ID[$GLOBALS['arraySoftwareState']['currentApplication']];
+    $gaRuntime['targetApplicationID'] =
+      TARGET_APPLICATION_ID[$gaRuntime['currentApplication']];
 
     // ----------------------------------------------------------------------------------------------------------------
 
     // Component Path
-    $componentPath = dirname(COMPONENTS[$GLOBALS['arraySoftwareState']['requestComponent']]);
+    $componentPath = dirname(COMPONENTS[$gaRuntime['qComponent']]);
 
     // Component Content Path (for static content)
-    $GLOBALS['arraySoftwareState']['componentContentPath'] = $componentPath . '/content/';
+    $gaRuntime['componentContentPath'] = $componentPath . '/content/';
 
     // Current Skin
     $skin = 'default';
 
     // SITE component has more than one skin so set it based on
     // current application
-    if ($GLOBALS['arraySoftwareState']['requestComponent'] == 'site') {
-      $skin = $GLOBALS['arraySoftwareState']['currentApplication'];
+    if ($gaRuntime['qComponent'] == 'site') {
+      $skin = $gaRuntime['currentApplication'];
     }
 
-    $GLOBALS['arraySoftwareState']['componentSkinPath'] = $componentPath . '/skin/' . $skin . '/';
-    $GLOBALS['arraySoftwareState']['componentSkinRelPath'] = 
-      str_replace(ROOT_PATH, '', $GLOBALS['arraySoftwareState']['componentSkinPath']);
+    $gaRuntime['componentSkinPath'] = $componentPath . '/skin/' . $skin . '/';
+    $gaRuntime['componentSkinRelPath'] = 
+      str_replace(ROOT_PATH, '', $gaRuntime['componentSkinPath']);
 
     // ----------------------------------------------------------------------------------------------------------------
 
-    if ($aUseSmarty) {
+    if ($gaRuntime['useSmarty']) {
       // Include Smarty
       require_once(LIBRARIES['smarty']);
 
       // Get smartyDebug HTTP GET Argument
-      $GLOBALS['arraySoftwareState']['requestSmartyDebug'] = funcUnifiedVariable('get', 'smartyDebug');
+      $gaRuntime['requestSmartyDebug'] = gfSuperVar('get', 'smartyDebug');
 
       // Initalize Smarty
       $this->libSmarty = new Smarty();
@@ -65,13 +64,13 @@ class classGenerateContent {
       // Set Smarty Debug
       $this->libSmarty->debugging = false;
 
-      if ($GLOBALS['arraySoftwareState']['requestSmartyDebug']) {
-        $this->libSmarty->debugging = $GLOBALS['arraySoftwareState']['debugMode'];
+      if ($gaRuntime['requestSmartyDebug']) {
+        $this->libSmarty->debugging = $gaRuntime['debugMode'];
       }
 
       // Set Smarty Paths
       $smartyObjPath = ROOT_PATH . OBJ_RELPATH . '/smarty/' .
-                       $GLOBALS['arraySoftwareState']['requestComponent'] .
+                       $gaRuntime['qComponent'] .
                        '-' . $skin . '/';
 
       $this->libSmarty->setCacheDir($smartyObjPath . 'cache');
@@ -91,9 +90,11 @@ class classGenerateContent {
   * @param $aExtraData    Used if not null
   ********************************************************************************************************************/
   public function addonSite($aType, $aTitle, $aData = null, $aExtraData = null) {
+    global $gaRuntime;
+
     // This function will only serve the SITE component
     if (!$this->libSmarty) {
-      funcError(__CLASS__ . '::' . __FUNCTION__ . ' - This method requires Smarty');
+      gfError(__CLASS__ . '::' . __FUNCTION__ . ' - This method requires Smarty');
     }
 
     // ----------------------------------------------------------------------------------------------------------------
@@ -102,14 +103,14 @@ class classGenerateContent {
     $template = $this->getContentTemplate('site-template.xhtml');
 
     if (!$template) {
-      funcError('Main template file could not be read or is missing');
+      gfError('Main template file could not be read or is missing');
     }
 
     // Read the Site Stylesheet
     $stylesheet = $this->getContentTemplate('site-stylesheet.css');
 
     if (!$stylesheet) {
-      funcError('Mail stylesheet file could not be read or is missing');
+      gfError('Main stylesheet file could not be read or is missing');
     }
 
     // ----------------------------------------------------------------------------------------------------------------
@@ -192,12 +193,12 @@ class classGenerateContent {
       default:
         $content = $this->getContentTemplate($aType, 'content');
         if (!$content) {
-          funcError('Unkown template or content');
+          gfError('Unkown template or content');
         }
     }
 
     if (!$content) {
-      funcError('Content or template file could not be read or is missing');
+      gfError('Content or template file could not be read or is missing');
     }
 
     // ----------------------------------------------------------------------------------------------------------------
@@ -210,35 +211,37 @@ class classGenerateContent {
     // ----------------------------------------------------------------------------------------------------------------
 
     // Assign Data to Smarty
-    $this->libSmarty->assign('APPLICATION_DEBUG', $GLOBALS['arraySoftwareState']['debugMode']);
+    $this->libSmarty->assign('APPLICATION_DEBUG', $gaRuntime['debugMode']);
     $this->libSmarty->assign('SITE_DOMAIN',
-                             $GLOBALS['arraySoftwareState']['currentScheme'] . '://' .
-                             $GLOBALS['arraySoftwareState']['currentDomain']);
+                             $gaRuntime['currentScheme'] . '://' .
+                             $gaRuntime['currentDomain']);
     $this->libSmarty->assign('PAGE_TITLE', $aTitle);
-    $this->libSmarty->assign('PAGE_PATH', $GLOBALS['arraySoftwareState']['requestPath']);
-    $this->libSmarty->assign('BASE_PATH', $GLOBALS['arraySoftwareState']['componentSkinRelPath']);
+    $this->libSmarty->assign('PAGE_PATH', $gaRuntime['qPath']);
+    $this->libSmarty->assign('BASE_PATH', $gaRuntime['componentSkinRelPath']);
     $this->libSmarty->assign('PHOEBUS_VERSION', SOFTWARE_VERSION);
-    $this->libSmarty->assign('SITE_NAME', $GLOBALS['arraySoftwareState']['currentName']);
-    $this->libSmarty->assign('SEARCH_TERMS', $GLOBALS['arraySoftwareState']['requestSearchTerms']);
-    $this->libSmarty->assign('APPLICATION_ID', $GLOBALS['arraySoftwareState']['targetApplicationID']);
+    $this->libSmarty->assign('SITE_NAME', $gaRuntime['currentName']);
+    $this->libSmarty->assign('SEARCH_TERMS', $gaRuntime['qSearchTerms']);
+    $this->libSmarty->assign('APPLICATION_ID', $gaRuntime['targetApplicationID']);
+    $this->libSmarty->assign('VALID_CLIENT', $gaRuntime['validClient']);
+    $this->libSmarty->assign('VALID_VERSION', $gaRuntime['validVersion']);
     $this->libSmarty->assign('PAGE_TYPE', $aType);
     $this->libSmarty->assign('PAGE_DATA', $aData);
     $this->libSmarty->assign('EXTRA_DATA', $aExtraData);
     
-    if ($GLOBALS['arraySoftwareState']['requestComponent'] == 'panel') {
+    if ($gaRuntime['qComponent'] == 'panel') {
       $this->libSmarty->assign('USER_LEVEL',
-                               $GLOBALS['arraySoftwareState']['authentication']['level'] ?? 0);
+      $gaRuntime['authentication']['level'] ?? 0);
     }
 
     // The Panel should NEVER be cached
-    if ($GLOBALS['arraySoftwareState']['requestComponent'] == 'panel') {
+    if ($gaRuntime['qComponent'] == 'panel') {
       header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
       header("Cache-Control: post-check=0, pre-check=0", false);
       header("Pragma: no-cache");
     }
 
     // Send html header
-    funcSendHeader('html');
+    gfHeader('html');
     
     // Send the final template to smarty and output
     $this->libSmarty->display('string:' . $finalTemplate);
@@ -253,15 +256,17 @@ class classGenerateContent {
   * @param $aAddonManifest   Add-on Manifest data structure
   ********************************************************************************************************************/
   public function addonUpdateService($aAddonManifest = null) {
-    if ($GLOBALS['arraySoftwareState']['requestComponent'] != 'aus') {
-      funcError(
+    global $gaRuntime;
+
+    if ($gaRuntime['qComponent'] != 'aus') {
+      gfError(
         __CLASS__ . '::' . __FUNCTION__ . ' - This method is designed to work with the AUS component only'
       );
     }
 
     if (!$aAddonManifest) {
       // Send XML header
-      funcSendHeader('xml');
+      gfHeader('xml');
 
       // Print XML Tag and Empty RDF Response
       print(self::XML_TAG . NEW_LINE . self::RDF_AUS_BLANK);
@@ -270,33 +275,31 @@ class classGenerateContent {
       exit();
     }
 
-    $updateRDF = file_get_contents($GLOBALS['arraySoftwareState']['componentContentPath'] . 'update.rdf');
+    $updateRDF = gfReadFile($gaRuntime['componentContentPath'] . 'update.rdf');
 
     $addonXPInstall = $aAddonManifest['xpinstall'][$aAddonManifest['releaseXPI']];
-    $addonTargetApplication = $addonXPInstall['targetApplication'][$GLOBALS['arraySoftwareState']['targetApplicationID']];
+    $addonTargetApplication = $addonXPInstall['targetApplication'][$gaRuntime['targetApplicationID']];
     
-    // Language Packs are an 'item' as far as update.rdf is conserned
+    // Language Packs are an 'item' as far as update.rdf is concerned
     if ($aAddonManifest['type'] == 'langpack') {
       $aAddonManifest['type'] = 'item';
     }
     
-    $arrayFilterSubstitute = array(
+    $substs = array(
       '{%ADDON_TYPE}'       => $aAddonManifest['type'],
       '{%ADDON_ID}'         => $aAddonManifest['id'],
       '{%ADDON_VERSION}'    => $addonXPInstall['version'],
-      '{%APPLICATION_ID}'   => $GLOBALS['arraySoftwareState']['targetApplicationID'],
+      '{%APPLICATION_ID}'   => $gaRuntime['targetApplicationID'],
       '{%ADDON_MINVERSION}' => $addonTargetApplication['minVersion'],
       '{%ADDON_MAXVERSION}' => $addonTargetApplication['maxVersion'],
       '{%ADDON_XPI}'        => $aAddonManifest['baseURL'] . $aAddonManifest['id'],
       '{%ADDON_HASH}'       => $addonXPInstall['hash']
     );
 
-    foreach ($arrayFilterSubstitute as $_key => $_value) {
-      $updateRDF = str_replace($_key, $_value, $updateRDF);
-    }
+    $updateRDF = gfSubst('simple', $substs, $updateRDF);
 
     // Send XML header
-    funcSendHeader('xml');
+    gfHeader('xml');
 
     // Print Update RDF
     print($updateRDF);
@@ -311,9 +314,11 @@ class classGenerateContent {
   * @param $aSearchManifest    Search Result Manifest
   ********************************************************************************************************************/
   public function amSearch($aSearchManifest = null) {
+    global $gaRuntime;
+
     if (!$aSearchManifest) {
       // Send XML header
-      funcSendHeader('xml');
+      gfHeader('xml');
 
       // Print XML Tag and Empty RDF Response
       print(self::XML_TAG . NEW_LINE . self::XML_API_SEARCH_BLANK);
@@ -322,7 +327,7 @@ class classGenerateContent {
       exit();
     }
 
-    $addonXML = file_get_contents($GLOBALS['arraySoftwareState']['componentContentPath'] . 'addon.xml');
+    $addonXML = gfReadFile($gaRuntime['componentContentPath'] . 'addon.xml');
 
     $intResultCount = count($aSearchManifest);
 
@@ -340,7 +345,7 @@ class classGenerateContent {
       }
 
       $_addonXPInstall = $_value['xpinstall'][$_value['releaseXPI']];
-      $_addonTargetApplication = $_addonXPInstall['targetApplication'][$GLOBALS['arraySoftwareState']['targetApplicationID']];
+      $_addonTargetApplication = $_addonXPInstall['targetApplication'][$gaRuntime['targetApplicationID']];
 
       switch ($_value['type']) {
         case 'extension':
@@ -356,7 +361,7 @@ class classGenerateContent {
           $_addonType = 0;
       }        
 
-      $_arrayFilterSubstitute = array(
+      $substs = array(
         '{%ADDON_TYPE}'         => $_addonType,
         '{%ADDON_ID}'           => $_value['id'],
         '{%ADDON_VERSION}'      => $_addonXPInstall['version'],
@@ -365,18 +370,16 @@ class classGenerateContent {
         '{%ADDON_CREATOR}'      => $_value['creator'],
         '{%ADDON_CREATORURL}'   => 'about:blank',
         '{%ADDON_DESCRIPTION}'  => $_value['description'],
-        '{%ADDON_URL}'          => 'http://' . $GLOBALS['arraySoftwareState']['currentDomain'] . $_value['url'],
-        '{%ADDON_ICON}'         => 'http://' . $GLOBALS['arraySoftwareState']['currentDomain'] . $_value['icon'],
+        '{%ADDON_URL}'          => 'http://' . $gaRuntime['currentDomain'] . $_value['url'],
+        '{%ADDON_ICON}'         => 'http://' . $gaRuntime['currentDomain'] . $_value['icon'],
         '{%ADDON_HOMEPAGEURL}'  => $_addonHomepageURL,
-        '{%APPLICATION_ID}'     => $GLOBALS['arraySoftwareState']['targetApplicationID'],
+        '{%APPLICATION_ID}'     => $gaRuntime['targetApplicationID'],
         '{%ADDON_MINVERSION}'   => $_addonTargetApplication['minVersion'],
         '{%ADDON_MAXVERSION}'   => $_addonTargetApplication['maxVersion'],
         '{%ADDON_XPI}'          => $_value['baseURL'] . $_value['id']
       );
 
-      foreach ($_arrayFilterSubstitute as $_key => $_value) {
-        $_addonXML = str_replace($_key, $_value, $_addonXML);
-      }
+      $_addonXML = gfSubst('simple', $substs, $_addonXML);
       
       $searchXML .= $_addonXML . NEW_LINE;
     }
@@ -384,7 +387,7 @@ class classGenerateContent {
     $searchXML .= '</searchresults>';
     
     // Send XML header
-    funcSendHeader('xml');
+    gfHeader('xml');
 
     // Print Update RDF
     print($searchXML);
@@ -400,8 +403,9 @@ class classGenerateContent {
   * @param $aFilename   name of file
   ********************************************************************************************************************/
   private function getContentTemplate($aFilename, $aSource = 'skin') {
+    global $gaRuntime;
     $aSource = ucfirst($aSource);
-    return @file_get_contents($GLOBALS['arraySoftwareState']['component' . $aSource . 'Path'] . $aFilename) ?? null;
+    return gfReadFile($gaRuntime['component' . $aSource . 'Path'] . $aFilename);
   }
 }
 

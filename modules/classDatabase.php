@@ -4,33 +4,31 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 class classDatabase {
-  private $arraySoftwareState;
   private $libSafeMySQL;
   private $connection;
   
   /********************************************************************************************************************
-  * Class constructor that sets inital state of things
+  * Class constructor that sets initial state of things
   ********************************************************************************************************************/
   function __construct() {
-    // Assign current software state to a class property by reference
-    $this->arraySoftwareState = &$GLOBALS['arraySoftwareState'];
+    global $gaRuntime;
 
     @include_once(ROOT_PATH . DATASTORE_RELPATH . '.phoebus/sql');
 
     if (!($arrayCreds ?? false)) {
-      funcError(__CLASS__ . '::' . __FUNCTION__ . ' - Could not read aql file');
+      gfError(__CLASS__ . '::' . __FUNCTION__ . ' - Could not read aql file');
     }
 
     $arrayCreds['currentDB'] = $arrayCreds['liveDB'];
 
-    if($this->arraySoftwareState['debugMode'] || $this->arraySoftwareState['requestDebugOff']) {
+    if($gaRuntime['debugMode'] || $gaRuntime['qDebugOff']) {
       $arrayCreds['currentDB'] = $arrayCreds['devDB'];;
     }
 
     $this->connection = mysqli_connect('localhost', $arrayCreds['username'], $arrayCreds['password'], $arrayCreds['currentDB']);
     
     if (mysqli_connect_errno()) {
-      funcError('SQL Connection Error: ' . mysqli_connect_errno($this->connection));
+      gfError('SQL Connection Error: ' . mysqli_connect_errno($this->connection));
     }
     
     mysqli_set_charset($this->connection, 'utf8');
@@ -60,7 +58,7 @@ class classDatabase {
     $result = null;
 
     if (!$this->connection) {
-      funcError(__CLASS__ . '::' . __FUNCTION__ . ' - An SQL Connection is required');
+      gfError(__CLASS__ . '::' . __FUNCTION__ . ' - An SQL Connection is required');
     }
 
     switch ($aQueryType) {
@@ -77,10 +75,10 @@ class classDatabase {
         $result = $this->libSafeMySQL->query(...$aExtraArgs);
         break;
       default:
-        funcError(__CLASS__ . '::' . __FUNCTION__ . ' - Unknown query type');
+        gfError(__CLASS__ . '::' . __FUNCTION__ . ' - Unknown query type');
     }
 
-    return funcUnifiedVariable('var', $result);
+    return gfSuperVar('var', $result);
   }
 
   /********************************************************************************************************************
@@ -90,7 +88,7 @@ class classDatabase {
   * @return   parsed query string or null
   ********************************************************************************************************************/
   public function parse(...$aArgs) {
-    return funcUnifiedVariable('var', $this->libSafeMySQL->parse(...$aArgs));
+    return gfSuperVar('var', $this->libSafeMySQL->parse(...$aArgs));
   }
 
 } // End of Class
