@@ -7,7 +7,7 @@ body {
 	margin-bottom: 0px;
 	/* background-color: #51667b; Mattcast Blue*/
   background-color: #020814;
-  background-image: url('/components/site/skin/interlink/background.webp');
+  background-image: url('/base/skin/interlink/background.webp');
   background-repeat: no-repeat;
   background-attachment: fixed;
   background-position-x: center;
@@ -21,7 +21,7 @@ body,td,th {
 
 @font-face {
     font-family: 'DejaVu Sans Web';
-    src: url('/components/site/skin/interlink/dejavusans-webfont.woff') format('woff');
+    src: url('/base/skin/interlink/dejavusans-webfont.woff') format('woff');
     font-weight: normal;
     font-style: normal;
 }
@@ -109,7 +109,7 @@ hr {
 
 #BinOC-Header {
   background-color: #020814;
-  background-image: url('/components/site/skin/interlink/background-blur.webp');
+  background-image: url('/base/skin/interlink/background-blur.webp');
   background-repeat: no-repeat;
   background-attachment: fixed;
   background-position-x: center;
@@ -125,9 +125,9 @@ hr {
 	width: 339px;
 	height:52px;
 {if $APPLICATION_DEBUG == true}
-	background-image: url('/components/site/skin/interlink/phoebus-header-logo.png');
+	background-image: url('/base/skin/interlink/phoebus-header-logo.png');
 {else}
-	background-image: url('/components/site/skin/interlink/binoc-header-logo.png');
+	background-image: url('/base/skin/interlink/binoc-header-logo.png');
 {/if}
 	background-repeat: no-repeat;
 	background-position: left center;
