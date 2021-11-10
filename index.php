@@ -73,7 +73,7 @@ const LIBRARIES = array(
 const TARGET_APPLICATION_SITE = array(
   'palemoon' => array(
     'enabled'       => true,
-    'oldVersion'    => '29.2.0',
+    'oldVersion'    => '29.4.0',
     'name'          => 'Pale Moon - Add-ons',
     'domain'        => array('live' => 'addons.palemoon.org', 'dev' => 'addons-dev.palemoon.org'),
     'features'      => array('https', 'extensions', 'extensions-cat', 'themes',
@@ -81,7 +81,7 @@ const TARGET_APPLICATION_SITE = array(
   ),
   'basilisk' => array(
     'enabled'       => true,
-    'oldVersion'    => '20210105',
+    'oldVersion'    => '20210927',
     'name'          => 'Basilisk: add-ons',
     'domain'        => array('live' => 'addons.basilisk-browser.org', 'dev' => null),
     'features'      => array('https', 'extensions', 'themes', 'personas', 'search-plugins')
@@ -281,6 +281,14 @@ function gfValidClientVersion($aCheckVersion = null, $aVersion = null) {
     $oldAndInsecureHackJobs = array(
       'nt 5',
       'nt 6.0',
+      'macintosh'
+      'intel',
+      'ppc',
+      'mac os',
+      'iphone',
+      'ipad',
+      'ipod',
+      'android',
       'goanna/3.5',
       'goanna/4.0',
       'rv:3.5',
