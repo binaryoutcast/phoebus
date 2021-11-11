@@ -281,7 +281,7 @@ function gfValidClientVersion($aCheckVersion = null, $aVersion = null) {
     $oldAndInsecureHackJobs = array(
       'nt 5',
       'nt 6.0',
-      'macintosh'
+      'macintosh',
       'intel',
       'ppc',
       'mac os',
