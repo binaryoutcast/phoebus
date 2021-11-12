@@ -81,7 +81,7 @@ const TARGET_APPLICATION_SITE = array(
   ),
   'basilisk' => array(
     'enabled'       => true,
-    'oldVersion'    => '20210927',
+    'oldVersion'    => '20210427',
     'name'          => 'Basilisk: add-ons',
     'domain'        => array('live' => 'addons.basilisk-browser.org', 'dev' => null),
     'features'      => array('https', 'extensions', 'themes', 'personas', 'search-plugins')
