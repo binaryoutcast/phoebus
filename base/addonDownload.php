@@ -104,27 +104,26 @@ if ($gaRuntime['qAddonID'] == null) {
   gfError('Missing minimum required arguments.');
 }
 
-if (!$gaRuntime['validClient']){
-  if (!$gaRuntime['debugMode']) {
-    gfHeader(404);
-  }
-  gfError('Client check failed.');
-}
-
-if (!$gaRuntime['validVersion']) {
-  if (!$gaRuntime['debugMode']) {
-    gfHeader(404);
-  }
-  gfError('Version check failed.');
-  
-}
-
 // Search for add-ons in our databases
 if ($gaRuntime['qPanel']) {
   $addonManifest = $gmReadManifest->getAddon('panel-by-id', $gaRuntime['qAddonID']);
   $gaRuntime['qBinary'] = true;
 }
 else {
+  if (!$gaRuntime['validClient']){
+    if (!$gaRuntime['debugMode']) {
+      gfHeader(404);
+    }
+    gfError('Client check failed.');
+  }
+
+  if (!$gaRuntime['validVersion']) {
+    if (!$gaRuntime['debugMode']) {
+      gfHeader(404);
+    }
+    gfError('Version check failed.');
+  }
+
   $addonManifest = $gmReadManifest->getAddon('by-id', $gaRuntime['qAddonID']);
 }
 
