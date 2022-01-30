@@ -66,7 +66,7 @@ $boolHasPostData = !empty($_POST);
 
 // The Panel can ONLY be used on HTTPS so redirect those sites without https to Pale Moon
 if (!in_array('https', TARGET_APPLICATION_SITE[$gaRuntime['currentApplication']]['features'])) {
-  gfRedirect('https://addons.palemoon.org/panel/');
+  gfRedirect('https://addons-legacy.palemoon.org/panel/');
 }
 
 if ($gaRuntime['currentScheme'] != 'https') {
