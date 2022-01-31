@@ -74,7 +74,7 @@ const TARGET_APPLICATION_SITE = array(
   'palemoon' => array(
     'enabled'       => true,
     'oldVersion'    => '28.0.0',
-    'name'          => 'Pale Moon - Legacy (29 and older) Add-ons',
+    'name'          => 'Pale Moon (29 and older) - Add-ons',
     'domain'        => array('live' => 'addons-legacy.palemoon.org', 'dev' => 'addons-dev.palemoon.org'),
     'features'      => array('https', 'extensions', 'extensions-cat', 'themes',
                              'personas', 'language-packs', 'search-plugins')
