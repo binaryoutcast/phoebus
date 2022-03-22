@@ -66,7 +66,7 @@ $boolHasPostData = !empty($_POST);
 
 // The Panel can ONLY be used on HTTPS so redirect those sites without https to Pale Moon
 if (!in_array('https', TARGET_APPLICATION_SITE[$gaRuntime['currentApplication']]['features'])) {
-  gfRedirect('https://addons-legacy.palemoon.org/panel/');
+  gfRedirect('https://addons-interlink.binaryoutcast.com/panel/');
 }
 
 if ($gaRuntime['currentScheme'] != 'https') {
@@ -81,6 +81,7 @@ switch ($gaRuntime['qPath']) {
     $gmGenerateContent->addonSite('panel-frontpage.xhtml', 'Landing Page');
     break;
   case URI_REG:
+    gfError('Registration is currently disabled. Please try again later.');
     if ($boolHasPostData) {
       $boolRegComplete = $gmAccount->registerUser();
 

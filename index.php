@@ -72,15 +72,15 @@ const LIBRARIES = array(
 // the enabled site features
 const TARGET_APPLICATION_SITE = array(
   'palemoon' => array(
-    'enabled'       => true,
+    'enabled'       => false,
     'oldVersion'    => '28.0.0',
     'name'          => 'Pale Moon - Add-ons for 29 and older',
-    'domain'        => array('live' => 'addons-legacy.palemoon.org', 'dev' => 'addons-dev.palemoon.org'),
+    'domain'        => array('live' => 'addons-legacy.palemoon.org', 'dev' => null),
     'features'      => array('https', 'extensions', 'extensions-cat', 'themes',
                              'personas', 'language-packs', 'search-plugins')
   ),
   'basilisk' => array(
-    'enabled'       => true,
+    'enabled'       => false,
     'oldVersion'    => '20210427',
     'name'          => 'Basilisk: add-ons',
     'domain'        => array('live' => 'addons.basilisk-browser.org', 'dev' => null),
@@ -104,7 +104,7 @@ const TARGET_APPLICATION_SITE = array(
     'enabled'       => true,
     'oldVersion'    => '0.1',
     'name'          => 'Interlink Add-ons - Binary Outcast',
-    'domain'        => array('live' => 'interlink-addons.binaryoutcast.com', 'dev' => null),
+    'domain'        => array('live' => 'interlink-addons.binaryoutcast.com', 'dev' => 'addons-dev.binaryoutcast.com'),
     'features'      => array('https', 'extensions', 'themes', 'search-plugins', 'disable-xpinstall')
   ),
 );
