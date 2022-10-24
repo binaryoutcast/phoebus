@@ -1,6 +1,0 @@
-[submodule "libraries/smarty"]
-	path = libraries/smarty
-	url = https://github.com/smarty-php/smarty.git
-[submodule "libraries/safemysql"]
-	path = libraries/safemysql
-	url = https://github.com/colshrapnel/safemysql.git
