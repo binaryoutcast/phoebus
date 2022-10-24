@@ -464,7 +464,7 @@ background: linear-gradient(to right, rgba(240,240,240,1) 50%,rgba(255,255,255,0
 }
 
 pre {
-  font-family: "Courier New",Courier,monospace;
+  font-family: monospace;
   font-size: 11pt;
   }
 
