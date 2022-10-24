@@ -21,7 +21,7 @@ define('DEBUG_MODE', $_GET['debug'] ?? null);
 
 // Define basic constants for the software
 const SOFTWARE_NAME       = 'Phoebus';
-const SOFTWARE_VERSION    = '2.2.0';
+const SOFTWARE_VERSION    = '2.3.1-binoc';
 const DATASTORE_RELPATH   = '/datastore/';
 const OBJ_RELPATH         = '/.obj/';
 const BASE_RELPATH        = '/base/';
@@ -249,132 +249,7 @@ function gfEnabledFeature($aFeature, $aReturn = null) {
 * @param $aReturn     if true we will return a value else 404
 ***********************************************************************************************************************/
 function gfValidClientVersion($aCheckVersion = null, $aVersion = null) {
-  global $gaRuntime;
-
-  $currentApplication = $gaRuntime['currentApplication'];
-
-  // No user agent is a blatantly bullshit state
-  if (!$gaRuntime['userAgent']) {
-    gfError('Reference Code - ID-10-T');
-  }
-
-  // Non-web clients get a pass because they aren't web clients... for NOW.
-  if (gfEnabledFeature('disable-xpinstall', true)) {
-    return true;
-  }
-
-  // Knock the UA to lowercase so it is easier to deal with
-  $userAgent = strtolower($gaRuntime['userAgent']);
-
-
-  // ------------------------------------------------------------------------------------------------------------------
-
-  // This is our basic client ua check.
-  if (!$aCheckVersion) {
-    // Check for invalid clients
-    foreach (['curl/', 'wget/', 'git/'] as $_value) {
-      if (str_contains($userAgent, $_value)) {
-        gfError('Reference Code - ID-10-T');
-      }
-    }
-
-    $oldAndInsecureHackJobs = array(
-      'nt 5',
-      'nt 6.0',
-      'macintosh',
-      'intel',
-      'ppc',
-      'mac os',
-      'iphone',
-      'ipad',
-      'ipod',
-      'android',
-      'goanna/3.5',
-      'goanna/4.0',
-      'rv:3.5',
-      'rv:52.9',
-      'basilisk/52.9.0',
-      '55.0',
-      'mypal/',
-      'centaury/',
-      'bnavigator/',
-    );
-
-    // Check for old and insecure Windows versions and enemy hackjobs
-    foreach ($oldAndInsecureHackJobs as $_value) {
-      if (str_contains($userAgent, $_value)) {
-        return false;
-      }
-    }
-
-    // Check if the application slice matches the current site.
-    if (!str_contains($userAgent, $currentApplication)) {
-      return false;
-    }
-
-    return true;
-  }
-
-  // ------------------------------------------------------------------------------------------------------------------
-
-  // This is the main meat of this function. To detect old and insecure application versions
-  // Try to find the position of the application slice in the UA
-  $uaVersion = strpos($userAgent, $currentApplication . SLASH);
-
-  // Make sure we have a position for the application slice
-  // If we don't then it ain't gonna match the current add-ons site
-  if ($uaVersion === false) {
-    return false;
-  }
-
-  // Extract the application slice by slicing off everything before it
-  // UXP Applications ALWAYS have the application slice at the end of the UA
-  $uaVersion = substr($userAgent, $uaVersion, $uaVersion);
-
-  // Extract the application version
-  $uaVersion = str_replace($currentApplication . SLASH, EMPTY_STRING, $uaVersion);
-
-  // Make sure we actually have a string
-  if (!gfSuperVar('var', $uaVersion)) {
-    return false;
-  }
-
-  // Set currentVersion to the supplied version else the extracted version from the ua
-  $currentVersion = $aVersion ?? $uaVersion;
-
-  // ------------------------------------------------------------------------------------------------------------------
-
-  // Set the old version to compare against 
-  $oldVersion = TARGET_APPLICATION_SITE[$currentApplication]['oldVersion'];
-
-  // Basilisk needs special handling because .. It is Basilisk.
-  // Convert any use the full mozilla-style version so it matches the UA slice when
-  // general.useragent.appVersionIsBuildID is true which is default.
-  // Just need to knock off the 52.9. and the dots
-  if ($currentApplication == 'basilisk') {
-    $lockedVersionPrefix = '52.9';
-    if (str_starts_with($uaVersion, $lockedVersionPrefix . DOT . '20')) {
-      $uaVersion = str_replace($lockedVersionPrefix, EMPTY_STRING, $uaVersion);
-      $uaVersion = str_replace(DOT, EMPTY_STRING, $uaVersion);
-    }
-
-    if (str_starts_with($currentVersion, $lockedVersionPrefix . DOT . '20')) {
-      $currentVersion = str_replace($lockedVersionPrefix, EMPTY_STRING, $currentVersion);
-      $currentVersion = str_replace(DOT, EMPTY_STRING, $currentVersion);
-    }
-  }
-
-  // If we are supplying the version number to check make sure it actually matches the UA.
-  if ($aVersion && ($currentVersion != $uaVersion)) {
-    return false;
-  }
-
-  // NOW we can compare it against the old version.. Finally.
-  if (ToolkitVersionComparator::compare($currentVersion, $oldVersion) <= 0) {
-    return false;
-  }
-
-  // Welp, seems it is newer than the currently stated old version so pass
+  // XXXTobin: Stop being /AS MUCH/ of a petty asshole.
   return true;
 }
 
